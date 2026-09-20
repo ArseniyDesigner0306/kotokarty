@@ -54,7 +54,9 @@ header{
   background:var(--panel);font-size:12px;flex-shrink:0;gap:6px;flex-wrap:wrap;
   border-bottom:1px solid var(--border);
 }
-#nick{font-weight:700;color:var(--gold);font-size:13px;display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+#nick{font-weight:700;color:var(--gold);font-size:13px;display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap;cursor:pointer;transition:.15s}
+#nick:hover{opacity:.85}
+#nick::after{content:'✏️';font-size:10px;opacity:.5;margin-left:2px}
 #lvlBadge{background:linear-gradient(135deg,var(--purple),#6b21a8);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;gap:3px;border:1px solid #c4b5fd55;color:#fff}
 #lvlBadge .lvl{color:var(--gold);font-size:13px;font-weight:800}
 #currencies{display:flex;gap:8px;font-size:11px;color:var(--txt-soft);flex-wrap:wrap}#currencies b{color:var(--txt)}
@@ -313,6 +315,10 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   font-size:50px;margin-bottom:12px;flex-shrink:0;
 }
 .avatarBox img{width:100%;height:100%;object-fit:cover;display:block}
+.avatarBox{cursor:pointer;position:relative;transition:.15s}
+.avatarBox:hover{border-color:var(--gold)}
+.avatarBox::after{content:'📷';position:absolute;bottom:-2px;right:-2px;background:var(--panel2);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--bg);box-shadow:0 2px 6px #0006;opacity:0;transition:opacity .2s}
+.avatarBox:hover::after{opacity:1}
 .profileName{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px}
 .profileSub{font-size:12px;opacity:.6}
 .profileCard{background:var(--panel);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--border)}
@@ -4828,6 +4834,8 @@ function getActiveTitleObjs(){
 function renderHeader(){
   const nickEl = $('nick');
   if(nickEl) nickEl.innerHTML = '<span>' + (state.nick || '—') + '</span>' + (state.showLvl ? '<span id="lvlBadge"><span class="lvl">' + state.lvl + '</span></span>' : '');
+  if(nickEl) nickEl.onclick = ()=>{ switchTab('profile'); setTimeout(()=>{ const el = $('nickEdit'); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>el.focus(), 300); } }, 200); };
+  if(nickEl) nickEl.title = 'Нажми чтобы сменить ник';
   const set = (id, val) => { const el = $(id); if(el) el.textContent = val; };
   set('coins', Math.floor(state.coins));
   set('gold', state.gold);
@@ -4842,7 +4850,7 @@ function renderHeader(){
   const mt = $('musicToggle'); if(mt) mt.textContent = state.musicOn ? (state.customMusicOn ? '🎧' : '🎵') : '🚫';
   const db = $('dailyBtn'); if(db) db.style.opacity = canClaimDaily() ? '1' : '0.5';
   const badge = $('lvlBadge');
-  if(badge) badge.onclick = openLevelModal;
+  if(badge) badge.onclick = (e)=>{ e.stopPropagation(); openLevelModal(); };
   checkUnlocks();
 }
 function applyBackground(){
@@ -4988,7 +4996,7 @@ function renderProfile(){
   const fStats = state.fishStats || {};
 
   $('profileContent').innerHTML =
-    '<div class="profileHead"><div class="avatarBox" id="avatarBox">🐱</div><div class="profileName">' + (state.nick || 'Без имени') + '</div><div class="profileSub">В игре: ' + fmtTime(state.playTime) + '</div><div style="margin-top:8px;text-align:center">' + activeTitlesHtml + '</div></div>' +
+    '<div class="profileHead"><div class="avatarBox" id="avatarBox">🐱</div><div onclick="openAvatarPickModal()" style="font-size:10px;opacity:.5;margin-bottom:8px;cursor:pointer;transition:.15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">нажми чтобы сменить</div><div class="profileName" id="profileNameClick" style="cursor:pointer;transition:.15s" title="Нажми чтобы сменить ник">' + (state.nick || 'Без имени') + ' <span style="font-size:14px;opacity:.5">✏️</span></div><div class="profileSub">В игре: ' + fmtTime(state.playTime) + '</div><div style="margin-top:8px;text-align:center">' + activeTitlesHtml + '</div></div>' +
 
     '<div class="profileCard"><h3>⭐ Уровень ' + state.lvl + '</h3><div style="font-size:11px;opacity:.7;margin-bottom:6px">' + Math.floor(cur) + ' / ' + need + ' XP</div><div style="height:12px;background:var(--bg2);border-radius:6px;overflow:hidden;margin-bottom:10px;border:1px solid var(--border)"><div style="height:100%;width:' + lvlPct + '%;background:linear-gradient(90deg,var(--purple),#ec4899,var(--gold))"></div></div><button class="profileBtn btnGold" id="openLvlBtn">⭐ Подробнее</button></div>' +
 
@@ -5054,6 +5062,8 @@ function renderProfile(){
 
   const box = $('avatarBox');
   if(box){
+    box.onclick = openAvatarPickModal;
+    box.title = 'Нажми чтобы сменить аватарку';
     box.innerHTML = '';
     box.style.fontSize = '50px';
     if(state.avatarType === 'emoji' && state.avatarEmoji){
@@ -5069,6 +5079,20 @@ function renderProfile(){
 
   renderBalanceChart();
 
+const nameClick = $('profileNameClick');
+  if(nameClick){
+    nameClick.onclick = ()=>{
+      const el = $('nickEdit');
+      if(el){
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(()=>el.focus(), 300);
+      }
+    };
+    nameClick.onmouseover = ()=>{ nameClick.style.opacity = '.8'; };
+    nameClick.onmouseout = ()=>{ nameClick.style.opacity = '1'; };
+  }
+  
+  $('openLvlBtn').onclick = openLevelModal;
   $('openLvlBtn').onclick = openLevelModal;
   $('openTitlesBtn').onclick = openTitlesModal;
   $('promoBtn').onclick = ()=>{
