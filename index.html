@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#15101f">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>🐱 Котокарты</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B1%3C/text%3E%3C/svg%3E">
 <style>
 /* ============ ТЕМЫ (CSS-переменные) ============ */
 :root{
@@ -466,7 +468,7 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 .cropHint{text-align:center;font-size:11px;opacity:.6;margin-bottom:8px}
 #cropZoom{width:100%;margin-bottom:12px;accent-color:var(--acc)}
 
-/* ============ АНИМАЦИЯ ПАКЕТА (новая) ============ */
+/* ============ АНИМАЦИЯ ПАКЕТА ============ */
 #openAnim{
   position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;
   align-items:center;justify-content:center;flex-direction:column;z-index:300;
@@ -502,7 +504,7 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 #openText{margin-top:20px;font-size:16px;font-weight:700;text-align:center;padding:0 20px;min-height:80px}
 #openSkip{position:absolute;bottom:30px;right:20px;background:#2d2444;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-family:inherit;font-weight:700;cursor:pointer;min-height:44px}
 
-/* ============ ТОСТ РЕФЕРАЛА ============ */
+/* ============ РЕФЕРАЛ ФЛЕШ ============ */
 #rareFlash{position:fixed;inset:0;pointer-events:none;z-index:290;opacity:0;background:radial-gradient(circle,rgba(255,217,61,.55),transparent 60%)}
 #rareFlash.go{animation:rareFade 1s ease-out}
 @keyframes rareFade{0%{opacity:1}100%{opacity:0}}
@@ -652,28 +654,6 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 .craft-preview-txt{flex:1;min-width:0;font-size:11px}
 .craft-preview-txt b{color:var(--purple);display:block;margin-bottom:3px;font-size:13px}
 
-/* ============ МИНИ-ИГРА ============ */
-.minigame-area{
-  background:linear-gradient(180deg,#2d2444,#1e1730);
-  border-radius:14px;padding:20px;text-align:center;
-  border:2px solid var(--purple);position:relative;overflow:hidden;
-}
-.minigame-cat{
-  font-size:80px;line-height:1;cursor:pointer;
-  transition:transform .1s;
-  user-select:none;
-  display:inline-block;
-}
-.minigame-cat:active{transform:scale(.85)}
-.minigame-score{
-  font-size:24px;font-weight:700;color:var(--gold);
-  margin:10px 0;
-}
-.minigame-rewards{
-  display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap;
-}
-.minigame-rewards span{background:var(--panel);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700}
-
 /* ============ РЕФЕРАЛКА ============ */
 .refBox{background:var(--panel);border:2px solid var(--green);border-radius:12px;padding:14px;margin-bottom:12px}
 .refCode{
@@ -702,9 +682,7 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 .notif-toggle.on::after{transform:translateX(20px)}
 
 /* ============ ПУСТЫЕ СОСТОЯНИЯ ============ */
-.empty{
-  text-align:center;padding:40px 20px;color:var(--txt-dim);
-}
+.empty{text-align:center;padding:40px 20px;color:var(--txt-dim)}
 .empty .em{font-size:64px;margin-bottom:10px;opacity:.5}
 .empty .tx{font-size:14px;margin-bottom:6px}
 .empty .sub{font-size:11px;opacity:.7}
@@ -809,7 +787,6 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
       <button data-shop="packs" class="active">📦 Пакеты</button>
       <button data-shop="daily">🏪 Магазин дня</button>
       <button data-shop="fishing">🎣 Прокачка</button>
-      <button data-shop="minigame">🐟 Мини-игра</button>
     </div>
     <div class="shopView active" id="shopView-packs">
       <div id="packsContainer"></div>
@@ -823,7 +800,6 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
     </div>
     <div class="shopView" id="shopView-daily"><div id="dailyShopContainer"></div></div>
     <div class="shopView" id="shopView-fishing"><div id="upgradesContainer"></div></div>
-    <div class="shopView" id="shopView-minigame"><div id="minigameContainer"></div></div>
   </div>
 
   <!-- ====== БИРЖА ====== -->
@@ -944,7 +920,7 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   <button class="btnClose" id="cropCancel">Отмена</button>
 </div></div>
 
-<!-- ============ АНИМАЦИЯ ОТКРЫТИЯ ПАКЕТА (новая) ============ -->
+<!-- ============ АНИМАЦИЯ ОТКРЫТИЯ ПАКЕТА ============ -->
 <div id="openAnim">
   <div id="envelope">📦</div>
   <div id="openCard"></div>
@@ -966,6 +942,9 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 <input type="file" id="saveFile" accept=".json,application/json" style="display:none">
 
 <script>
+/* ============================================================
+   ЧАСТЬ 2 (ДАННЫЕ) НАЧИНАЕТСЯ ЗДЕСЬ
+   ============================================================ */
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
@@ -1024,9 +1003,9 @@ const DAILY_REWARDS = [
   {coins:5000, gold:5, ess:3, mana:1, emoji:'🏆'}
 ];
 
-/* Мини-игра «Накорми кота» */
-const MINIGAME_CD_MS = 4 * 60 * 60 * 1000; // 4 часа
-const MINIGAME_TARGET = 10; // сколько тапов для победы
+/* Мини-игра «Накорми кота» (вырежем в Части 6) */
+const MINIGAME_CD_MS = 4 * 60 * 60 * 1000;
+const MINIGAME_TARGET = 10;
 const MINIGAME_REWARDS = {
   coins: [500, 2000],
   gold: [1, 3],
@@ -1049,11 +1028,31 @@ const NOTIF_TYPES = {
 };
 
 /* ============================================================
-   КАРТИНКИ КАРТ (~130 штук)
-   Пути в папке cats/. Если файла нет — покажется эмодзи.
+   🚫 ГЕНЕРАТОР ПРОМОКОДОВ (критично — без него падает initPromos)
+   ============================================================ */
+function generatePromoCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';
+  for(let i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)];
+  return s;
+}
+
+/* ============================================================
+   🆔 ГЕНЕРАТОР РЕФ-КОДА (формат KOT-СИМБ-STAR234)
+   ============================================================ */
+function generateRefCode(nick){
+  const ruWords = ['СИМБ','АЛИС','КОТ','МУРЗ','БАРС','ЛЕО','ПУСЯ','ТЕНЬ','ЗВЕЗ','НЕОН'];
+  const enWords = ['STAR','MOON','KING','CAT','GOD','PRO','MAX','TOP','HERO','LORD'];
+  const ru = ruWords[Math.floor(Math.random()*ruWords.length)];
+  const en = enWords[Math.floor(Math.random()*enWords.length)];
+  const num = 100 + Math.floor(Math.random()*900);
+  return 'KOT-' + ru + '-' + en + num;
+}
+
+/* ============================================================
+   КАРТИНКИ КАРТ
    ============================================================ */
 const CARD_IMAGES = {
-  /* === Старые Симба === */
   'Симба на кровати':'cats/simba_na_krovati.jpg',
   'Симба и банан':'cats/simba_i_banan.jpg',
   'Симба и рыбка':'cats/simba_i_ribka.jpg',
@@ -1063,7 +1062,6 @@ const CARD_IMAGES = {
   'Симба-Акула':'cats/simbaakyla.jpg',
   'Симба в космосе':'cats/simba_v_kosmose.jpg',
   'Симба и бомж':'cats/simba_i_bomzh.jpg',
-  /* === Старые Алиса === */
   'Алиса на закате':'cats/alisa_na_fone_zakata.jpg',
   'Алиса в раковине':'cats/alisa_v_rakovine.jpg',
   'Алиса-Убийца':'cats/alisa_ybica.jpg',
@@ -1080,7 +1078,6 @@ const CARD_IMAGES = {
   'Симба на миссии':'cats/simba_na_missii.jpg',
   'Симба-Пират':'cats/simba_pirat.jpg',
   'Симба и Алиса в детстве':'cats/simba_i_alisa_v_detstve.jpg',
-  /* === Новые Симба === */
   'Симба спит на кровати':'cats/simba_spit_na_krovati.jpg',
   'Симба лежит на кровати':'cats/simba_lezhit_na_krovati.jpg',
   'Симба на подоконнике':'cats/simba_na_podokonnike.jpg',
@@ -1121,7 +1118,6 @@ const CARD_IMAGES = {
   'Лавовый Симба':'cats/lavovii_simba.jpg',
   'Толстый Симба-Анонимус':'cats/simba_tolsti_anonimys.jpg',
   'Симба-Король':'cats/simba_korol.jpg',
-  /* === Новые Алиса === */
   'Алиса спит':'cats/alisa_spit.jpg',
   'Алиса сидит на кровати':'cats/alisa_sidit_na_krovati.jpg',
   'Алиса на ковре':'cats/alisa_na_kovre.jpg',
@@ -1161,10 +1157,8 @@ const CARD_IMAGES = {
   'Пиксельная Алиса':'cats/pixelnaya_alisa.jpg',
   'Злая и добрая Алиса':'cats/zlaya_i_dobraya_alisa.jpg',
   'Алиса и мишка в тазике':'cats/alisa_i_mishka_v_tazike.jpg',
-  /* === Дуо === */
   'Симба и Алиса совсем маленькие':'cats/alisa_i_simba_sovsem_malenkie.jpg',
   'Алиса и Симба в закулисье':'cats/alisa_i_simba_v_zakylisie.jpg',
-  /* === Крафт === */
   'Лавовая Алиса в тазике':'cats/lavovaya_alisa_v_tazike_pod_vodoi.jpg',
   'Неоновая Алиса-Пират':'cats/pirato.jpg'
 };
@@ -1219,66 +1213,66 @@ const STAR_MULT = [1, 1.5, 2.5, 5, 10, 25];
 const SLOT_PRICES = [0, 0, 10, 25, 50, 100];
 
 /* ============================================================
-   ОБЛОЖКИ (эмодзи для карт без картинок)
+   ОБЛОЖКИ (эмодзи для карт)
    ============================================================ */
 const COVERS = {
-  'Симба на кровати':{emoji:'🛏️',tint:'#8b7fd1'},'Симба и банан':{emoji:'🍌',tint:'#f5c542'},
-  'Симба и рыбка':{emoji:'🐟',tint:'#4ba3d1'},'Симба поднял лапы':{emoji:'🙌',tint:'#d17f7f'},
-  'Симба с пандой':{emoji:'🐼',tint:'#888'},'Симба-Робот':{emoji:'🤖',tint:'#5b8fd1'},
-  'Симба-Акула':{emoji:'🦈',tint:'#3b82f6'},'Симба в космосе':{emoji:'🚀',tint:'#4ba3d1'},
-  'Симба и бомж':{emoji:'🧔',tint:'#a87f4b'},'Алиса на закате':{emoji:'🌅',tint:'#ff8c42'},
-  'Алиса в раковине':{emoji:'🐚',tint:'#f5a9c2'},'Алиса-Убийца':{emoji:'🔪',tint:'#7f1f1f'},
-  'Симба-Художник':{emoji:'🎨',tint:'#a855f7'},'Симба-Рэпер':{emoji:'🎤',tint:'#ffd700'},
-  'Алиса-Повар':{emoji:'👩‍🍳',tint:'#d17f7f'},'Алиса-Китайка':{emoji:'🏮',tint:'#dc2626'},
-  'Алиса на фоне взрыва':{emoji:'💥',tint:'#ff6b35'},'Симба в грибочках':{emoji:'🍄',tint:'#d14b4b'},
-  'Неоновая Алиса':{emoji:'✨',tint:'#a855f7'},'Симба на льдине':{emoji:'❄️',tint:'#7dd3fc'},
-  'Алиса в тазике под водой':{emoji:'🥣',tint:'#4ba3d1'},'Симба-Клоун':{emoji:'🤡',tint:'#f59e0b'},
-  'Симба на миссии':{emoji:'🎯',tint:'#4ba376'},'Симба-Пират':{emoji:'🏴‍☠️',tint:'#1c0a0a'},
-  'Симба и Алиса в детстве':{emoji:'👶',tint:'#ffe4e6'},
-  'Симба спит на кровати':{emoji:'😴',tint:'#a78bfa'},'Симба лежит на кровати':{emoji:'🛌',tint:'#818cf8'},
-  'Симба на подоконнике':{emoji:'🪟',tint:'#7dd3fc'},'Симба на когтеточке':{emoji:'🪵',tint:'#a16207'},
-  'Симба на даче':{emoji:'🏡',tint:'#65a30d'},'Симба на пляже':{emoji:'🏖️',tint:'#fbbf24'},
-  'Симба в кофте':{emoji:'🧥',tint:'#78716c'},'Симба в розовой кофточке':{emoji:'👚',tint:'#f9a8d4'},
-  'Симба в тазике':{emoji:'🛁',tint:'#38bdf8'},'Толстомордый Симба':{emoji:'😺',tint:'#fcd34d'},
-  'Симба-Ковбой (ориг)':{emoji:'🤠',tint:'#a16207'},'Симба-Ниндзя':{emoji:'🥷',tint:'#1e293b'},
-  'Симба-Маг':{emoji:'🧙',tint:'#7c3aed'},'Симба-Писатель':{emoji:'✍️',tint:'#475569'},
-  'Симба-Доктор':{emoji:'🩺',tint:'#06b6d4'},'Симба-Строитель':{emoji:'🔨',tint:'#f59e0b'},
-  'Симба-Хоккеист':{emoji:'🏒',tint:'#0ea5e9'},'Симба-Злой Король':{emoji:'😈',tint:'#7f1d1d'},
-  'Симба-Космонавт':{emoji:'👨‍🚀',tint:'#3b82f6'},'Симба на ракете':{emoji:'🚀',tint:'#dc2626'},
-  'Симба и ёжик на голове':{emoji:'🦔',tint:'#65a30d'},'Симба и маска анонимуса':{emoji:'🎭',tint:'#1c0a0a'},
-  'Симба и матрёшка':{emoji:'🪆',tint:'#dc2626'},'Симба и пельмени':{emoji:'🥟',tint:'#fbbf24'},
-  'Симба и ёлка':{emoji:'🎄',tint:'#16a34a'},'Симба-Шут':{emoji:'🤡',tint:'#ec4899'},
-  'Симба на Хэллоуин':{emoji:'🎃',tint:'#f97316'},'Симба орёт':{emoji:'😾',tint:'#dc2626'},
-  'Симба удивлён':{emoji:'😮',tint:'#a855f7'},'Симба высунул язык':{emoji:'👅',tint:'#f472b6'},
-  'Симба с рюкзаком':{emoji:'🎒',tint:'#65a30d'},'Симба в детстве':{emoji:'🐱',tint:'#fcd34d'},
-  'Симба в тюрьме':{emoji:'🔒',tint:'#525252'},'Симба за иллюминатором':{emoji:'✈️',tint:'#0284c7'},
-  'Три Симбы':{emoji:'🐱',tint:'#a16207'},'Злой Симба':{emoji:'😠',tint:'#7f1d1d'},
-  'Инверсионный Симба':{emoji:'🔄',tint:'#a78bfa'},'Лавовый Симба':{emoji:'🌋',tint:'#dc2626'},
-  'Толстый Симба-Анонимус':{emoji:'🕶️',tint:'#a78bfa'},'Симба-Король':{emoji:'👑',tint:'#fbbf24'},
-  'Алиса спит':{emoji:'😴',tint:'#a78bfa'},'Алиса сидит на кровати':{emoji:'🛏️',tint:'#c4b5fd'},
-  'Алиса на ковре':{emoji:'🧶',tint:'#c084fc'},'Алиса под одеялом':{emoji:'🛌',tint:'#818cf8'},
-  'Алиса на полу':{emoji:'🪑',tint:'#a16207'},'Алиса на арбузе':{emoji:'🍉',tint:'#16a34a'},
-  'Алиса-Игрушка':{emoji:'🧸',tint:'#f9a8d4'},'Алиса в тазике':{emoji:'🛁',tint:'#38bdf8'},
-  'Алиса с ёжиком на голове':{emoji:'🦔',tint:'#65a30d'},'Алиса в тазике в космосе':{emoji:'🌌',tint:'#a855f7'},
-  'Алиса в будке':{emoji:'🏠',tint:'#a16207'},'Алиса в будущем':{emoji:'🤖',tint:'#8b5cf6'},
-  'Алиса на унитазе':{emoji:'🚽',tint:'#f5a9c2'},'Алиса-Робот':{emoji:'🤖',tint:'#5b8fd1'},
-  'Алиса-Полицейская':{emoji:'👮',tint:'#1e40af'},'Алиса-Официантка':{emoji:'🍽️',tint:'#f472b6'},
-  'Алиса-Археолог':{emoji:'🏺',tint:'#a16207'},'Алиса на ферме':{emoji:'🚜',tint:'#65a30d'},
-  'Алиса на стуле':{emoji:'🪑',tint:'#ec4899'},'Алиса с питоном':{emoji:'🐍',tint:'#16a34a'},
-  'Алиса в маске':{emoji:'🎭',tint:'#a855f7'},'Алиса в панамке':{emoji:'👒',tint:'#fcd34d'},
-  'Алиса в розах':{emoji:'🌹',tint:'#dc2626'},'Алиса-Дракула':{emoji:'🧛',tint:'#7f1f1f'},
-  'Алиса-Гигантша':{emoji:'🗻',tint:'#06b6d4'},'Алиса на Хэллоуин':{emoji:'🎃',tint:'#f97316'},
-  'Алиса сильно удивлена':{emoji:'😲',tint:'#a855f7'},'Алиса удивлена':{emoji:'😯',tint:'#c084fc'},
-  'Алиса в джунглях':{emoji:'🌴',tint:'#16a34a'},'Алиса-Динозавр':{emoji:'🦖',tint:'#65a30d'},
-  'Алиса в Лего':{emoji:'🧱',tint:'#fbbf24'},'Алиса в Роблоксе':{emoji:'🎮',tint:'#dc2626'},
-  'Алиса в Майнкрафте в лодке':{emoji:'⛏️',tint:'#65a30d'},'Алиса целует Симбу':{emoji:'💋',tint:'#ec4899'},
-  'Кибер-Алиса':{emoji:'💻',tint:'#a855f7'},'Электро-Алиса':{emoji:'⚡',tint:'#fde047'},
-  'Пиксельная Алиса':{emoji:'👾',tint:'#8b5cf6'},'Злая и добрая Алиса':{emoji:'😼',tint:'#a855f7'},
-  'Алиса и мишка в тазике':{emoji:'🧸',tint:'#f9a8d4'},
-  'Симба и Алиса совсем маленькие':{emoji:'🐣',tint:'#fbbf24'},
-  'Алиса и Симба в закулисье':{emoji:'🎪',tint:'#8b5cf6'},
-  'Лавовая Алиса в тазике':{emoji:'🌋',tint:'#dc2626'},
-  'Неоновая Алиса-Пират':{emoji:'🏴‍☠️',tint:'#a5b4fc'}
+  'Симба на кровати':{emoji:'🛏️'},'Симба и банан':{emoji:'🍌'},
+  'Симба и рыбка':{emoji:'🐟'},'Симба поднял лапы':{emoji:'🙌'},
+  'Симба с пандой':{emoji:'🐼'},'Симба-Робот':{emoji:'🤖'},
+  'Симба-Акула':{emoji:'🦈'},'Симба в космосе':{emoji:'🚀'},
+  'Симба и бомж':{emoji:'🧔'},'Алиса на закате':{emoji:'🌅'},
+  'Алиса в раковине':{emoji:'🐚'},'Алиса-Убийца':{emoji:'🔪'},
+  'Симба-Художник':{emoji:'🎨'},'Симба-Рэпер':{emoji:'🎤'},
+  'Алиса-Повар':{emoji:'👩‍🍳'},'Алиса-Китайка':{emoji:'🏮'},
+  'Алиса на фоне взрыва':{emoji:'💥'},'Симба в грибочках':{emoji:'🍄'},
+  'Неоновая Алиса':{emoji:'✨'},'Симба на льдине':{emoji:'❄️'},
+  'Алиса в тазике под водой':{emoji:'🥣'},'Симба-Клоун':{emoji:'🤡'},
+  'Симба на миссии':{emoji:'🎯'},'Симба-Пират':{emoji:'🏴‍☠️'},
+  'Симба и Алиса в детстве':{emoji:'👶'},
+  'Симба спит на кровати':{emoji:'😴'},'Симба лежит на кровати':{emoji:'🛌'},
+  'Симба на подоконнике':{emoji:'🪟'},'Симба на когтеточке':{emoji:'🪵'},
+  'Симба на даче':{emoji:'🏡'},'Симба на пляже':{emoji:'🏖️'},
+  'Симба в кофте':{emoji:'🧥'},'Симба в розовой кофточке':{emoji:'👚'},
+  'Симба в тазике':{emoji:'🛁'},'Толстомордый Симба':{emoji:'😺'},
+  'Симба-Ковбой (ориг)':{emoji:'🤠'},'Симба-Ниндзя':{emoji:'🥷'},
+  'Симба-Маг':{emoji:'🧙'},'Симба-Писатель':{emoji:'✍️'},
+  'Симба-Доктор':{emoji:'🩺'},'Симба-Строитель':{emoji:'🔨'},
+  'Симба-Хоккеист':{emoji:'🏒'},'Симба-Злой Король':{emoji:'😈'},
+  'Симба-Космонавт':{emoji:'👨‍🚀'},'Симба на ракете':{emoji:'🚀'},
+  'Симба и ёжик на голове':{emoji:'🦔'},'Симба и маска анонимуса':{emoji:'🎭'},
+  'Симба и матрёшка':{emoji:'🪆'},'Симба и пельмени':{emoji:'🥟'},
+  'Симба и ёлка':{emoji:'🎄'},'Симба-Шут':{emoji:'🤡'},
+  'Симба на Хэллоуин':{emoji:'🎃'},'Симба орёт':{emoji:'😾'},
+  'Симба удивлён':{emoji:'😮'},'Симба высунул язык':{emoji:'👅'},
+  'Симба с рюкзаком':{emoji:'🎒'},'Симба в детстве':{emoji:'🐱'},
+  'Симба в тюрьме':{emoji:'🔒'},'Симба за иллюминатором':{emoji:'✈️'},
+  'Три Симбы':{emoji:'🐱'},'Злой Симба':{emoji:'😠'},
+  'Инверсионный Симба':{emoji:'🔄'},'Лавовый Симба':{emoji:'🌋'},
+  'Толстый Симба-Анонимус':{emoji:'🕶️'},'Симба-Король':{emoji:'👑'},
+  'Алиса спит':{emoji:'😴'},'Алиса сидит на кровати':{emoji:'🛏️'},
+  'Алиса на ковре':{emoji:'🧶'},'Алиса под одеялом':{emoji:'🛌'},
+  'Алиса на полу':{emoji:'🪑'},'Алиса на арбузе':{emoji:'🍉'},
+  'Алиса-Игрушка':{emoji:'🧸'},'Алиса в тазике':{emoji:'🛁'},
+  'Алиса с ёжиком на голове':{emoji:'🦔'},'Алиса в тазике в космосе':{emoji:'🌌'},
+  'Алиса в будке':{emoji:'🏠'},'Алиса в будущем':{emoji:'🤖'},
+  'Алиса на унитазе':{emoji:'🚽'},'Алиса-Робот':{emoji:'🤖'},
+  'Алиса-Полицейская':{emoji:'👮'},'Алиса-Официантка':{emoji:'🍽️'},
+  'Алиса-Археолог':{emoji:'🏺'},'Алиса на ферме':{emoji:'🚜'},
+  'Алиса на стуле':{emoji:'🪑'},'Алиса с питоном':{emoji:'🐍'},
+  'Алиса в маске':{emoji:'🎭'},'Алиса в панамке':{emoji:'👒'},
+  'Алиса в розах':{emoji:'🌹'},'Алиса-Дракула':{emoji:'🧛'},
+  'Алиса-Гигантша':{emoji:'🗻'},'Алиса на Хэллоуин':{emoji:'🎃'},
+  'Алиса сильно удивлена':{emoji:'😲'},'Алиса удивлена':{emoji:'😯'},
+  'Алиса в джунглях':{emoji:'🌴'},'Алиса-Динозавр':{emoji:'🦖'},
+  'Алиса в Лего':{emoji:'🧱'},'Алиса в Роблоксе':{emoji:'🎮'},
+  'Алиса в Майнкрафте в лодке':{emoji:'⛏️'},'Алиса целует Симбу':{emoji:'💋'},
+  'Кибер-Алиса':{emoji:'💻'},'Электро-Алиса':{emoji:'⚡'},
+  'Пиксельная Алиса':{emoji:'👾'},'Злая и добрая Алиса':{emoji:'😼'},
+  'Алиса и мишка в тазике':{emoji:'🧸'},
+  'Симба и Алиса совсем маленькие':{emoji:'🐣'},
+  'Алиса и Симба в закулисье':{emoji:'🎪'},
+  'Лавовая Алиса в тазике':{emoji:'🌋'},
+  'Неоновая Алиса-Пират':{emoji:'🏴‍☠️'}
 };
 function cover(name){ return COVERS[name] || {emoji:'🐱', tint:'#555'}; }
 
@@ -1405,39 +1399,6 @@ const FISH_RARITY_TIER = {c:0,u:1,r:2,sr:3,e:4,l:5,d:6,m:7,s:8};
 const FISH_RARITY_NAME = {c:'Обычная',u:'Необычная',r:'Редкая',sr:'Супер редкая',e:'Эпическая',l:'Легендарная',d:'Алмазная',m:'Мифическая',s:'Секретная'};
 const FISH_BASE_WEIGHT = {c:0.5,u:2,r:12,sr:60,e:300,l:2000,d:10000,m:50000,s:400000};
 const FISH_WEIGHT_RANGE = {c:[0.05,1.5],u:[0.3,4],r:[1,12],sr:[3,40],e:[10,150],l:[50,800],d:[200,2000],m:[500,5000],s:[1000,5000]};
-function makeFishInstance(depthTier){
-  const r = rollFishRarity(depthTier);
-  const pool = fishesByRarity(r);
-  const base = pick(pool);
-  const tier = FISH_RARITY_TIER[r];
-
-  // Случайный вес из диапазона по тиру (не шаблонный!)
-  const range = FISH_WEIGHT_RANGE[r] || FISH_WEIGHT_RANGE.c;
-  const weightLuck = 1 + getUpgradeVal('size_luck')/100 + getRod().weightBonus/100;
-  let rawWeight = rnd(range[0], range[1]) * weightLuck;
-
-  // Определяем размер по проценту от макс. веса в тире
-  const maxW = range[1] * weightLuck;
-  const ratio = Math.max(0, Math.min(1, rawWeight / maxW));
-  let size = 1.0;
-  if(ratio <= 0.10)      size = 0.6;   // Крошка
-  else if(ratio <= 0.25) size = 0.8;   // Мелкая
-  else if(ratio <= 0.55) size = 1.0;   // Обычная
-  else if(ratio <= 0.78) size = 1.4;   // Крупная
-  else if(ratio <= 0.93) size = 2.0;   // Огромная
-  else                   size = 3.0;   // Гигантская
-
-  const priceMult = tier >= 5 ? Math.min(size, 1.5) : Math.min(size, 2.5);
-  const price = Math.round(base.price * priceMult);
-  const slowMult = 1 - getUpgradeVal('slow')/100;
-  const raritySpeedMult = 1 + tier * 0.22;
-  const spd = Math.max(0.3, base.spd * slowMult * raritySpeedMult * (0.85 + Math.random()*0.3));
-
-  return {
-    fishId: base.id, emoji: base.emoji, name: base.name, rarity: r,
-    size, weight: Math.max(0.01, rawWeight), price, spd, mutations: []
-  };
-}
 
 const FISH_DATA = [
   {id:'peskar',emoji:'🐟',name:'Пескарь',r:'c',price:15,spd:1,size:0.7},
@@ -1625,14 +1586,6 @@ const NPC_NICKS = [
   'Хакер2000','ДедИнсайд','АУЕ_Школьник','ЦарьГоры','КрутойПерец','Топчик','ИзиКатка','NoScope','FragMaster','PvP_King',
   'Том','Джерри','Леопольд','Чешир','Симба','Барсик','Васька','Пушок','Мурка','Дымка','Пуся','МилыйКотик','Пушистик','Усатик','Хвостик','Лапка','Носик'
 ];
-function generateRefCode(nick){
-  const ruWords = ['СИМБ','АЛИС','КОТ','МУРЗ','БАРС','ЛЕО','ПУСЯ','ТЕНЬ','ЗВЕЗ','НЕОН'];
-  const enWords = ['STAR','MOON','KING','CAT','GOD','PRO','MAX','TOP','HERO','LORD'];
-  const ru = ruWords[Math.floor(Math.random()*ruWords.length)];
-  const en = enWords[Math.floor(Math.random()*enWords.length)];
-  const num = 100 + Math.floor(Math.random()*900);
-  return 'KOT-' + ru + '-' + en + num;
-}
 
 /* ============================================================
    ТИТУЛЫ
@@ -1663,10 +1616,9 @@ const TITLE_BY_ID = {}; TITLES.forEach(t => TITLE_BY_ID[t.id] = t);
 const TITLE_CAT_NAMES = {ach:'🏅 Достижения', col:'🎴 Коллекция', rich:'💰 Богатство', fish:'🎣 Рыбалка'};
 
 /* ============================================================
-   АЧИВКИ (с расчётом прогресса)
+   АЧИВКИ (БЕЗ мини-игры — уберём в Части 6)
    ============================================================ */
 const ACHIEVEMENTS = [
-  /* Карты */
   {id:'card_1',  group:'Карты',icon:'🎴',name:'Первая карта',   check:s=>s.exp>=1,     prog:s=>[s.exp,1]},
   {id:'card_10', group:'Карты',icon:'📚',name:'10 карт',        check:s=>s.exp>=10,    prog:s=>[s.exp,10]},
   {id:'card_50', group:'Карты',icon:'📚',name:'50 карт',        check:s=>s.exp>=50,    prog:s=>[s.exp,50]},
@@ -1675,7 +1627,6 @@ const ACHIEVEMENTS = [
   {id:'col_10',  group:'Карты',icon:'🎴',name:'10 видов карт',  check:s=>s.namesSeen.length>=10,  prog:s=>[s.namesSeen.length,10]},
   {id:'col_50',  group:'Карты',icon:'📚',name:'50 видов карт',  check:s=>s.namesSeen.length>=50,  prog:s=>[s.namesSeen.length,50]},
   {id:'col_100', group:'Карты',icon:'📚',name:'100 видов карт', check:s=>s.namesSeen.length>=100, prog:s=>[s.namesSeen.length,100]},
-  /* Уровни */
   {id:'lvl_5',  group:'Уровни',icon:'⭐',name:'Уровень 5',   check:s=>(s.lvl||1)>=5,  prog:s=>[s.lvl,5]},
   {id:'lvl_10', group:'Уровни',icon:'⭐',name:'Уровень 10',  check:s=>(s.lvl||1)>=10, prog:s=>[s.lvl,10]},
   {id:'lvl_25', group:'Уровни',icon:'🌟',name:'Уровень 25',  check:s=>(s.lvl||1)>=25, prog:s=>[s.lvl,25]},
@@ -1683,7 +1634,6 @@ const ACHIEVEMENTS = [
   {id:'lvl_100',group:'Уровни',icon:'✨',name:'Уровень 100', check:s=>(s.lvl||1)>=100,prog:s=>[s.lvl,100]},
   {id:'lvl_200',group:'Уровни',icon:'🔥',name:'Уровень 200', check:s=>(s.lvl||1)>=200,prog:s=>[s.lvl,200]},
   {id:'lvl_500',group:'Уровни',icon:'👑',name:'Уровень 500',desc:'ЛЕГЕНДА',check:s=>(s.lvl||1)>=500,prog:s=>[s.lvl,500]},
-  /* Редкости */
   {id:'rar_uncommon', group:'Редкости',icon:'💚',name:'Необычная',   check:s=>s.raritySeen?.includes('Необычная')},
   {id:'rar_rare',     group:'Редкости',icon:'💙',name:'Редкая',      check:s=>s.raritySeen?.includes('Редкая')},
   {id:'rar_superrare',group:'Редкости',icon:'💜',name:'Супер редкая',check:s=>s.raritySeen?.includes('Супер редкая')},
@@ -1694,23 +1644,18 @@ const ACHIEVEMENTS = [
   {id:'rar_secret',   group:'Редкости',icon:'👁',name:'Секретная',    check:s=>s.raritySeen?.includes('Секретная')},
   {id:'rar_exclusive',group:'Редкости',icon:'🔮',name:'Эксклюзивная', check:s=>s.raritySeen?.includes('Эксклюзивная')},
   {id:'rar_craft',    group:'Редкости',icon:'⚒️',name:'Крафтовая',    check:s=>s.raritySeen?.includes('Крафтовая')},
-  /* Мутации */
   ...MUTATIONS.map(m => ({id:'mut_'+m.id, group:'Мутации', icon:m.icon, name:m.name, check:s=>s.mutationsSeen?.includes(m.id)})),
   {id:'mut_all',group:'Мутации',icon:'🧬',name:'Все мутации',check:s=>MUTATIONS.every(m=>s.mutationsSeen?.includes(m.id)),prog:s=>[(s.mutationsSeen||[]).length,MUTATIONS.length]},
-  /* Звёзды */
   {id:'star_1',group:'Звёзды',icon:'⭐',name:'1 звезда',check:s=>(s.starsMax||0)>=1,prog:s=>[s.starsMax,1]},
   {id:'star_3',group:'Звёзды',icon:'⭐',name:'3 звезды',check:s=>(s.starsMax||0)>=3,prog:s=>[s.starsMax,3]},
   {id:'star_5',group:'Звёзды',icon:'🌟',name:'5 звёзд', check:s=>(s.starsMax||0)>=5,prog:s=>[s.starsMax,5]},
-  /* Клики */
   {id:'click_100',  group:'Клики',icon:'👆',name:'100 кликов',  check:s=>s.totalClicks>=100,   prog:s=>[s.totalClicks,100]},
   {id:'click_1000', group:'Клики',icon:'👆',name:'1000 кликов', check:s=>s.totalClicks>=1000,  prog:s=>[s.totalClicks,1000]},
   {id:'click_10000',group:'Клики',icon:'👆',name:'10000 кликов',check:s=>s.totalClicks>=10000, prog:s=>[s.totalClicks,10000]},
-  /* Богатство */
   {id:'coins_10k',group:'Богатство',icon:'🪙',name:'10к монет',  check:s=>s.coinsEarned>=10000,  prog:s=>[Math.floor(s.coinsEarned),10000]},
   {id:'coins_1m', group:'Богатство',icon:'💎',name:'1 миллион',  check:s=>s.coinsEarned>=1000000,prog:s=>[Math.floor(s.coinsEarned),1000000]},
   {id:'gold_10',  group:'Богатство',icon:'🥇',name:'10 золота',  check:s=>s.goldEarned>=10,      prog:s=>[s.goldEarned,10]},
   {id:'gold_100', group:'Богатство',icon:'🥇',name:'100 золота', check:s=>s.goldEarned>=100,     prog:s=>[s.goldEarned,100]},
-  /* Особые */
   {id:'slot_5',    group:'Особые',icon:'🔓',name:'Все слоты',      check:s=>s.slotsMax>=5, prog:s=>[s.slotsMax,5]},
   {id:'best_10000',group:'Особые',icon:'🔥',name:'Карта на 10000', check:s=>s.collection.some(c=>cardPoints(c)>=10000)},
   {id:'best_craft',group:'Особые',icon:'⚒️',name:'Крафтовая карта',check:s=>s.collection.some(c=>c.rarity==='Крафтовая')},
@@ -1726,8 +1671,6 @@ const ACHIEVEMENTS = [
   {id:'ref_1',   group:'Особые',icon:'🔗',name:'Реферал',      check:s=>(s.referrals?.count||0)>=1,prog:s=>[s.referrals?.count||0,1]},
   {id:'ref_5',   group:'Особые',icon:'🔗',name:'5 друзей',     check:s=>(s.referrals?.count||0)>=5,prog:s=>[s.referrals?.count||0,5]},
   {id:'theme',   group:'Особые',icon:'🌗',name:'Смена темы',   check:s=>s.theme==='light'},
-  {id:'minigame',group:'Особые',icon:'🐟',name:'Накормил кота',check:s=>(s.minigameWins||0)>=1,prog:s=>[s.minigameWins||0,1]},
-  /* Рыбалка */
   {id:'fish_first',group:'Рыбалка',icon:'🎣',name:'Первая рыба',   check:s=>(s.fishStats?.totalCaught||0)>=1,   prog:s=>[s.fishStats?.totalCaught||0,1]},
   {id:'fish_10',   group:'Рыбалка',icon:'🐟',name:'10 рыб',        check:s=>(s.fishStats?.totalCaught||0)>=10,  prog:s=>[s.fishStats?.totalCaught||0,10]},
   {id:'fish_100',  group:'Рыбалка',icon:'🐠',name:'100 рыб',       check:s=>(s.fishStats?.totalCaught||0)>=100, prog:s=>[s.fishStats?.totalCaught||0,100]},
@@ -1774,7 +1717,7 @@ const QUEST_TEMPLATES = {
 };
 
 /* ============================================================
-   МУЗЫКА (6 треков — 3 старых + 3 новых)
+   МУЗЫКА (6 треков)
    ============================================================ */
 const TRACKS = [
   {name:'Приключение',notes:[[523.25,130.81,0.35],[659.25,130.81,0.35],[783.99,130.81,0.35],[659.25,130.81,0.35],[587.33,146.83,0.35],[698.46,146.83,0.35],[880,146.83,0.35],[698.46,146.83,0.35],[659.25,164.81,0.35],[783.99,164.81,0.35],[1046.5,164.81,0.35],[783.99,164.81,0.35],[659.25,196,0.35],[587.33,196,0.35],[523.25,130.81,0.7],[0,0,0.7]]},
@@ -1784,8 +1727,9 @@ const TRACKS = [
   {name:'Разлом',notes:[[329.63,82.41,0.3],[415.3,103.83,0.3],[493.88,123.47,0.3],[622.25,155.56,0.3],[493.88,123.47,0.3],[415.3,103.83,0.3],[369.99,92.5,0.3],[466.16,116.54,0.3],[554.37,138.59,0.3],[698.46,174.61,0.4],[0,0,0.3]]},
   {name:'Победа',notes:[[523.25,130.81,0.2],[659.25,164.81,0.2],[783.99,196,0.2],[1046.5,261.63,0.4],[880,220,0.2],[987.77,246.94,0.2],[1046.5,261.63,0.6],[0,0,0.4]]}
 ];
+
 /* ============================================================
-   STATE
+   STATE — дефолтное состояние
    ============================================================ */
 function defaultState(){
   return {
@@ -1809,7 +1753,7 @@ function defaultState(){
     autoSellEnabled:false, autoSellRarities:[], quickDismantle:false,
     totalSold:0, totalSoldCoins:0, totalPacksOpened:0, bourseDeals:0,
     dailyStats:{date:'', sold:0, soldCoins:0, clicks:0, coins:0, cards:0, packs:0},
-    balanceHistory:[], /* для графика: [{t:Date.now(), coins:N}] */
+    balanceHistory:[],
     quests:null, questCycle:'',
     questStats:{clicks:0, packsTotal:0, packsSimple:0, packsRandom:0, packsCool:0, soldCards:0, soldCoins:0, coinsEarned:0, mutations:0, cardsByRarity:{}},
     dailyShop:null, dailyShopCycle:'',
@@ -1823,7 +1767,6 @@ function defaultState(){
     cardCooldowns:{},
     mutAttemptsLeft:0, pendingCatch:null,
     craftSlots:[], craftSlotsMax:1, craftCounts:{},
-    /* v9 новое */
     referrals:{ code:'', count:0, applied:'', invitedBy:'', bonusClaimed:false },
     notifSettings:{ craft:true, fishing:true, daily:true, shop:false, quests:false, minigame:true },
     notifPermission:'default',
@@ -1895,7 +1838,6 @@ function daysSince(ds){ if(!ds) return 999; const l=new Date(ds+' 00:00:00'); co
 function getRod(){ return RODS_BY_ID[state.currentRod] || RODS[0]; }
 function isCardOnCooldown(cardId){ return (state.cardCooldowns[cardId] || 0) > Date.now(); }
 function getCardCooldownLeft(cardId){ const until = state.cardCooldowns[cardId] || 0; return Math.max(0, until - Date.now()); }
-
 /* ============================================================
    ЦЕНЫ / ПРОГРЕСС
    ============================================================ */
@@ -1909,6 +1851,8 @@ function getPriceMultiplier(count){
   }
   return Math.min(mult, PRICE_CAP);
 }
+
+/* 💰 ЦЕНА ПАКЕТА — первый Классический БЕСПЛАТНО (для обучалки) */
 function getPackPrice(p){
   if(p.id === 'classic' && (state.packCounts[p.id]||0) === 0) return 0;
   return Math.round(p.base * getPriceMultiplier(state.packCounts[p.id]||0));
@@ -1956,7 +1900,7 @@ function showLvlToast(lvl){
 }
 
 /* ============================================================
-   МСК
+   МСК ВРЕМЯ
    ============================================================ */
 function getMskNow(){
   const now = new Date();
@@ -2071,14 +2015,12 @@ function save(){
 }
 function load(){
   try {
-    /* Пробуем новый ключ, потом старый v8, потом пусто */
     let raw = localStorage.getItem(SAVE_KEY);
-    if(!raw) raw = localStorage.getItem('kotokarty'); /* миграция с v8 */
+    if(!raw) raw = localStorage.getItem('kotokarty');
     if(!raw){ state = defaultState(); return; }
     const p = JSON.parse(raw);
     state = Object.assign(defaultState(), p);
 
-    /* Массивы */
     ['collection','equippedIds','newCards','raritySeen','mutationsSeen','combosSeen','namesSeen',
      'activePromos','usedPromoCodes','autoSellRarities','craftSlots','balanceHistory'].forEach(k=>{
       if(!Array.isArray(state[k])) state[k] = [];
@@ -2089,7 +2031,6 @@ function load(){
     if(!Array.isArray(state.titles.active)) state.titles.active = [];
     if(!Array.isArray(state.bourse?.history)) state.bourse.history = [];
 
-    /* Pity — миграция со старого pityCounter */
     if(!state.pityCounters || typeof state.pityCounters !== 'object'){
       state.pityCounters = {legendary:0, diamond:0, mythic:0, secret:0};
       if(typeof state.pityCounter === 'number' && state.pityCounter > 0){
@@ -2101,7 +2042,6 @@ function load(){
     });
     delete state.pityCounter;
 
-    /* Числа */
     ['totalClicks','coinsEarned','goldEarned','essEarned','manaEarned','starsMax','playTime',
      'dailyStreak','totalSold','totalSoldCoins','totalPacksOpened','bourseDeals','lvl','xpTotal',
      'lastCoinBonus','lastBuffBonus','currentTrack'].forEach(k=>{
@@ -2109,19 +2049,16 @@ function load(){
     });
     if(state.lvl < 1) state.lvl = 1;
 
-    /* Булы */
     ['showLvl','soundOn','musicOn','customMusic','customMusicOn','autoSellEnabled',
      'quickDismantle','reduceMotion','firstLaunch'].forEach(k=>{
       if(typeof state[k] !== 'boolean') state[k] = (k==='showLvl'||k==='soundOn'||k==='musicOn');
     });
 
-    /* Строки */
     ['nick','dailyLast','avatar','avatarType','avatarEmoji','bg','sortMode','colFilter',
      'theme','questCycle','dailyShopCycle','currentRod','notifPermission'].forEach(k=>{
       if(typeof state[k] !== 'string') state[k] = (k==='theme'?'dark':k==='currentRod'?'stick':'');
     });
 
-    /* Объекты */
     if(!state.buffs || typeof state.buffs !== 'object') state.buffs = {money:0,cd:0,luck:0};
     if(!state.achievements || typeof state.achievements !== 'object') state.achievements = {};
     if(!state.packCounts || typeof state.packCounts !== 'object') state.packCounts = {classic:0,improved:0,rare:0,epic:0,legendary:0,divine:0};
@@ -2146,11 +2083,10 @@ function load(){
     if(!state.notifSettings || typeof state.notifSettings !== 'object') state.notifSettings = {craft:true,fishing:true,daily:true,shop:false,quests:false,minigame:true};
     if(!state.minigame || typeof state.minigame !== 'object') state.minigame = {lastPlay:0,wins:0};
     if(!state.tutorial || typeof state.tutorial !== 'object') state.tutorial = {step:0,done:false,clicks:{base:null,target:null}};
-if(!state.tutorial.clicks) state.tutorial.clicks = {base:null, target:null};
+    if(!state.tutorial.clicks) state.tutorial.clicks = {base:null, target:null};
     if(typeof state.tutorial.step !== 'number') state.tutorial.step = 0;
     if(typeof state.tutorial.done !== 'boolean') state.tutorial.done = false;
 
-    /* Очистка и проверки */
     if(state.fishing) state.fishing = null;
     const now = Date.now();
     for(const k in state.cardCooldowns){ if(state.cardCooldowns[k] < now) delete state.cardCooldowns[k]; }
@@ -2194,7 +2130,6 @@ function importSave(file){
       const data = JSON.parse(e.target.result);
       if(!data || typeof data !== 'object') throw new Error('Неверный формат');
       if(!confirm('⚠️ Загрузить сохранение?\n\nТекущий прогресс БУДЕТ ПОТЕРЯН!\n\nНик в сейве: ' + (data.nick||'—'))) return;
-      /* Оставляем аватарку текущей сессии? Нет — грузим как есть */
       state = Object.assign(defaultState(), data);
       save();
       showToast('📥 Сейв загружен!');
@@ -2247,13 +2182,12 @@ function checkRefFromUrl(){
 }
 
 /* ============================================================
-   ТЕМА / АНИМАЦИИ
+   ТЕМА
    ============================================================ */
 function applyTheme(){
   document.body.classList.toggle('light', state.theme === 'light');
   const t = $('themeToggle');
   if(t) t.textContent = state.theme === 'light' ? '☀️' : '🌙';
-  /* Обновляем meta theme-color */
   const meta = document.querySelector('meta[name="theme-color"]');
   if(meta) meta.content = state.theme === 'light' ? '#f0ecf7' : '#15101f';
 }
@@ -2274,7 +2208,7 @@ function toggleMotion(){
 }
 
 /* ============================================================
-   УВЕДОМЛЕНИЯ (браузерные)
+   БРАУЗЕРНЫЕ УВЕДОМЛЕНИЯ
    ============================================================ */
 function isNotifSupported(){ return 'Notification' in window; }
 async function requestNotifPermission(){
@@ -2341,9 +2275,10 @@ function renderNotifSettings(){
 }
 
 /* ============================================================
-   ЗВУК
+   ЗВУК — Web Audio API
    ============================================================ */
 let audioCtx = null, musicTimer = null, noteIdx = 0;
+
 function initAudio(){
   if(!audioCtx){
     try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
@@ -2351,8 +2286,11 @@ function initAudio(){
   }
   if(audioCtx.state === 'suspended') audioCtx.resume();
 }
+
 function beep(freq, dur, vol, type){
   if(!audioCtx || !state.soundOn) return;
+  if(window._audioMuted) return;
+  if(document.hidden) return;
   const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
   osc.type = type || 'sine';
   osc.frequency.value = freq;
@@ -2362,6 +2300,7 @@ function beep(freq, dur, vol, type){
   osc.start();
   osc.stop(audioCtx.currentTime + dur);
 }
+
 function playClick(){ beep(880, 0.08, 0.10, 'sine'); }
 function playResource(){ beep(1200, 0.12, 0.14, 'triangle'); setTimeout(()=>beep(1600,0.10,0.11,'triangle'),60); }
 function playDrop(){ beep(600,0.15,0.13,'sawtooth'); setTimeout(()=>beep(800,0.15,0.13,'sawtooth'),120); setTimeout(()=>beep(1100,0.20,0.14,'sawtooth'),240); }
@@ -2423,6 +2362,42 @@ function nextTrack(){
   save();
   showToast('🎵 ' + TRACKS[state.currentTrack].name);
 }
+
+/* ============================================================
+   🔇 АВТО-ГЛУШЕНИЕ ЗВУКА ПРИ УХОДЕ С ВКЛАДКИ
+   (требование Pikabu, VK, Яндекс.Игр)
+   ============================================================ */
+let _wasMusicOnBeforeHide = false;
+
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    _wasMusicOnBeforeHide = state && state.musicOn;
+    if(typeof stopMusic === 'function') stopMusic();
+    if(typeof stopCustomMusic === 'function') stopCustomMusic();
+    window._audioMuted = true;
+  } else {
+    window._audioMuted = false;
+    if(_wasMusicOnBeforeHide && state && state.musicOn){
+      if(typeof firstInteract === 'function') firstInteract();
+      if(state.customMusicOn && customAudio) startCustomMusic();
+      else if(!state.customMusicOn && typeof startMusic === 'function') startMusic();
+    }
+  }
+});
+
+window.addEventListener('blur', () => {
+  if(typeof stopMusic === 'function') stopMusic();
+  if(typeof stopCustomMusic === 'function') stopCustomMusic();
+  window._audioMuted = true;
+});
+
+window.addEventListener('focus', () => {
+  window._audioMuted = false;
+  if(state && state.musicOn){
+    if(state.customMusicOn && customAudio) startCustomMusic();
+    else if(!state.customMusicOn && typeof startMusic === 'function') startMusic();
+  }
+});
 
 /* ============================================================
    КАСТОМНАЯ МУЗЫКА (IndexedDB)
@@ -2506,7 +2481,7 @@ function getCD(){
 function getBaseClick(){ return Math.max(1, Math.round(BASE_CLICK * getIncomeMult())); }
 
 /* ============================================================
-   ХЕЛПЕРЫ МОДАЛОК
+   МОДАЛКИ — базовые
    ============================================================ */
 function openModal(id){
   const el = $(id);
@@ -2519,7 +2494,6 @@ function closeModal(id){
 window.openModal = openModal;
 window.closeModal = closeModal;
 
-/* Закрытие модалок по клику вне */
 document.addEventListener('click', (e)=>{
   if(e.target.classList && e.target.classList.contains('modal')){
     e.target.classList.remove('open');
@@ -2557,15 +2531,13 @@ function trackBalance(){
   const now = Date.now();
   const h = state.balanceHistory;
   const last = h[h.length-1];
-  /* пишем не чаще раза в 30 минут */
   if(last && now - last.t < 1800000) return;
   h.push({t: now, coins: Math.floor(state.coins)});
-  /* храним не больше 2000 точек */
   if(h.length > 2000) h.splice(0, h.length - 2000);
 }
 
 /* ============================================================
-   ГЛАВНЫЙ ЦИКЛ ИГРЫ (тик 1 сек)
+   ГЛАВНЫЙ ЦИКЛ (тик 1 сек)
    ============================================================ */
 function startGameTick(){
   setInterval(()=>{
@@ -2591,7 +2563,6 @@ function startGameTick(){
     tickCrafts();
     trackBalance();
 
-    /* Проверки для уведомлений */
     checkCraftNotifs();
     checkFishingNotifs();
     checkDailyNotifs();
@@ -2600,11 +2571,6 @@ function startGameTick(){
     checkMinigameNotifs();
   }, 1000);
 }
-
-/* ============================================================
-   УТИЛИТА ПАУЗЫ
-   ============================================================ */
-function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 /* ============================================================
    ОБНАРУЖЕНИЕ ТАЧ-УСТРОЙСТВА
@@ -2744,11 +2710,17 @@ function renderShop(){
     const bought = state.packCounts[p.id] || 0;
     const mult = isGold ? 1 : getPriceMultiplier(bought);
     const info = bought > 0 ? 'Куплено: ' + bought : '';
-    const priceStr = price === 0
-  ? '🎁 <b style="color:#10b981">БЕСПЛАТНО</b>'
-  : (isGold ? '🥇 ' + price : '🪙 ' + price + ' <span style="font-size:10px;opacity:.6">x' + mult.toFixed(2) + '</span>');
 
-    /* Превью шансов */
+    /* 🎁 Если цена 0 — показываем БЕСПЛАТНО */
+    let priceStr;
+    if(price === 0){
+      priceStr = '🎁 <b style="color:#10b981">БЕСПЛАТНО</b>';
+    } else if(isGold){
+      priceStr = '🥇 ' + price;
+    } else {
+      priceStr = '🪙 ' + price + ' <span style="font-size:10px;opacity:.6">x' + mult.toFixed(2) + '</span>';
+    }
+
     let chancesHtml = '<div class="pack-chances">';
     for(const [rar, ch] of p.chances){
       const r = RARITY[rar];
@@ -2798,7 +2770,6 @@ function bindPackClicks(){
       if(pack.id === 'improved') state.questStats.packsRandom = (state.questStats.packsRandom||0) + 1;
       if(pack.id === 'rare') state.questStats.packsCool = (state.questStats.packsCool||0) + 1;
 
-      /* Роллим карты */
       const count = Array.isArray(pack.count)
         ? pack.count[0] + Math.floor(Math.random() * (pack.count[1] - pack.count[0] + 1))
         : (pack.count || 1);
@@ -2814,7 +2785,7 @@ function bindPackClicks(){
 }
 
 /* ============================================================
-   НОВАЯ АНИМАЦИЯ ПАКЕТА — конверт → карта
+   АНИМАЦИЯ ОТКРЫТИЯ ПАКЕТА
    ============================================================ */
 function flashRare(){
   const el = $('rareFlash');
@@ -2825,14 +2796,12 @@ function flashRare(){
 }
 function getRarityAnimDuration(rarity){
   const tier = RARITY[rarity].tier;
-  /* Обычные — быстрее, редкие — дольше */
   if(tier <= 0) return 1100;
   if(tier <= 2) return 1400;
   if(tier <= 4) return 1800;
   return 2200;
 }
 function getEnvelopeEmoji(rarity){
-  /* Меняем конверт под редкость лучшей карты */
   const tier = RARITY[rarity].tier;
   if(tier >= 5) return '🌟';
   if(tier >= 4) return '👑';
@@ -2845,14 +2814,12 @@ function openPackAnim(cards){
   const anim = $('openAnim'), envelope = $('envelope'), cardEl = $('openCard'), textEl = $('openText'), skipBtn = $('openSkip');
   if(!anim) return;
 
-  /* Находим максимальную редкость */
   let bestRarity = cards[0].rarity;
   let bestIdx = 0;
   cards.forEach((c,i)=>{
     if(RARITY[c.rarity].tier > RARITY[bestRarity].tier){ bestRarity = c.rarity; bestIdx = i; }
   });
 
-  /* Настраиваем конверт */
   envelope.textContent = getEnvelopeEmoji(bestRarity);
   envelope.classList.remove('opening');
   envelope.style.display = 'flex';
@@ -2865,7 +2832,6 @@ function openPackAnim(cards){
   packSkip = false;
   let idx = 0;
 
-  /* Клик по пропуску */
   skipBtn.onclick = ()=>{ packSkip = true; };
 
   const wait = (ms) => new Promise(r=>{
@@ -2912,24 +2878,20 @@ function openPackAnim(cards){
   };
 
   const run = async ()=>{
-    /* Фаза 1: показать конверт */
     skipBtn.style.display = 'block';
     await wait(700);
     if(packSkip) return finish();
 
-    /* Фаза 2: открываем конверт */
     envelope.classList.add('opening');
     playRare();
     await wait(400);
     envelope.style.display = 'none';
     if(packSkip) return finish();
 
-    /* Фаза 3: показываем карты по одной */
     for(let i = 0; i < cards.length; i++){
       if(packSkip) break;
       await showCard(cards[i], i);
       if(packSkip) break;
-      /* Между картами маленькая пауза */
       if(i < cards.length - 1){
         await wait(300);
       }
@@ -2939,7 +2901,6 @@ function openPackAnim(cards){
   };
 
   const finish = async ()=>{
-    /* Добавляем все карты сразу */
     let added = 0, sold = 0, soldCoins = 0;
     cards.forEach(c=>{
       if(shouldAutoSell(c)){
@@ -3257,7 +3218,6 @@ function openCardModal(card){
   };
 }
 
-/* Делегируем клик по карточкам в коллекции */
 document.addEventListener('click', (e)=>{
   const el = e.target.closest('#collectionGrid .card');
   if(!el) return;
@@ -3266,7 +3226,7 @@ document.addEventListener('click', (e)=>{
 });
 
 /* ============================================================
-   АЧИВКИ — с прогресс-барами
+   АЧИВКИ
    ============================================================ */
 function checkAchievements(){
   let newOnes = [];
@@ -3328,511 +3288,8 @@ function renderAchievements(){
   }
   cont.innerHTML = html;
 }
-
 /* ============================================================
-   КРАФТ
-   ============================================================ */
-function getCraftSlotsMax(){ return getUpgradeVal('craft_slots') || 1; }
-function ensureCraftSlots(){
-  const max = getCraftSlotsMax();
-  state.craftSlotsMax = max;
-  if(!Array.isArray(state.craftSlots)) state.craftSlots = [];
-  while(state.craftSlots.length < max) state.craftSlots.push(null);
-  while(state.craftSlots.length > max) state.craftSlots.pop();
-}
-function getCraftPrice(recipe){
-  const n = state.craftCounts[recipe.id] || 0;
-  return Math.round(recipe.baseCoins * Math.pow(recipe.priceMult, n));
-}
-function findCardsForCraft(recipe){
-  const pool = state.collection.filter(c =>
-    !state.equippedIds.includes(c.id) && !isCardOnCooldown(c.id)
-  );
-  const result = [];
-  const usedIds = new Set();
-  for(const name of recipe.mandatory){
-    const found = pool.find(c => c.name === name && !usedIds.has(c.id));
-    if(!found) return {ok:false, msg:'Не хватает обязательной карты: «' + name + '»'};
-    result.push(found);
-    usedIds.add(found.id);
-  }
-  for(const sac of recipe.sacrifice){
-    const matching = pool.filter(c =>
-      c.rarity === sac.rarity && !usedIds.has(c.id)
-    ).sort((a,b) => cardPoints(a) - cardPoints(b));
-    if(matching.length < sac.count){
-      return {ok:false, msg:'Не хватает ' + sac.count + '× ' + sac.rarity};
-    }
-    for(let i=0;i<sac.count;i++){
-      result.push(matching[i]);
-      usedIds.add(matching[i].id);
-    }
-  }
-  return {ok:true, cards: result};
-}
-function getSpeedupGoldCost(slot){
-  if(!slot || slot.endsAt <= Date.now()) return 0;
-  const leftMin = Math.ceil((slot.endsAt - Date.now()) / 60000);
-  return Math.max(1, Math.round(leftMin / 12));
-}
-function startCraft(recipeId){
-  ensureCraftSlots();
-  const recipe = CRAFT_BY_ID[recipeId];
-  if(!recipe) return;
-  const freeIdx = state.craftSlots.findIndex(s => !s);
-  if(freeIdx === -1) return alert('⚠️ Все слоты крафта заняты!');
-  const price = getCraftPrice(recipe);
-  if(state.coins < price){
-    return alert('Не хватает монет! Нужно ' + price + ' 🪙');
-  }
-  const search = findCardsForCraft(recipe);
-  if(!search.ok) return alert('⚠️ ' + search.msg);
-  const cardsList = search.cards.map(c => '• ' + c.name + ' (' + c.rarity + ')').join('\n');
-  const count = state.craftCounts[recipe.id] || 0;
-  const nextMult = Math.pow(recipe.priceMult, count + 1).toFixed(2);
-  if(!confirm('⚒️ ' + recipe.name + '\n\nСГОРЯТ ' + search.cards.length + ' КАРТ:\n' + cardsList + '\n\nСПИШЕТСЯ: 🪙 ' + price + '\n(следующий крафт будет ×' + nextMult + ')\n\nВремя: ' + recipe.timeMinH + '–' + recipe.timeMaxH + ' ч\nНаграда: ' + recipe.resultName + '\n\n⚠️ Отменить нельзя!')) return;
-  if(price >= 500000){
-    if(!confirm('Точно-точно? Теряешь ' + search.cards.length + ' карт и 🪙 ' + price)) return;
-  }
-  state.coins -= price;
-  for(const c of search.cards){
-    state.collection = state.collection.filter(x => x.id !== c.id);
-    state.equippedIds = state.equippedIds.filter(x => x !== c.id);
-    state.newCards = state.newCards.filter(x => x !== c.id);
-  }
-  state.craftCounts[recipe.id] = (state.craftCounts[recipe.id] || 0) + 1;
-  const hours = rnd(recipe.timeMinH, recipe.timeMaxH);
-  const now = Date.now();
-  state.craftSlots[freeIdx] = {
-    recipeId: recipe.id,
-    startedAt: now,
-    endsAt: now + Math.round(hours * 3600 * 1000),
-    cardsSpent: search.cards.map(c => ({name: c.name, rarity: c.rarity})),
-    ready: false,
-    notifSent: false
-  };
-  playResource(); save(); renderHeader(); renderCraft(); checkAchievements();
-  alert('⚒️ Крафт запущен! Готово через ' + hours.toFixed(1) + ' ч.');
-}
-function speedupCraft(slotIdx){
-  ensureCraftSlots();
-  const slot = state.craftSlots[slotIdx];
-  if(!slot) return;
-  const cost = getSpeedupGoldCost(slot);
-  if(cost <= 0) return;
-  if(state.gold < cost) return alert('Не хватает золота! Нужно 🥇 ' + cost);
-  if(!confirm('⚡ Ускорить за 🥇 ' + cost + '?')) return;
-  state.gold -= cost;
-  slot.endsAt = Date.now();
-  playResource(); save(); renderHeader(); renderCraft();
-}
-function claimCraft(slotIdx){
-  ensureCraftSlots();
-  const slot = state.craftSlots[slotIdx];
-  if(!slot || !slot.ready) return;
-  const recipe = CRAFT_BY_ID[slot.recipeId];
-  if(!recipe){ state.craftSlots[slotIdx] = null; save(); renderCraft(); return; }
-  if(state.collection.length >= state.invMax){
-    return alert('⚠️ Инвентарь полон!');
-  }
-  const cardBase = CARD_POOL.find(c => c.name === recipe.resultName);
-  if(!cardBase){ alert('Ошибка: карта не найдена'); state.craftSlots[slotIdx] = null; save(); renderCraft(); return; }
-  const ridx = Object.keys(RARITY).indexOf(cardBase.rarity);
-  const tier = RARITY[cardBase.rarity].tier;
-  const slotsMax = Math.min(10, 1 + ridx*2 + Math.floor(rnd(0,3)));
-  const cardSlots = Math.floor(rnd(6, slotsMax+1));
-  const mutations = rollMutations(tier, cardSlots);
-  const stars = Math.floor(rnd(3, 6));
-  const card = {
-    id: uid(), name: cardBase.name, rarity: cardBase.rarity,
-    income: pct(20,60), goldCh: pct(10,40), essCh: pct(10,40), manaCh: pct(10,40),
-    cdMod: +(rnd(-20,70)).toFixed(1),
-    slots: cardSlots, mutations, stars, activeVisual: null,
-    createdAt: Date.now()
-  };
-  state.collection.push(card);
-  registerCardStats(card);
-  if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
-  state.craftSlots[slotIdx] = null;
-  addXP(1000);
-  playRare(); flashRare(); playAchievement();
-  save(); renderHeader(); renderCraft(); renderCollection(); checkAchievements();
-  alert('🎉 Крафт завершён!\n\n' + cardBase.name + '\n' + cardBase.rarity + '\n' + card.stars + '★\n' + cardPoints(card) + ' очков');
-}
-function tickCrafts(){
-  ensureCraftSlots();
-  let changed = false;
-  const now = Date.now();
-  state.craftSlots.forEach((slot)=>{
-    if(slot && !slot.ready && now >= slot.endsAt){
-      slot.ready = true;
-      changed = true;
-    }
-  });
-  if(changed) save();
-}
-function renderCraft(){
-  ensureCraftSlots();
-  const headerEl = $('craftHeader');
-  const slotsEl = $('craftSlots');
-  const recipesEl = $('craftRecipes');
-  if(!headerEl) return;
-
-  headerEl.innerHTML = '<div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:14px;padding:14px;margin-bottom:14px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--purple)">⚒️ Крафт карт</div><div style="font-size:11px;opacity:.75;margin-top:4px">Создавай уникальные карты редкости «Крафтовая». Из пакетов они НЕ выпадают. С каждым крафтом цена растёт ×1.5.</div></div>';
-
-  let slotsHTML = '<div style="font-size:12px;font-weight:700;margin:8px 0 6px">Слоты (' + state.craftSlots.length + '/' + state.craftSlotsMax + ')</div>';
-  state.craftSlots.forEach((slot, i)=>{
-    if(!slot){
-      slotsHTML += '<div class="craftrow" style="text-align:center;opacity:.7;border-style:dashed">Слот ' + (i+1) + ' · Свободен</div>';
-      return;
-    }
-    const recipe = CRAFT_BY_ID[slot.recipeId];
-    if(!recipe){ slotsHTML += '<div class="craftrow" style="color:var(--red)">Ошибка рецепта</div>'; return; }
-    if(slot.ready){
-      slotsHTML += '<div class="craftrow" style="background:linear-gradient(135deg,var(--green),#065f46);color:#fff"><div style="font-size:13px;font-weight:700">' + recipe.icon + ' ' + recipe.name + '</div><div style="font-size:11px;opacity:.9;margin-top:4px">🎉 ГОТОВО! Забирай</div><button class="craftClaimBtn" data-idx="' + i + '" style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:#fff;color:#065f46;font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;min-height:44px">✨ Забрать карту</button></div>';
-      return;
-    }
-    const left = Math.max(0, slot.endsAt - Date.now());
-    const total = slot.endsAt - slot.startedAt;
-    const pct = Math.min(100, Math.round((1 - left/total) * 100));
-    const goldCost = getSpeedupGoldCost(slot);
-    slotsHTML += '<div class="craftrow"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;font-weight:700">' + recipe.icon + ' ' + recipe.name + '</div><div style="font-size:11px;color:var(--gold);font-weight:700">' + fmtTime(Math.ceil(left/1000)) + '</div></div><div class="prog"><div class="progf" style="width:' + pct + '%"></div></div><button class="craftSpeedupBtn" data-idx="' + i + '" style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#f59e0b,#dc2626);color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;min-height:44px">⚡ Ускорить за 🥇 ' + goldCost + '</button></div>';
-  });
-  const locked = Math.max(0, 3 - state.craftSlotsMax);
-  for(let i=0;i<locked;i++){
-    slotsHTML += '<div class="craftrow" style="text-align:center;opacity:.5;border-style:dashed">🔒 Слот ' + (state.craftSlotsMax + 1 + i) + ' · Прокачай в магазине</div>';
-  }
-  slotsEl.innerHTML = slotsHTML;
-
-  let recipesHTML = '<div style="font-size:12px;font-weight:700;margin:14px 0 6px">📜 Рецепты</div>';
-  CRAFT_RECIPES.forEach(recipe => {
-    const search = findCardsForCraft(recipe);
-    const price = getCraftPrice(recipe);
-    const moneyOk = state.coins >= price;
-    const slotsFree = state.craftSlots.filter(s => !s).length > 0;
-    const canStart = search.ok && moneyOk && slotsFree;
-    const count = state.craftCounts[recipe.id] || 0;
-    const mandatoryList = recipe.mandatory.map(n => '• ' + n).join('<br>');
-    const sacrificeList = recipe.sacrifice.map(s => s.count + '× ' + s.rarity).join(', ');
-    const missingHTML = !search.ok ? '<div style="font-size:10px;color:var(--red);margin-top:6px">⚠️ ' + search.msg + '</div>' : '';
-    const moneyHTML = !moneyOk ? '<div style="font-size:10px;color:var(--red);margin-top:4px">⚠️ Не хватает 🪙 ' + (price - Math.floor(state.coins)) + '</div>' : '';
-
-    /* Превью крафт-карты */
-    const resultDef = CARD_POOL.find(c => c.name === recipe.resultName);
-    const resultImg = resultDef ? getCardImage(resultDef.name) : null;
-    const resultCover = resultDef ? cover(resultDef.name) : {emoji:'⚒️'};
-    const previewPhoto = resultImg
-      ? '<img src="' + resultImg + '" onerror="this.outerHTML=\'<span style=&quot;font-size:32px&quot;>' + resultCover.emoji + '</span>\'">'
-      : '<span style="font-size:32px">' + resultCover.emoji + '</span>';
-
-    recipesHTML += '<div class="craftrow">' +
-      '<div style="font-size:14px;font-weight:700;color:var(--purple)">' + recipe.icon + ' ' + recipe.name + '</div>' +
-      '<div class="craft-preview">' +
-        '<div class="craft-preview-img">' + previewPhoto + '</div>' +
-        '<div class="craft-preview-txt"><b>' + recipe.resultName + '</b>Крафтовая редкость · уникальная</div>' +
-      '</div>' +
-      '<div style="font-size:10px;opacity:.7;margin-top:8px;line-height:1.5"><b>Обязательные карты:</b><br>' + mandatoryList + '</div>' +
-      '<div style="font-size:10px;opacity:.7;margin-top:8px"><b>Жертва:</b> ' + sacrificeList + '</div>' +
-      '<div style="font-size:11px;opacity:.8;margin-top:8px">🪙 Цена: <b style="color:var(--gold)">' + price + '</b>' + (count > 0 ? ' <span style="opacity:.6">(крафтил: ' + count + ')</span>' : '') + '<br>⏱ Время: ' + recipe.timeMinH + '–' + recipe.timeMaxH + ' ч</div>' +
-      missingHTML + moneyHTML +
-      '<button class="craftStartBtn" data-id="' + recipe.id + '" ' + (canStart ? '' : 'disabled') + ' style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:' + (canStart ? 'linear-gradient(135deg,var(--green),#065f46)' : 'var(--panel2)') + ';color:#fff;font-weight:700;font-family:inherit;font-size:13px;cursor:' + (canStart ? 'pointer' : 'not-allowed') + ';opacity:' + (canStart ? 1 : .5) + ';min-height:44px">⚒️ Начать крафт</button>' +
-      (!slotsFree ? '<div style="font-size:10px;color:#f59e0b;margin-top:4px;text-align:center">Все слоты заняты</div>' : '') +
-      '</div>';
-  });
-  recipesEl.innerHTML = recipesHTML;
-
-  slotsEl.querySelectorAll('.craftClaimBtn').forEach(btn => { btn.onclick = ()=>claimCraft(+btn.dataset.idx); });
-  slotsEl.querySelectorAll('.craftSpeedupBtn').forEach(btn => { btn.onclick = ()=>speedupCraft(+btn.dataset.idx); });
-  recipesEl.querySelectorAll('.craftStartBtn').forEach(btn => { btn.onclick = ()=>startCraft(btn.dataset.id); });
-}
-
-/* ============================================================
-   МАГАЗИН ДНЯ
-   ============================================================ */
-const DAILY_SHOP_GOLD_PRICE = {
-  'Обычная':3,'Необычная':6,'Редкая':15,'Супер редкая':40,
-  'Эпическая':100,'Легендарная':280,'Алмазная':700,
-  'Мифическая':1800,'Секретная':5000
-};
-const DAILY_SHOP_WEIGHTS = {
-  'Обычная':3, 'Необычная':10, 'Редкая':30, 'Супер редкая':25,
-  'Эпическая':18, 'Легендарная':9, 'Алмазная':3,
-  'Мифическая':1.2, 'Секретная':0.4
-};
-function rollDailyShopRarity(){
-  let total = 0;
-  const entries = Object.entries(DAILY_SHOP_WEIGHTS);
-  for(const [n,w] of entries) total += w;
-  let r = Math.random() * total;
-  for(const [n,w] of entries){ r -= w; if(r < 0) return n; }
-  return 'Обычная';
-}
-function makeDailyShopCard(){
-  const rarity = rollDailyShopRarity();
-  const pool = CARD_POOL.filter(c => c.rarity === rarity);
-  const base = pick(pool);
-  const slots = 5 + Math.floor(rnd(0,4));
-  let stars = 0;
-  if(Math.random() < 0.6){ stars = 1; for(let i=1;i<5;i++){ if(Math.random() < 0.5) stars++; else break; } }
-  const price = DAILY_SHOP_GOLD_PRICE[rarity] || 100;
-  return {
-    id: uid(), name: base.name, rarity, slots, stars, mutations: [],
-    income: pct(-20,40), goldCh: pct(-15,30), essCh: pct(-15,30), manaCh: pct(-15,30),
-    cdMod: +(rnd(-30,50)).toFixed(1), activeVisual: null,
-    price, currency: 'gold', sold: false, createdAt: Date.now()
-  };
-}
-function ensureDailyShop(){
-  const cycle = getMskCycleKey();
-  if(state.dailyShopCycle !== cycle || !state.dailyShop || !Array.isArray(state.dailyShop.items) || !state.dailyShop.items.length){
-    state.dailyShopCycle = cycle;
-    state.dailyShop = {items: [makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard()]};
-    state.lastSeenDailyShop = 0;
-    save();
-  }
-}
-function renderDailyShop(){
-  ensureDailyShop();
-  const cont = $('dailyShopContainer'); if(!cont) return;
-  const resetTime = getNextResetMsk();
-  const items = state.dailyShop.items;
-  let html = '<div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:12px;padding:10px 14px;margin-bottom:10px;border:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between"><span>🔄 Следующий ресток через</span><b style="color:var(--acc)">' + fmtTimeLeftMsk(resetTime) + '</b></div>';
-  html += '<div style="font-size:10px;opacity:.6;margin-bottom:8px;text-align:center">Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК</div>';
-  items.forEach((c, i)=>{
-    const priceStr = '🥇 ' + c.price;
-    const canAfford = state.gold >= c.price;
-    if(c.sold){
-      html += '<div style="background:var(--panel);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--border);opacity:.5"><div style="font-size:13px;font-weight:700">' + c.name + '</div><div style="font-size:11px;opacity:.7;margin-top:4px">' + c.rarity + ' · Куплено ✓</div></div>';
-      return;
-    }
-    const cov = cover(c.name);
-    const img = getCardImage(c.name);
-    const photo = img
-      ? '<img src="' + img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.outerHTML=\'<div style=&quot;font-size:36px&quot;>' + cov.emoji + '</div>\'">'
-      : '<div style="font-size:36px">' + cov.emoji + '</div>';
-    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + c.rarity + ' · ' + c.slots + ' слотов ' + (c.stars>0?'· '+'★'.repeat(c.stars):'') + '</div></div><button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'var(--panel2)') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.5) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceStr + '</button></div>';
-  });
-  cont.innerHTML = html;
-  cont.querySelectorAll('.dailyShopBuy').forEach(btn => { btn.onclick = ()=>buyDailyShopCard(+btn.dataset.i); });
-}
-function buyDailyShopCard(idx){
-  const c = state.dailyShop.items[idx]; if(!c || c.sold) return;
-  if(state.collection.length >= state.invMax) return alert('Инвентарь полон!');
-  if(state.gold < c.price) return alert('Не хватает золота');
-  if(!confirm('Купить ' + c.name + '?')) return;
-  state.gold -= c.price;
-  const card = Object.assign({}, c);
-  delete card.price; delete card.currency; delete card.sold;
-  state.collection.push(card);
-  registerCardStats(card);
-  if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
-  c.sold = true;
-  addXP(50); playResource(); playAchievement();
-  save(); renderHeader(); renderDailyShop(); checkAchievements();
-  alert('Куплена: ' + card.name);
-}
-
-/* ============================================================
-   ПРОКАЧКА РЫБАЛКИ (Upgrades)
-   ============================================================ */
-function renderUpgrades(){
-  const cont = $('upgradesContainer'); if(!cont) return;
-  let html = '<div style="background:var(--panel);border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--border);font-size:12px"><div style="display:flex;justify-content:space-between"><span style="opacity:.7">Монет</span><b>🪙 ' + Math.floor(state.coins) + '</b></div><div style="display:flex;justify-content:space-between;margin-top:4px"><span style="opacity:.7">Энергия</span><b>⚡ ' + Math.floor(state.energy) + ' / ' + getMaxEnergy() + '</b></div><div style="font-size:10px;opacity:.5;margin-top:4px">Реген: +1⚡ / ' + getEnergyRegenSec().toFixed(1) + ' сек</div></div>';
-  UPGRADES.forEach(u=>{
-    const lvl = getUpgradeLvl(u.id);
-    const maxed = lvl >= u.maxLvl;
-    const cost = getUpgradeCost(u.id);
-    const canBuy = !maxed && state.coins >= cost;
-    const currentVal = u.getVal(lvl);
-    const nextVal = maxed ? null : u.getVal(lvl+1);
-    html += '<div class="upgradeRow"><div><div class="uName">' + u.icon + ' ' + u.name + '</div><div class="uDesc">' + u.desc + '</div><div class="uLvl">Ур. ' + lvl + ' / ' + u.maxLvl + ' · ' + currentVal + (nextVal !== null && nextVal !== currentVal ? ' → ' + nextVal : '') + '</div></div>' + (maxed ? '<span style="font-size:11px;opacity:.5;color:var(--gold);font-weight:700">MAX</span>' : '<button class="upgradeBtn" data-id="' + u.id + '" ' + (canBuy?'':'disabled') + '>Улучшить<span class="priceStr">🪙 ' + cost + '</span></button>') + '</div>';
-  });
-  cont.innerHTML = html;
-  cont.querySelectorAll('.upgradeBtn').forEach(btn => {
-    btn.onclick = ()=>{ tryUpgrade(btn.dataset.id); renderUpgrades(); };
-  });
-}
-
-/* ============================================================
-   МИНИ-ИГРА «Накорми кота»
-   ============================================================ */
-let minigameState = null;
-
-function canPlayMinigame(){
-  const last = state.minigame?.lastPlay || 0;
-  return Date.now() - last >= MINIGAME_CD_MS;
-}
-function getMinigameTimeLeft(){
-  const last = state.minigame?.lastPlay || 0;
-  return Math.max(0, MINIGAME_CD_MS - (Date.now() - last));
-}
-function renderMinigame(){
-  const cont = $('minigameContainer'); if(!cont) return;
-  const ready = canPlayMinigame();
-  const left = getMinigameTimeLeft();
-  const cdText = ready ? 'Готово!' : 'Через ' + fmtTimeShort(left);
-
-  let html = '';
-  if(!minigameState || !minigameState.active){
-    html = '<div class="minigame-area">' +
-      '<div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px">🐟 Накорми кота</div>' +
-      '<div style="font-size:12px;opacity:.75;margin-bottom:16px">Тапни по котику 10 раз за 8 секунд — получишь награду! Раз в 4 часа.</div>' +
-      '<div class="minigame-cat" id="mgCat" style="opacity:' + (ready?1:0.4) + '">' + (ready?'😺':'😿') + '</div>' +
-      '<div style="font-size:12px;opacity:.7;margin-top:12px">Статус: <b>' + cdText + '</b></div>' +
-      (ready ? '<button class="profileBtn btnGold" id="mgStart" style="max-width:220px;margin:14px auto 0;min-height:48px">🎮 Начать</button>' : '') +
-      '<div class="minigame-rewards"><span>🪙 ' + MINIGAME_REWARDS.coins[0] + '–' + MINIGAME_REWARDS.coins[1] + '</span><span>🥇 ' + MINIGAME_REWARDS.gold[0] + '–' + MINIGAME_REWARDS.gold[1] + '</span><span>🧪 ' + MINIGAME_REWARDS.essence[0] + '–' + MINIGAME_REWARDS.essence[1] + '</span></div>' +
-      '<div style="font-size:11px;opacity:.5;margin-top:10px">Побед: <b>' + (state.minigame?.wins || 0) + '</b></div>' +
-      '</div>';
-  } else {
-    html = '<div class="minigame-area">' +
-      '<div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px">🐟 Накорми кота!</div>' +
-      '<div style="font-size:12px;opacity:.75;margin-bottom:10px">Осталось: <b id="mgTime">8.0</b> сек</div>' +
-      '<div class="minigame-cat" id="mgCat">😺</div>' +
-      '<div class="minigame-score"><span id="mgScore">0</span> / ' + MINIGAME_TARGET + '</div>' +
-      '<div style="height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;max-width:240px;margin:0 auto"><div id="mgBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .15s"></div></div>' +
-      '</div>';
-  }
-  cont.innerHTML = html;
-
-  if(!minigameState || !minigameState.active){
-    if(ready && $('mgStart')){
-      $('mgStart').onclick = ()=>{ startMinigame(); };
-    }
-  } else {
-    const cat = $('mgCat');
-    if(cat) cat.onclick = ()=> minigameTap();
-  }
-}
-function startMinigame(){
-  minigameState = {
-    active: true,
-    score: 0,
-    startTime: Date.now(),
-    duration: 8000
-  };
-  playResource();
-  renderMinigame();
-  minigameTick();
-}
-function minigameTap(){
-  if(!minigameState || !minigameState.active) return;
-  minigameState.score++;
-  playClick();
-  const scoreEl = $('mgScore'); if(scoreEl) scoreEl.textContent = minigameState.score;
-  const barEl = $('mgBar');
-  if(barEl) barEl.style.width = Math.min(100, minigameState.score / MINIGAME_TARGET * 100) + '%';
-  const cat = $('mgCat');
-  if(cat){
-    const emojis = ['😺','😸','😻','😽'];
-    cat.textContent = emojis[Math.min(3, Math.floor(minigameState.score/3))];
-    cat.style.transform = 'scale(1.15)';
-    setTimeout(()=>{ cat.style.transform = ''; }, 100);
-  }
-  if(minigameState.score >= MINIGAME_TARGET){
-    finishMinigame(true);
-  }
-}
-function minigameTick(){
-  if(!minigameState || !minigameState.active) return;
-  const elapsed = Date.now() - minigameState.startTime;
-  const left = Math.max(0, (minigameState.duration - elapsed) / 1000);
-  const timeEl = $('mgTime');
-  if(timeEl) timeEl.textContent = left.toFixed(1);
-  if(left <= 0){
-    finishMinigame(minigameState.score >= MINIGAME_TARGET);
-    return;
-  }
-  requestAnimationFrame(minigameTick);
-}
-function finishMinigame(win){
-  if(!minigameState) return;
-  const score = minigameState.score;
-  minigameState.active = false;
-  state.minigame.lastPlay = Date.now();
-  if(win){
-    const coins = Math.round(rnd(MINIGAME_REWARDS.coins[0], MINIGAME_REWARDS.coins[1]));
-    const gold = Math.round(rnd(MINIGAME_REWARDS.gold[0], MINIGAME_REWARDS.gold[1]));
-    const essence = Math.round(rnd(MINIGAME_REWARDS.essence[0], MINIGAME_REWARDS.essence[1]));
-    state.coins += coins; state.coinsEarned += coins;
-    state.gold += gold; state.goldEarned += gold;
-    state.essence += essence; state.essEarned += essence;
-    state.minigame.wins = (state.minigame.wins || 0) + 1;
-    playAchievement(); flashRare();
-    renderHeader();
-    checkAchievements();
-    setTimeout(()=>{
-      alert('🎉 Кот накормлен!\n\n+' + coins + '🪙 +' + gold + '🥇 +' + essence + '🧪');
-    }, 200);
-  } else {
-    playFishMiss();
-    setTimeout(()=>{
-      alert('😿 Кот остался голодным... Счёт: ' + score + ' / ' + MINIGAME_TARGET);
-    }, 200);
-  }
-  save();
-  renderMinigame();
-}
-
-/* ============================================================
-   ФУНКЦИИ УВЕДОМЛЕНИЙ (используются в startGameTick)
-   ============================================================ */
-function checkCraftNotifs(){
-  if(!state.notifSettings.craft) return;
-  state.craftSlots.forEach((slot, i)=>{
-    if(slot && slot.ready && !slot.notifSent){
-      slot.notifSent = true;
-      sendNotif('craft', '⚒️ Крафт готов!', 'Заходи забирать карту: ' + (CRAFT_BY_ID[slot.recipeId]?.name || ''));
-      save();
-    }
-  });
-}
-function checkFishingNotifs(){
-  /* Рыбалка завершается сама через 60 сек, но пользователь может уйти со вкладки */
-}
-function checkDailyNotifs(){
-  if(!state.notifSettings.daily) return;
-  if(canClaimDaily() && !state.lastDailyNotif){
-    state.lastDailyNotif = todayKey();
-    sendNotif('daily', '🎁 Ежедневный бонус!', 'Забери награду за вход');
-    save();
-  }
-}
-function checkShopNotifs(){
-  if(!state.notifSettings.shop) return;
-  const cycle = getMskCycleKey();
-  if(state.lastSeenDailyShop !== cycle && state.lastSeenDailyShop !== 0){
-    sendNotif('shop', '🛒 Магазин обновился', '4 новых карты ждут');
-    state.lastSeenDailyShop = cycle;
-    save();
-  } else if(state.lastSeenDailyShop === 0){
-    state.lastSeenDailyShop = cycle;
-    save();
-  }
-}
-function checkQuestNotifs(){
-  if(!state.notifSettings.quests) return;
-  const cycle = getQuestCycleKey();
-  if(state.lastSeenQuests !== cycle && state.lastSeenQuests !== 0){
-    sendNotif('quests', '📋 Новые задания', 'Заходи выполнять');
-    state.lastSeenQuests = cycle;
-    save();
-  } else if(state.lastSeenQuests === 0){
-    state.lastSeenQuests = cycle;
-    save();
-  }
-}
-function checkMinigameNotifs(){
-  if(!state.notifSettings.minigame) return;
-  if(canPlayMinigame() && !state.minigameNotifSent){
-    state.minigameNotifSent = true;
-    sendNotif('minigame', '🐟 Кот голоден!', 'Покорми котика — получи награду');
-    save();
-  } else if(!canPlayMinigame()){
-    state.minigameNotifSent = false;
-  }
-}
-/* ============================================================
-   РЫБАЛКА — генерация рыб
+   ГЕНЕРАЦИЯ РЫБ
    ============================================================ */
 function rollFishRarity(depthTier){
   const weights = {c:30, u:30, r:17, sr:10, e:6, l:4, d:1.5, m:0.8, s:0.2};
@@ -3857,26 +3314,37 @@ function rollFishRarity(depthTier){
   for(const k in weights){ r -= weights[k]; if(r < 0) return k; }
   return 'c';
 }
+
+/* 🔥 Вес рыбы — рандомный от min до max с бустами */
 function makeFishInstance(depthTier){
   const r = rollFishRarity(depthTier);
   const pool = fishesByRarity(r);
   const base = pick(pool);
   const tier = FISH_RARITY_TIER[r];
-  const sizeLuck = 1 + getUpgradeVal('size_luck')/100 + getRod().weightBonus/100;
-  const maxMult = maxSizeMultForTier(tier);
-  let size = +(rnd(0.6, maxMult) * base.size * sizeLuck).toFixed(2);
-  if(size < 0.1) size = 0.1;
-  const baseWeight = FISH_BASE_WEIGHT[r] || 1;
-  const weightMult = tier >= 5 ? Math.min(size, 1.8) : Math.min(size, 3.0);
-  const weight = +(baseWeight * weightMult).toFixed(3);
+
+  const range = FISH_WEIGHT_RANGE[r] || FISH_WEIGHT_RANGE.c;
+  const weightLuck = 1 + getUpgradeVal('size_luck')/100 + getRod().weightBonus/100;
+  let rawWeight = rnd(range[0], range[1]) * weightLuck;
+
+  const maxW = range[1] * weightLuck;
+  const ratio = Math.max(0, Math.min(1, rawWeight / maxW));
+  let size = 1.0;
+  if(ratio <= 0.10)      size = 0.6;
+  else if(ratio <= 0.25) size = 0.8;
+  else if(ratio <= 0.55) size = 1.0;
+  else if(ratio <= 0.78) size = 1.4;
+  else if(ratio <= 0.93) size = 2.0;
+  else                   size = 3.0;
+
   const priceMult = tier >= 5 ? Math.min(size, 1.5) : Math.min(size, 2.5);
   const price = Math.round(base.price * priceMult);
   const slowMult = 1 - getUpgradeVal('slow')/100;
   const raritySpeedMult = 1 + tier * 0.22;
   const spd = Math.max(0.3, base.spd * slowMult * raritySpeedMult * (0.85 + Math.random()*0.3));
+
   return {
     fishId: base.id, emoji: base.emoji, name: base.name, rarity: r,
-    size, weight, price, spd, mutations: []
+    size, weight: Math.max(0.01, rawWeight), price, spd, mutations: []
   };
 }
 
@@ -4025,7 +3493,6 @@ function startFishingLoop(){
       f.lastSpawn = now;
       spawnFish(f.depthId, progress);
     }
-    /* движение рыб */
     for(let i = f.fish.length - 1; i >= 0; i--){
       const fish = f.fish[i];
       fish.x += fish.vx * 16.67 / 1000;
@@ -4036,7 +3503,6 @@ function startFishingLoop(){
       fish.y = Math.max(15, Math.min(canvas.height - 15, fish.y));
       if(now - fish.bornAt > fish.lifetime){ f.fish.splice(i,1); }
     }
-    /* логика подсечённой рыбы */
     if(hookFish){
       if(!hookFish.nextTug || now >= hookFish.nextTug){
         hookFish.nextTug = now + 400 + Math.random() * 600;
@@ -4062,7 +3528,6 @@ function startFishingLoop(){
         }
       }
     }
-    /* рисуем фон */
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const depth = DEPTHS[f.depthId];
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -4077,7 +3542,6 @@ function startFishingLoop(){
       ctx.fillRect(0, wy, canvas.width, 20);
     }
     ctx.globalAlpha = 1;
-    /* рисуем рыб */
     f.fish.forEach(fish => {
       const age = (now - fish.bornAt) / fish.lifetime;
       const alpha = age < 0.1 ? age/0.1 : age > 0.85 ? (1-age)/0.15 : 1;
@@ -4098,7 +3562,6 @@ function startFishingLoop(){
       ctx.textBaseline = 'middle';
       ctx.fillText('?', fish.x, fish.y);
     });
-    /* рисуем подсечённую */
     if(hookFish){
       const fishData = hookFish.fishData;
       const col = rarityColors[fishData.rarity] || '#fff';
@@ -4164,7 +3627,6 @@ function handleFishingClick(e){
   if(now < (f.hookCooldown||0)) return;
   const canvas = $('fishingCanvas');
   const rect = canvas.getBoundingClientRect();
-  /* учитываем масштаб (canvas может быть другого размера чем CSS) */
   const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
   const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
   const x = (clientX - rect.left) * (canvas.width / rect.width);
@@ -4273,13 +3735,13 @@ function handleFishingClick(e){
   hook.setLastDecay(now);
   floatTextAt('🪝 ЗАЦЕПИЛ! Тапай!', clientX, clientY - 40, '#ffd93d');
 }
-/* Подписки на canvas — и клик, и тач */
+
 const fishingCanvas = $('fishingCanvas');
 if(fishingCanvas){
   fishingCanvas.addEventListener('click', handleFishingClick);
   fishingCanvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); handleFishingClick(e); }, {passive:false});
 }
-/* Кнопки рыбалки */
+
 if($('fishQuitBtn')) $('fishQuitBtn').addEventListener('click', ()=>{
   if(!state.fishing || !state.fishing.active) return;
   if(!confirm('Закончить рыбалку?')) return;
@@ -4626,6 +4088,377 @@ function bourseSell(n){
 }
 
 /* ============================================================
+   КРАФТ
+   ============================================================ */
+function getCraftSlotsMax(){ return getUpgradeVal('craft_slots') || 1; }
+function ensureCraftSlots(){
+  const max = getCraftSlotsMax();
+  state.craftSlotsMax = max;
+  if(!Array.isArray(state.craftSlots)) state.craftSlots = [];
+  while(state.craftSlots.length < max) state.craftSlots.push(null);
+  while(state.craftSlots.length > max) state.craftSlots.pop();
+}
+function getCraftPrice(recipe){
+  const n = state.craftCounts[recipe.id] || 0;
+  return Math.round(recipe.baseCoins * Math.pow(recipe.priceMult, n));
+}
+function findCardsForCraft(recipe){
+  const pool = state.collection.filter(c =>
+    !state.equippedIds.includes(c.id) && !isCardOnCooldown(c.id)
+  );
+  const result = [];
+  const usedIds = new Set();
+  for(const name of recipe.mandatory){
+    const found = pool.find(c => c.name === name && !usedIds.has(c.id));
+    if(!found) return {ok:false, msg:'Не хватает обязательной карты: «' + name + '»'};
+    result.push(found);
+    usedIds.add(found.id);
+  }
+  for(const sac of recipe.sacrifice){
+    const matching = pool.filter(c =>
+      c.rarity === sac.rarity && !usedIds.has(c.id)
+    ).sort((a,b) => cardPoints(a) - cardPoints(b));
+    if(matching.length < sac.count){
+      return {ok:false, msg:'Не хватает ' + sac.count + '× ' + sac.rarity};
+    }
+    for(let i=0;i<sac.count;i++){
+      result.push(matching[i]);
+      usedIds.add(matching[i].id);
+    }
+  }
+  return {ok:true, cards: result};
+}
+function getSpeedupGoldCost(slot){
+  if(!slot || slot.endsAt <= Date.now()) return 0;
+  const leftMin = Math.ceil((slot.endsAt - Date.now()) / 60000);
+  return Math.max(1, Math.round(leftMin / 12));
+}
+function startCraft(recipeId){
+  ensureCraftSlots();
+  const recipe = CRAFT_BY_ID[recipeId];
+  if(!recipe) return;
+  const freeIdx = state.craftSlots.findIndex(s => !s);
+  if(freeIdx === -1) return alert('⚠️ Все слоты крафта заняты!');
+  const price = getCraftPrice(recipe);
+  if(state.coins < price){
+    return alert('Не хватает монет! Нужно ' + price + ' 🪙');
+  }
+  const search = findCardsForCraft(recipe);
+  if(!search.ok) return alert('⚠️ ' + search.msg);
+  const cardsList = search.cards.map(c => '• ' + c.name + ' (' + c.rarity + ')').join('\n');
+  const count = state.craftCounts[recipe.id] || 0;
+  const nextMult = Math.pow(recipe.priceMult, count + 1).toFixed(2);
+  if(!confirm('⚒️ ' + recipe.name + '\n\nСГОРЯТ ' + search.cards.length + ' КАРТ:\n' + cardsList + '\n\nСПИШЕТСЯ: 🪙 ' + price + '\n(следующий крафт будет ×' + nextMult + ')\n\nВремя: ' + recipe.timeMinH + '–' + recipe.timeMaxH + ' ч\nНаграда: ' + recipe.resultName + '\n\n⚠️ Отменить нельзя!')) return;
+  if(price >= 500000){
+    if(!confirm('Точно-точно? Теряешь ' + search.cards.length + ' карт и 🪙 ' + price)) return;
+  }
+  state.coins -= price;
+  for(const c of search.cards){
+    state.collection = state.collection.filter(x => x.id !== c.id);
+    state.equippedIds = state.equippedIds.filter(x => x !== c.id);
+    state.newCards = state.newCards.filter(x => x !== c.id);
+  }
+  state.craftCounts[recipe.id] = (state.craftCounts[recipe.id] || 0) + 1;
+  const hours = rnd(recipe.timeMinH, recipe.timeMaxH);
+  const now = Date.now();
+  state.craftSlots[freeIdx] = {
+    recipeId: recipe.id,
+    startedAt: now,
+    endsAt: now + Math.round(hours * 3600 * 1000),
+    cardsSpent: search.cards.map(c => ({name: c.name, rarity: c.rarity})),
+    ready: false,
+    notifSent: false
+  };
+  playResource(); save(); renderHeader(); renderCraft(); checkAchievements();
+  alert('⚒️ Крафт запущен! Готово через ' + hours.toFixed(1) + ' ч.');
+}
+function speedupCraft(slotIdx){
+  ensureCraftSlots();
+  const slot = state.craftSlots[slotIdx];
+  if(!slot) return;
+  const cost = getSpeedupGoldCost(slot);
+  if(cost <= 0) return;
+  if(state.gold < cost) return alert('Не хватает золота! Нужно 🥇 ' + cost);
+  if(!confirm('⚡ Ускорить за 🥇 ' + cost + '?')) return;
+  state.gold -= cost;
+  slot.endsAt = Date.now();
+  playResource(); save(); renderHeader(); renderCraft();
+}
+function claimCraft(slotIdx){
+  ensureCraftSlots();
+  const slot = state.craftSlots[slotIdx];
+  if(!slot || !slot.ready) return;
+  const recipe = CRAFT_BY_ID[slot.recipeId];
+  if(!recipe){ state.craftSlots[slotIdx] = null; save(); renderCraft(); return; }
+  if(state.collection.length >= state.invMax){
+    return alert('⚠️ Инвентарь полон!');
+  }
+  const cardBase = CARD_POOL.find(c => c.name === recipe.resultName);
+  if(!cardBase){ alert('Ошибка: карта не найдена'); state.craftSlots[slotIdx] = null; save(); renderCraft(); return; }
+  const ridx = Object.keys(RARITY).indexOf(cardBase.rarity);
+  const tier = RARITY[cardBase.rarity].tier;
+  const slotsMax = Math.min(10, 1 + ridx*2 + Math.floor(rnd(0,3)));
+  const cardSlots = Math.floor(rnd(6, slotsMax+1));
+  const mutations = rollMutations(tier, cardSlots);
+  const stars = Math.floor(rnd(3, 6));
+  const card = {
+    id: uid(), name: cardBase.name, rarity: cardBase.rarity,
+    income: pct(20,60), goldCh: pct(10,40), essCh: pct(10,40), manaCh: pct(10,40),
+    cdMod: +(rnd(-20,70)).toFixed(1),
+    slots: cardSlots, mutations, stars, activeVisual: null,
+    createdAt: Date.now()
+  };
+  state.collection.push(card);
+  registerCardStats(card);
+  if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
+  state.craftSlots[slotIdx] = null;
+  addXP(1000);
+  playRare(); flashRare(); playAchievement();
+  save(); renderHeader(); renderCraft(); renderCollection(); checkAchievements();
+  alert('🎉 Крафт завершён!\n\n' + cardBase.name + '\n' + cardBase.rarity + '\n' + card.stars + '★\n' + cardPoints(card) + ' очков');
+}
+function tickCrafts(){
+  ensureCraftSlots();
+  let changed = false;
+  const now = Date.now();
+  state.craftSlots.forEach((slot)=>{
+    if(slot && !slot.ready && now >= slot.endsAt){
+      slot.ready = true;
+      changed = true;
+    }
+  });
+  if(changed) save();
+}
+function renderCraft(){
+  ensureCraftSlots();
+  const headerEl = $('craftHeader');
+  const slotsEl = $('craftSlots');
+  const recipesEl = $('craftRecipes');
+  if(!headerEl) return;
+
+  headerEl.innerHTML = '<div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:14px;padding:14px;margin-bottom:14px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--purple)">⚒️ Крафт карт</div><div style="font-size:11px;opacity:.75;margin-top:4px">Создавай уникальные карты редкости «Крафтовая». Из пакетов они НЕ выпадают. С каждым крафтом цена растёт ×1.5.</div></div>';
+
+  let slotsHTML = '<div style="font-size:12px;font-weight:700;margin:8px 0 6px">Слоты (' + state.craftSlots.length + '/' + state.craftSlotsMax + ')</div>';
+  state.craftSlots.forEach((slot, i)=>{
+    if(!slot){
+      slotsHTML += '<div class="craftrow" style="text-align:center;opacity:.7;border-style:dashed">Слот ' + (i+1) + ' · Свободен</div>';
+      return;
+    }
+    const recipe = CRAFT_BY_ID[slot.recipeId];
+    if(!recipe){ slotsHTML += '<div class="craftrow" style="color:var(--red)">Ошибка рецепта</div>'; return; }
+    if(slot.ready){
+      slotsHTML += '<div class="craftrow" style="background:linear-gradient(135deg,var(--green),#065f46);color:#fff"><div style="font-size:13px;font-weight:700">' + recipe.icon + ' ' + recipe.name + '</div><div style="font-size:11px;opacity:.9;margin-top:4px">🎉 ГОТОВО! Забирай</div><button class="craftClaimBtn" data-idx="' + i + '" style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:#fff;color:#065f46;font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;min-height:44px">✨ Забрать карту</button></div>';
+      return;
+    }
+    const left = Math.max(0, slot.endsAt - Date.now());
+    const total = slot.endsAt - slot.startedAt;
+    const pct = Math.min(100, Math.round((1 - left/total) * 100));
+    const goldCost = getSpeedupGoldCost(slot);
+    slotsHTML += '<div class="craftrow"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;font-weight:700">' + recipe.icon + ' ' + recipe.name + '</div><div style="font-size:11px;color:var(--gold);font-weight:700">' + fmtTime(Math.ceil(left/1000)) + '</div></div><div class="prog"><div class="progf" style="width:' + pct + '%"></div></div><button class="craftSpeedupBtn" data-idx="' + i + '" style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#f59e0b,#dc2626);color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;min-height:44px">⚡ Ускорить за 🥇 ' + goldCost + '</button></div>';
+  });
+  const locked = Math.max(0, 3 - state.craftSlotsMax);
+  for(let i=0;i<locked;i++){
+    slotsHTML += '<div class="craftrow" style="text-align:center;opacity:.5;border-style:dashed">🔒 Слот ' + (state.craftSlotsMax + 1 + i) + ' · Прокачай в магазине</div>';
+  }
+  slotsEl.innerHTML = slotsHTML;
+
+  let recipesHTML = '<div style="font-size:12px;font-weight:700;margin:14px 0 6px">📜 Рецепты</div>';
+  CRAFT_RECIPES.forEach(recipe => {
+    const search = findCardsForCraft(recipe);
+    const price = getCraftPrice(recipe);
+    const moneyOk = state.coins >= price;
+    const slotsFree = state.craftSlots.filter(s => !s).length > 0;
+    const canStart = search.ok && moneyOk && slotsFree;
+    const count = state.craftCounts[recipe.id] || 0;
+    const mandatoryList = recipe.mandatory.map(n => '• ' + n).join('<br>');
+    const sacrificeList = recipe.sacrifice.map(s => s.count + '× ' + s.rarity).join(', ');
+    const missingHTML = !search.ok ? '<div style="font-size:10px;color:var(--red);margin-top:6px">⚠️ ' + search.msg + '</div>' : '';
+    const moneyHTML = !moneyOk ? '<div style="font-size:10px;color:var(--red);margin-top:4px">⚠️ Не хватает 🪙 ' + (price - Math.floor(state.coins)) + '</div>' : '';
+
+    const resultDef = CARD_POOL.find(c => c.name === recipe.resultName);
+    const resultImg = resultDef ? getCardImage(resultDef.name) : null;
+    const resultCover = resultDef ? cover(resultDef.name) : {emoji:'⚒️'};
+    const previewPhoto = resultImg
+      ? '<img src="' + resultImg + '" onerror="this.outerHTML=\'<span style=&quot;font-size:32px&quot;>' + resultCover.emoji + '</span>\'">'
+      : '<span style="font-size:32px">' + resultCover.emoji + '</span>';
+
+    recipesHTML += '<div class="craftrow">' +
+      '<div style="font-size:14px;font-weight:700;color:var(--purple)">' + recipe.icon + ' ' + recipe.name + '</div>' +
+      '<div class="craft-preview">' +
+        '<div class="craft-preview-img">' + previewPhoto + '</div>' +
+        '<div class="craft-preview-txt"><b>' + recipe.resultName + '</b>Крафтовая редкость · уникальная</div>' +
+      '</div>' +
+      '<div style="font-size:10px;opacity:.7;margin-top:8px;line-height:1.5"><b>Обязательные карты:</b><br>' + mandatoryList + '</div>' +
+      '<div style="font-size:10px;opacity:.7;margin-top:8px"><b>Жертва:</b> ' + sacrificeList + '</div>' +
+      '<div style="font-size:11px;opacity:.8;margin-top:8px">🪙 Цена: <b style="color:var(--gold)">' + price + '</b>' + (count > 0 ? ' <span style="opacity:.6">(крафтил: ' + count + ')</span>' : '') + '<br>⏱ Время: ' + recipe.timeMinH + '–' + recipe.timeMaxH + ' ч</div>' +
+      missingHTML + moneyHTML +
+      '<button class="craftStartBtn" data-id="' + recipe.id + '" ' + (canStart ? '' : 'disabled') + ' style="width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;background:' + (canStart ? 'linear-gradient(135deg,var(--green),#065f46)' : 'var(--panel2)') + ';color:#fff;font-weight:700;font-family:inherit;font-size:13px;cursor:' + (canStart ? 'pointer' : 'not-allowed') + ';opacity:' + (canStart ? 1 : .5) + ';min-height:44px">⚒️ Начать крафт</button>' +
+      (!slotsFree ? '<div style="font-size:10px;color:#f59e0b;margin-top:4px;text-align:center">Все слоты заняты</div>' : '') +
+      '</div>';
+  });
+  recipesEl.innerHTML = recipesHTML;
+
+  slotsEl.querySelectorAll('.craftClaimBtn').forEach(btn => { btn.onclick = ()=>claimCraft(+btn.dataset.idx); });
+  slotsEl.querySelectorAll('.craftSpeedupBtn').forEach(btn => { btn.onclick = ()=>speedupCraft(+btn.dataset.idx); });
+  recipesEl.querySelectorAll('.craftStartBtn').forEach(btn => { btn.onclick = ()=>startCraft(btn.dataset.id); });
+}
+
+/* ============================================================
+   МАГАЗИН ДНЯ
+   ============================================================ */
+const DAILY_SHOP_GOLD_PRICE = {
+  'Обычная':3,'Необычная':6,'Редкая':15,'Супер редкая':40,
+  'Эпическая':100,'Легендарная':280,'Алмазная':700,
+  'Мифическая':1800,'Секретная':5000
+};
+const DAILY_SHOP_WEIGHTS = {
+  'Обычная':3, 'Необычная':10, 'Редкая':30, 'Супер редкая':25,
+  'Эпическая':18, 'Легендарная':9, 'Алмазная':3,
+  'Мифическая':1.2, 'Секретная':0.4
+};
+function rollDailyShopRarity(){
+  let total = 0;
+  const entries = Object.entries(DAILY_SHOP_WEIGHTS);
+  for(const [n,w] of entries) total += w;
+  let r = Math.random() * total;
+  for(const [n,w] of entries){ r -= w; if(r < 0) return n; }
+  return 'Обычная';
+}
+function makeDailyShopCard(){
+  const rarity = rollDailyShopRarity();
+  const pool = CARD_POOL.filter(c => c.rarity === rarity);
+  const base = pick(pool);
+  const slots = 5 + Math.floor(rnd(0,4));
+  let stars = 0;
+  if(Math.random() < 0.6){ stars = 1; for(let i=1;i<5;i++){ if(Math.random() < 0.5) stars++; else break; } }
+  const price = DAILY_SHOP_GOLD_PRICE[rarity] || 100;
+  return {
+    id: uid(), name: base.name, rarity, slots, stars, mutations: [],
+    income: pct(-20,40), goldCh: pct(-15,30), essCh: pct(-15,30), manaCh: pct(-15,30),
+    cdMod: +(rnd(-30,50)).toFixed(1), activeVisual: null,
+    price, currency: 'gold', sold: false, createdAt: Date.now()
+  };
+}
+function ensureDailyShop(){
+  const cycle = getMskCycleKey();
+  if(state.dailyShopCycle !== cycle || !state.dailyShop || !Array.isArray(state.dailyShop.items) || !state.dailyShop.items.length){
+    state.dailyShopCycle = cycle;
+    state.dailyShop = {items: [makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard()]};
+    state.lastSeenDailyShop = 0;
+    save();
+  }
+}
+function renderDailyShop(){
+  ensureDailyShop();
+  const cont = $('dailyShopContainer'); if(!cont) return;
+  const resetTime = getNextResetMsk();
+  const items = state.dailyShop.items;
+  let html = '<div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:12px;padding:10px 14px;margin-bottom:10px;border:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between"><span>🔄 Следующий ресток через</span><b style="color:var(--acc)">' + fmtTimeLeftMsk(resetTime) + '</b></div>';
+  html += '<div style="font-size:10px;opacity:.6;margin-bottom:8px;text-align:center">Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК</div>';
+  items.forEach((c, i)=>{
+    const priceStr = '🥇 ' + c.price;
+    const canAfford = state.gold >= c.price;
+    if(c.sold){
+      html += '<div style="background:var(--panel);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--border);opacity:.5"><div style="font-size:13px;font-weight:700">' + c.name + '</div><div style="font-size:11px;opacity:.7;margin-top:4px">' + c.rarity + ' · Куплено ✓</div></div>';
+      return;
+    }
+    const cov = cover(c.name);
+    const img = getCardImage(c.name);
+    const photo = img
+      ? '<img src="' + img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.outerHTML=\'<div style=&quot;font-size:36px&quot;>' + cov.emoji + '</div>\'">'
+      : '<div style="font-size:36px">' + cov.emoji + '</div>';
+    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + c.rarity + ' · ' + c.slots + ' слотов ' + (c.stars>0?'· '+'★'.repeat(c.stars):'') + '</div></div><button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'var(--panel2)') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.5) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceStr + '</button></div>';
+  });
+  cont.innerHTML = html;
+  cont.querySelectorAll('.dailyShopBuy').forEach(btn => { btn.onclick = ()=>buyDailyShopCard(+btn.dataset.i); });
+}
+function buyDailyShopCard(idx){
+  const c = state.dailyShop.items[idx]; if(!c || c.sold) return;
+  if(state.collection.length >= state.invMax) return alert('Инвентарь полон!');
+  if(state.gold < c.price) return alert('Не хватает золота');
+  if(!confirm('Купить ' + c.name + '?')) return;
+  state.gold -= c.price;
+  const card = Object.assign({}, c);
+  delete card.price; delete card.currency; delete card.sold;
+  state.collection.push(card);
+  registerCardStats(card);
+  if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
+  c.sold = true;
+  addXP(50); playResource(); playAchievement();
+  save(); renderHeader(); renderDailyShop(); checkAchievements();
+  alert('Куплена: ' + card.name);
+}
+
+/* ============================================================
+   ПРОКАЧКА РЫБАЛКИ
+   ============================================================ */
+function renderUpgrades(){
+  const cont = $('upgradesContainer'); if(!cont) return;
+  let html = '<div style="background:var(--panel);border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--border);font-size:12px"><div style="display:flex;justify-content:space-between"><span style="opacity:.7">Монет</span><b>🪙 ' + Math.floor(state.coins) + '</b></div><div style="display:flex;justify-content:space-between;margin-top:4px"><span style="opacity:.7">Энергия</span><b>⚡ ' + Math.floor(state.energy) + ' / ' + getMaxEnergy() + '</b></div><div style="font-size:10px;opacity:.5;margin-top:4px">Реген: +1⚡ / ' + getEnergyRegenSec().toFixed(1) + ' сек</div></div>';
+  UPGRADES.forEach(u=>{
+    const lvl = getUpgradeLvl(u.id);
+    const maxed = lvl >= u.maxLvl;
+    const cost = getUpgradeCost(u.id);
+    const canBuy = !maxed && state.coins >= cost;
+    const currentVal = u.getVal(lvl);
+    const nextVal = maxed ? null : u.getVal(lvl+1);
+    html += '<div class="upgradeRow"><div><div class="uName">' + u.icon + ' ' + u.name + '</div><div class="uDesc">' + u.desc + '</div><div class="uLvl">Ур. ' + lvl + ' / ' + u.maxLvl + ' · ' + currentVal + (nextVal !== null && nextVal !== currentVal ? ' → ' + nextVal : '') + '</div></div>' + (maxed ? '<span style="font-size:11px;opacity:.5;color:var(--gold);font-weight:700">MAX</span>' : '<button class="upgradeBtn" data-id="' + u.id + '" ' + (canBuy?'':'disabled') + '>Улучшить<span class="priceStr">🪙 ' + cost + '</span></button>') + '</div>';
+  });
+  cont.innerHTML = html;
+  cont.querySelectorAll('.upgradeBtn').forEach(btn => {
+    btn.onclick = ()=>{ tryUpgrade(btn.dataset.id); renderUpgrades(); };
+  });
+}
+
+/* ============================================================
+   ФУНКЦИИ УВЕДОМЛЕНИЙ
+   ============================================================ */
+function checkCraftNotifs(){
+  if(!state.notifSettings.craft) return;
+  state.craftSlots.forEach((slot, i)=>{
+    if(slot && slot.ready && !slot.notifSent){
+      slot.notifSent = true;
+      sendNotif('craft', '⚒️ Крафт готов!', 'Заходи забирать карту: ' + (CRAFT_BY_ID[slot.recipeId]?.name || ''));
+      save();
+    }
+  });
+}
+function checkFishingNotifs(){ /* рыбалка заканчивается сама через 60 сек */ }
+function checkDailyNotifs(){
+  if(!state.notifSettings.daily) return;
+  if(canClaimDaily() && !state.lastDailyNotif){
+    state.lastDailyNotif = todayKey();
+    sendNotif('daily', '🎁 Ежедневный бонус!', 'Забери награду за вход');
+    save();
+  }
+}
+function checkShopNotifs(){
+  if(!state.notifSettings.shop) return;
+  const cycle = getMskCycleKey();
+  if(state.lastSeenDailyShop !== cycle && state.lastSeenDailyShop !== 0){
+    sendNotif('shop', '🛒 Магазин обновился', '4 новых карты ждут');
+    state.lastSeenDailyShop = cycle;
+    save();
+  } else if(state.lastSeenDailyShop === 0){
+    state.lastSeenDailyShop = cycle;
+    save();
+  }
+}
+function checkQuestNotifs(){
+  if(!state.notifSettings.quests) return;
+  const cycle = getQuestCycleKey();
+  if(state.lastSeenQuests !== cycle && state.lastSeenQuests !== 0){
+    sendNotif('quests', '📋 Новые задания', 'Заходи выполнять');
+    state.lastSeenQuests = cycle;
+    save();
+  } else if(state.lastSeenQuests === 0){
+    state.lastSeenQuests = cycle;
+    save();
+  }
+}
+function checkMinigameNotifs(){ /* мини-игра вырезана в Части 6 */ }
+
+/* ============================================================
    ЗАДАНИЯ
    ============================================================ */
 function generateQuests(){
@@ -4822,6 +4655,66 @@ function openDailyModal(){
     };
   }
 }
+/* ============================================================
+   🚫 СКРЫТЫЕ НИКИ — не показываются в топе
+   ============================================================ */
+const HIDDEN_NICKS = [
+  'Арсений Разраб 1343',
+  // добавляй сюда свои твины, если захочешь спрятать
+];
+
+/* ============================================================
+   🚫 ФИЛЬТР МАТА (компактный)
+   ============================================================ */
+const BAD_ROOTS = [
+  'хуй','хуя','хую','хуе','пизд','ебал','ебан','ебет','ебуч','ебля','ебн','ебу',
+  'бляд','блят','сука','сучк','мудак','мудил',
+  'гандон','гондон','долбоеб','долбаеб','дебил','дибил',
+  'пидор','пидар','пидр','педик','мразь','мраз',
+  'шлюх','шлюш','залуп','манда','уебан','уеб','уёб',
+  'идиот','кретин','критин','козел','козёл','казел',
+  'чмо','чмош','лошар','лошара','тварь','падла','гнида','урод',
+  'дроч','минет','онан','подъеб','приеб','наеб','отъеб','разъеб','заеб','впизд',
+  'fuck','fuk','fck','shit','sh1t','bitch','asshole','dick','cock','pussy',
+  'cunt','whore','nigg','bastard','porn','sex','rape','penis','vagina',
+  'hentai','nazi','hitler','jerk','suck','idiot','moron','loser','stupid',
+  'gay','lesb','tits','boob','balls','cum','anal','oral','clit','dildo',
+  'fetish','bdsm','xxx'
+];
+
+const CHAR_MAP = {
+  '0':'о','1':'и','2':'з','3':'з','4':'ч','5':'с','6':'б','7':'т','8':'в','9':'д',
+  '@':'а','$':'с','!':'и','#':'н','%':'о','&':'и',
+  'a':'а','b':'в','c':'с','d':'д','e':'е','f':'ф','g':'г','h':'н','i':'и','j':'й',
+  'k':'к','l':'л','m':'м','n':'п','o':'о','p':'р','q':'к','r':'р','s':'с','t':'т',
+  'u':'у','v':'в','w':'в','x':'х','y':'у','z':'з',
+  'ё':'е','й':'и','ы':'и','э':'е','ю':'у','я':'а'
+};
+
+function normalizeText(str){
+  str = String(str || '').toLowerCase();
+  let out = '';
+  for(const ch of str){
+    out += CHAR_MAP[ch] !== undefined ? CHAR_MAP[ch] : ch;
+  }
+  return out.replace(/[^а-я]/g, '').replace(/(.)\1+/g, '$1');
+}
+function containsBad(str){
+  const norm = normalizeText(str);
+  return BAD_ROOTS.some(root => norm.includes(root));
+}
+function censorNick(nick){
+  return containsBad(nick) ? '█'.repeat(Math.min(String(nick).length, 10)) : nick;
+}
+function isValidNick(nick){
+  nick = String(nick || '').trim();
+  if(nick.length < 2) return { ok:false, msg:'Ник от 2 до 20 символов' };
+  if(nick.length > 20) return { ok:false, msg:'Ник слишком длинный' };
+  if(/^\d+$/.test(nick)) return { ok:false, msg:'Ник не может быть только из цифр' };
+  if(containsBad(nick)) return { ok:false, msg:'Недопустимое слово в нике' };
+  if(/(.)\1{5,}/.test(nick)) return { ok:false, msg:'Слишком много одинаковых букв' };
+  return { ok:true };
+}
 
 /* ============================================================
    ТОП
@@ -4857,7 +4750,12 @@ function randNpcLvl(maxLvl){
 function genNPCs(kind){
   if(topCache[kind]) return topCache[kind];
   const playerVal = playerTopValue(kind);
-  const nicks = NPC_NICKS.slice().sort(()=>Math.random()-.5);
+
+  /* 🚫 Фильтр скрытых ников из списка НПС */
+  const nicks = NPC_NICKS
+    .filter(n => !HIDDEN_NICKS.includes(n))
+    .sort(()=>Math.random()-.5);
+
   const list = [];
   const usePlayer = playerVal > 0;
   const aboveCount = usePlayer ? Math.floor(Math.random()*4) : 0;
@@ -4888,10 +4786,14 @@ function genNPCs(kind){
       titles: randomTitlesForNpc(), lvl: randNpcLvl(myLvl)
     });
   }
-  list.push({
-    nick: state.nick||'Ты', val: playerVal, me:true,
-    titles: getActiveTitleObjs(), lvl: myLvl
-  });
+
+  /* 🚫 Если твой ник в скрытых — не показываем себя в топе */
+  if(!HIDDEN_NICKS.includes(state.nick || '')){
+    list.push({
+      nick: state.nick||'Ты', val: playerVal, me:true,
+      titles: getActiveTitleObjs(), lvl: myLvl
+    });
+  }
   list.sort((a,b)=>b.val-a.val);
   topCache[kind] = list;
   return list;
@@ -4906,18 +4808,21 @@ function renderTop(){
     const titlesHtml = (r.titles||[]).map(t => '<span class="topTitle">' + t.icon + ' ' + t.name + '</span>').join('');
     let lvlHtml = '';
     if(state.showLvl && r.lvl) lvlHtml = '<span class="topLvl">⭐ ' + r.lvl + '</span>';
-    return '<div class="topRow ' + cls + '"><span class="rank">' + (i+1) + '.</span><span class="nick">' + r.nick + lvlHtml + titlesHtml + '</span><span class="score">' + icons[currentTopKind] + ' ' + r.val + '</span></div>';
+    /* 🚫 Применяем цензуру ника */
+    const safeNick = censorNick(r.nick);
+    return '<div class="topRow ' + cls + '"><span class="rank">' + (i+1) + '.</span><span class="nick">' + safeNick + lvlHtml + titlesHtml + '</span><span class="score">' + icons[currentTopKind] + ' ' + r.val + '</span></div>';
   }).join('');
 }
 
 /* ============================================================
-   ТИТУЛЫ — активные для топа/профиля
+   ТИТУЛЫ — активные
    ============================================================ */
 function getActiveTitleObjs(){
   return (state.titles.active||[]).map(id => TITLE_BY_ID[id]).filter(Boolean);
 }
+
 /* ============================================================
-   ШАПКА / HEADER
+   ШАПКА
    ============================================================ */
 function renderHeader(){
   const nickEl = $('nick');
@@ -4954,7 +4859,7 @@ function openLevelModal(){
 }
 
 /* ============================================================
-   NAV / РАЗБЛОКИРОВКА
+   NAV
    ============================================================ */
 function checkUnlocks(){
   $$('nav button[data-lvl]').forEach(btn => {
@@ -4980,18 +4885,16 @@ function switchTab(tabId){
   if(tabEl) tabEl.classList.add('active');
   $$('nav button').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  /* рендер нужной вкладки */
   if(tabId === 'collection') renderCollection();
   if(tabId === 'top') renderTop();
   if(tabId === 'achievements') renderAchievements();
   if(tabId === 'profile') renderProfile();
-  if(tabId === 'shop'){ renderShop(); bindPackClicks(); renderDailyShop(); renderUpgrades(); renderMinigame(); }
+  if(tabId === 'shop'){ renderShop(); bindPackClicks(); renderDailyShop(); renderUpgrades(); }
   if(tabId === 'bourse') renderBourse();
   if(tabId === 'quests') renderQuests();
   if(tabId === 'fishing') renderFishing();
   if(tabId === 'craft') renderCraft();
   if(tabId === 'click'){ renderSlots(); renderBuffs(); applyBackground(); }
-  /* скролл наверх */
   const main = document.querySelector('main');
   if(main) main.scrollTop = 0;
 }
@@ -5021,7 +4924,7 @@ function firstInteract(){
 function doClick(mult, e){
   if(!isTutClickStep() && clickCd > 0) return;
   const now = Date.now();
-  if(now - lastClickTime < 100) return; /* защита от двойных */
+  if(now - lastClickTime < 100) return;
   lastClickTime = now;
   firstInteract();
   playClick();
@@ -5148,7 +5051,6 @@ function renderProfile(){
 
     '<div class="profileCard"><h3>⚠️ Опасная зона</h3><button class="profileBtn btnRed" id="resetBtn">🗑 Сбросить прогресс</button></div>';
 
-  /* Аватар */
   const box = $('avatarBox');
   if(box){
     box.innerHTML = '';
@@ -5164,10 +5066,8 @@ function renderProfile(){
     } else box.textContent = '🐱';
   }
 
-  /* График баланса */
   renderBalanceChart();
 
-  /* Обработчики */
   $('openLvlBtn').onclick = openLevelModal;
   $('openTitlesBtn').onclick = openTitlesModal;
   $('promoBtn').onclick = ()=>{
@@ -5180,7 +5080,6 @@ function renderProfile(){
   };
   $('promoInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('promoBtn').click(); });
 
-  /* Реф-код */
   const refEl = $('refCodeEl');
   if(refEl) refEl.onclick = ()=>{
     const code = state.referrals.code;
@@ -5209,11 +5108,16 @@ function renderProfile(){
   if($('clearAvatar')) $('clearAvatar').onclick = ()=>{ state.avatar=''; state.avatarType=''; state.avatarEmoji=''; save(); renderProfile(); renderHeader(); };
   $('pickBg').onclick = ()=>{ const f = $('bgFile'); if(f) f.click(); };
   if($('clearBg')) $('clearBg').onclick = ()=>{ state.bg=''; save(); applyBackground(); renderProfile(); };
+
+  /* 🚫 Сохранение ника С ФИЛЬТРОМ */
   $('saveNick').onclick = ()=>{
     const v = $('nickEdit').value.trim();
     if(!v) return alert('Введи ник');
+    const check = isValidNick(v);
+    if(!check.ok) return alert('❌ ' + check.msg);
     state.nick = v.slice(0,20);
     if(!state.referrals.code) ensureRefCode();
+    topCache = {points:null, lvl:null, coins:null};
     save(); renderHeader(); renderProfile(); renderTop();
     alert('Ник изменён');
   };
@@ -5314,7 +5218,7 @@ function openAvatarPickModal(){
 }
 
 /* ============================================================
-   ТИТУЛЫ — модалка
+   ТИТУЛЫ — МОДАЛКА
    ============================================================ */
 function canUnlockTitle(t){ return t.check(state) && !state.titles.unlocked.includes(t.id); }
 function isTitleActive(t){ return t.check(state); }
@@ -5582,7 +5486,7 @@ if($('saveFile')) $('saveFile').addEventListener('change', (e)=>{
 });
 
 /* ============================================================
-   HELP — большая справка
+   HELP
    ============================================================ */
 function openHelp(){
   let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button><h2>❓ Справка</h2>';
@@ -5627,19 +5531,15 @@ function openHelp(){
   html += '<div class="sectionTitle">⭐ Звёзды</div>';
   html += '<div class="legendRow"><div class="ic">★</div><div class="txt"><b>Множители</b><small>1★ x1.5 · 2★ x2.5 · 3★ x5 · 4★ x10 · 5★ x25</small></div></div>';
 
-  html += '<div class="sectionTitle">⚒️ Крафт (с 0 ур.)</div>';
+  html += '<div class="sectionTitle">⚒️ Крафт</div>';
   CRAFT_RECIPES.forEach(r=>{
     const mandatory = r.mandatory.map(n=>'• '+n).join('<br>');
     const sac = r.sacrifice.map(s=>s.count+'× '+s.rarity).join(', ');
     html += '<div style="background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid var(--purple)"><div style="font-size:13px;font-weight:700;color:var(--purple)">'+r.icon+' '+r.name+'</div><div style="font-size:10px;opacity:.7;margin-top:4px;line-height:1.5"><b>Обязательные:</b><br>'+mandatory+'</div><div style="font-size:10px;opacity:.7;margin-top:6px"><b>Жертва:</b> '+sac+'</div><div style="font-size:11px;opacity:.9;margin-top:6px">🪙 '+r.baseCoins+' · ⏱ '+r.timeMinH+'–'+r.timeMaxH+' ч</div></div>';
   });
-  html += '<div class="legendRow"><div class="ic">⚡</div><div class="txt"><b>Ускорение</b><small>1🥇 = 12 минут остатка</small></div></div>';
 
-  html += '<div class="sectionTitle">🎣 Рыбалка (с 3 ур.)</div>';
+  html += '<div class="sectionTitle">🎣 Рыбалка</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Тратится ⚡ на каждую рыбу. Глубины по 60 сек.</div>';
-  html += '<div class="legendRow"><div class="ic">🪝</div><div class="txt"><b>Автоловля</b><small>Тапнул рыбу → тапай ещё, пока шкала до 100%</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🍾</div><div class="txt"><b>Бутылки</b><small>+50⚡ · качаются в прокачке</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🐌</div><div class="txt"><b>Замедление</b><small>Упрощает ловлю редких</small></div></div>';
 
   html += '<div class="sectionTitle">🎋 Удочки</div>';
   RODS.forEach(r=>{
@@ -5647,36 +5547,21 @@ function openHelp(){
     html += '<div class="legendRow"><div class="ic">'+r.icon+'</div><div class="txt"><b>'+r.name+'</b> · '+price+'<small>'+r.desc+'</small></div></div>';
   });
 
-  html += '<div class="sectionTitle">🐟 Рыбы (90 видов)</div>';
-  ['c','u','r','sr','e','l','d','m','s'].forEach(r=>{
-    const fish = fishesByRarity(r);
-    const colors = {c:'#9ca3af',u:'#10b981',r:'#3b82f6',sr:'#8b5cf6',e:'#a855f7',l:'#f59e0b',d:'#06b6d4',m:'#dc2626',s:'#ec4899'};
-    html += '<div class="legendRow"><div class="ic" style="color:'+colors[r]+'">🐟</div><div class="txt"><b style="color:'+colors[r]+'">'+FISH_RARITY_NAME[r]+'</b> · '+fish.length+' видов</div></div>';
-  });
-
-  html += '<div class="sectionTitle">💱 Биржа (с 5 ур.)</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">НЕ азарт — экономика! Курс меняется каждые 30 минут. Спред 12%. Купи дёшево — продай дорого.</div>';
-
-  html += '<div class="sectionTitle">🐟 Мини-игра</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Раз в 4 часа — тапни котика 10 раз за 8 секунд. Получишь монеты, золото и эссенцию.</div>';
+  html += '<div class="sectionTitle">💱 Биржа</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Курс меняется каждые 30 минут. Спред 12%. Купи дёшево — продай дорого.</div>';
 
   html += '<div class="sectionTitle">🔗 Рефералы</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Поделись кодом в профиле. За каждого друга — бонус тебе и ему.</div>';
-
-  html += '<div class="sectionTitle">🎁 Бонусы</div>';
-  html += '<div class="legendRow"><div class="ic">🪙</div><div class="txt"><b>100 монет</b><small>Каждые 60 сек</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🎁</div><div class="txt"><b>Случайный буст</b><small>Каждые 5 мин · 60 сек</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🎟</div><div class="txt"><b>Промокоды</b><small>В топе ищи «🎁 ПРОМОКОД: XXXXXX»</small></div></div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Поделись кодом в профиле. За каждого друга — бонус.</div>';
 
   html += '<div style="height:14px"></div>';
-  html += '<button class="profileBtn btnGold" onclick="closeModal(\'helpModal\');restartTutorial()">🎓 Пройти обучение заново</button>';
+  html += '<button class="profileBtn btnGold" onclick="closeModal(\'helpModal\');restartTut()">🎓 Пройти обучение заново</button>';
   html += '<button class="btnClose" onclick="closeModal(\'helpModal\')">Понятно</button>';
   $('helpContent').innerHTML = html;
   openModal('helpModal');
 }
 
 /* ============================================================
-   ОБУЧАЛКА v10 — работает через box-shadow (без SVG-маски)
+   ОБУЧАЛКА v10 (box-shadow, работает)
    ============================================================ */
 const TUT_STEPS = [
   {id:'welcome', icon:'👋', title:'Привет, кошатник!', text:'Сейчас проведу тебя по игре. Следи за подсветкой и жми куда показываю.', mode:'center', manual:'Погнали 🚀', onEnter:()=>switchTab('click')},
@@ -5696,12 +5581,9 @@ function currentTutStep(){
   if(state.tutorial.step >= TUT_STEPS.length) return null;
   return TUT_STEPS[state.tutorial.step];
 }
-
-/* true — сейчас шаг «Клик 5 раз» → КД отключён */
 function isTutClickStep(){
   return state.tutorial && !state.tutorial.done && state.tutorial.step === 1;
 }
-
 function ensureTutEls(){
   if(tutEls && document.body.contains(tutEls.tip)) return tutEls;
 
@@ -5733,7 +5615,6 @@ function ensureTutEls(){
   tutEls = {overlay, ring, arrow, tip};
   return tutEls;
 }
-
 function hideTutOverlay(){
   if(!tutEls) return;
   tutEls.overlay.style.display = 'none';
@@ -5741,7 +5622,6 @@ function hideTutOverlay(){
   tutEls.arrow.style.display = 'none';
   tutEls.tip.style.display = 'none';
 }
-
 function renderTutBanner(){
   const step = currentTutStep();
   if(!step){ hideTutOverlay(); return; }
@@ -5749,7 +5629,6 @@ function renderTutBanner(){
   const total = TUT_STEPS.length;
   const cur = state.tutorial.step + 1;
 
-  // Прогресс внутри шага: "3 / 5 кликов"
   let progTxt = '';
   if(step.goal && step.metric){
     const c = state.tutorial.clicks || {};
@@ -5804,7 +5683,7 @@ function renderTutBanner(){
 
   const r = target.getBoundingClientRect();
   const pad = 6;
-  els.overlay.style.display = 'none';  // затемнение даёт box-shadow у ring
+  els.overlay.style.display = 'none';
   els.ring.style.display = 'block';
   els.ring.style.left = (r.left - pad) + 'px';
   els.ring.style.top = (r.top - pad) + 'px';
@@ -5826,7 +5705,6 @@ function renderTutBanner(){
     els.arrow.style.top = Math.min(window.innerHeight - 60, r.bottom + 10) + 'px';
   }
 }
-
 function setTutBase(step){
   if(!step || !step.metric){
     if(state.tutorial) state.tutorial.clicks = {base:null, target:null};
@@ -5836,7 +5714,6 @@ function setTutBase(step){
   }
   save();
 }
-
 function advanceTutorial(){
   state.tutorial.step++;
   if(state.tutorial.step >= TUT_STEPS.length) state.tutorial.done = true;
@@ -5845,7 +5722,6 @@ function advanceTutorial(){
   if(next && next.onEnter){ try{ next.onEnter(); }catch(e){} }
   setTimeout(()=>{ setTutBase(currentTutStep()); renderTutBanner(); }, 120);
 }
-
 function checkTutorial(){
   const step = currentTutStep();
   if(!step || step.manual || step.mode === 'center') return;
@@ -5863,14 +5739,12 @@ function checkTutorial(){
     if(step.metric() - state.tutorial.clicks.base >= step.goal) advanceTutorial();
   }
 }
-
 function skipTut(){
   if(!confirm('Пропустить обучение? Можно включить заново в ❓ Справке.')) return;
   state.tutorial.done = true;
   save(); hideTutOverlay();
   if(tutTickTimer){ clearInterval(tutTickTimer); tutTickTimer = null; }
 }
-
 function restartTut(){
   state.tutorial = {step:0, done:false, clicks:{base:null, target:null}};
   save();
@@ -5880,7 +5754,6 @@ function restartTut(){
   renderTutBanner();
   startTutTicker();
 }
-
 function finishTutStep(){
   const step = currentTutStep();
   if(!step) return;
@@ -5892,7 +5765,6 @@ function finishTutStep(){
   }
   advanceTutorial();
 }
-
 function startTutTicker(){
   if(tutTickTimer) clearInterval(tutTickTimer);
   tutTickTimer = setInterval(()=>{
@@ -5924,9 +5796,7 @@ if($('musicToggle')) $('musicToggle').onclick = ()=>{
 };
 if($('helpBtn')) $('helpBtn').onclick = openHelp;
 
-/* ============================================================
-   СОБЫТИЯ NAV
-   ============================================================ */
+/* NAV */
 $$('nav button').forEach(btn=>{
   btn.onclick = ()=>{
     const tab = btn.dataset.tab;
@@ -5936,17 +5806,13 @@ $$('nav button').forEach(btn=>{
   };
 });
 
-/* ============================================================
-   СОБЫТИЯ ФИЛЬТРА КОЛЛЕКЦИИ
-   ============================================================ */
+/* ФИЛЬТР КОЛЛЕКЦИИ */
 $$('.colControls [data-sort]').forEach(b=>{
   b.onclick = ()=>{ state.sortMode = b.dataset.sort; save(); renderCollection(); };
 });
 if($('colFilter')) $('colFilter').onchange = (e)=>{ state.colFilter = e.target.value; save(); renderCollection(); };
 
-/* ============================================================
-   БУСТЫ
-   ============================================================ */
+/* БУСТЫ */
 $$('.buffCard').forEach(c=>{
   c.onclick = ()=>{
     const kind = c.dataset.buff;
@@ -5959,9 +5825,7 @@ $$('.buffCard').forEach(c=>{
   };
 });
 
-/* ============================================================
-   ТОП-ТАБЫ
-   ============================================================ */
+/* ТОП-ТАБЫ */
 $$('.topTabs button').forEach(b=>{
   b.onclick = ()=>{
     $$('.topTabs button').forEach(x => x.classList.remove('active'));
@@ -5972,9 +5836,7 @@ $$('.topTabs button').forEach(b=>{
   };
 });
 
-/* ============================================================
-   ШОП-ТАБЫ
-   ============================================================ */
+/* ШОП-ТАБЫ */
 $$('.shopTabs button').forEach(btn=>{
   btn.onclick = ()=>{
     $$('.shopTabs button').forEach(b=>b.classList.remove('active'));
@@ -5986,12 +5848,11 @@ $$('.shopTabs button').forEach(btn=>{
     if(btn.dataset.shop === 'packs'){ renderShop(); bindPackClicks(); }
     if(btn.dataset.shop === 'daily') renderDailyShop();
     if(btn.dataset.shop === 'fishing') renderUpgrades();
-    if(btn.dataset.shop === 'minigame') renderMinigame();
   };
 });
 
 /* ============================================================
-   НАЧАЛО ИГРЫ
+   СТАРТ
    ============================================================ */
 function ensureDailyStats(){
   const today = todayKey();
@@ -6007,13 +5868,14 @@ function resetProgress(){
   location.reload();
 }
 
-/* Кнопка "Погнали" */
+/* Кнопка "Погнали" — с ФИЛЬТРОМ */
 if($('nickBtn')) $('nickBtn').onclick = ()=>{
   const v = $('nickInput').value.trim();
   if(!v) return alert('Введи ник');
+  const check = isValidNick(v);
+  if(!check.ok) return alert('❌ ' + check.msg);
   state.nick = v.slice(0,20);
   ensureRefCode();
-  /* Если пришёл по реф-ссылке — применим */
   if(state.pendingRefFromUrl){
     const res = applyRefCode(state.pendingRefFromUrl);
     if(res.ok) setTimeout(()=>alert('🎁 ' + res.msg), 500);
@@ -6030,22 +5892,16 @@ if($('nickBtn')) $('nickBtn').onclick = ()=>{
 };
 if($('nickInput')) $('nickInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('nickBtn').click(); });
 
-/* Главная функция запуска */
 function startGame(){
   ensureDailyStats(); ensureQuests(); ensureDailyShop(); ensureBourse();
   ensureCraftSlots();
 
-  /* Тема / анимации */
   applyTheme();
   applyMotion();
 
-  /* Часы игры */
   setInterval(()=>{ state.playTime = (state.playTime||0) + 1; }, 1000);
-
-  /* Автосохранение раз в 30 сек */
   setInterval(save, 30000);
 
-  /* Рендер всего */
   renderHeader();
   renderNav();
   renderSlots();
@@ -6058,20 +5914,14 @@ function startGame(){
   bindPackClicks();
   renderDailyShop();
   renderUpgrades();
-  renderMinigame();
   renderQuests();
   renderBourse();
   renderCraft();
 
-  /* Проверка разблокировок */
   checkUnlocks();
-
-  /* Кастомная музыка */
   initCustomMusic();
 
-  /* Мягкая попытка получить разрешение на уведомления */
   if(isNotifSupported() && Notification.permission === 'default'){
-    /* Не дёргаем сразу — только при первом взаимодействии */
     const tryAsk = async ()=>{
       document.removeEventListener('click', tryAsk);
       await requestNotifPermission();
@@ -6083,10 +5933,8 @@ function startGame(){
     }, 5000);
   }
 
-  /* Главный игровой тик */
   startGameTick();
 
-  /* Тик кулдауна клика (быстрый) */
   setInterval(()=>{
     if(clickCd > 0){
       clickCd -= 0.05;
@@ -6099,7 +5947,6 @@ function startGame(){
     }
   }, 50);
 
-  /* Кликеры */
   const staticBtn = $('staticBtn');
   const movingBtn = $('movingBtn');
   const ultraBtn = $('ultraBtn');
@@ -6110,7 +5957,6 @@ function startGame(){
   setInterval(()=>{ if(currentTab === 'click') moveBtn($('ultraBtn'), 500); }, 500);
   setTimeout(()=>{ moveBtn($('movingBtn'), 0); moveBtn($('ultraBtn'), 0); }, 100);
 
-  /* Тутториал — если не пройден */
   if(!state.tutorial.done){
     const first = currentTutStep();
     if(first && first.onEnter) first.onEnter();
@@ -6133,22 +5979,18 @@ ensureBourse();
 ensureCraftSlots();
 ensureRefCode();
 
-/* Сброс кэша топа — обновится при следующем заходе */
 topCache = {points:null, lvl:null, coins:null};
 
-/* Закрытие модалок по Escape */
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape'){
     $$('.modal.open').forEach(m => m.classList.remove('open'));
   }
 });
 
-/* Единый способ открывать модалки через onclick в HTML */
 window.closeModal = closeModal;
 window.openModal = openModal;
-window.restartTutorial = restartTut;
+window.restartTut = restartTut;
 
-/* Запуск */
 if(state.nick){
   $('nickSetup').style.display = 'none';
   startGame();
@@ -6158,13 +6000,114 @@ if(state.nick){
   renderHeader();
 }
 
-/* Разрешаем скролл-блокировку на мобиле */
 document.body.addEventListener('touchmove', (e)=>{
-  /* Разрешаем скролл только внутри main и модалок */
   if(e.target.closest('main, .modalBox, .avPickGrid, #openAnim')) return;
   if(e.cancelable) e.preventDefault();
 }, {passive:false});
+/* ============================================================
+   ✅ ФИНАЛЬНАЯ САМОПРОВЕРКА — ищем пропавшие функции
+   ============================================================ */
+(function selfCheck(){
+  const required = [
+    'generatePromoCode', 'generateRefCode',
+    'defaultState', 'save', 'load',
+    'renderHeader', 'renderNav', 'renderShop', 'renderCollection',
+    'renderCraft', 'renderQuests', 'renderTop', 'renderProfile',
+    'renderAchievements', 'renderFishing', 'renderBourse',
+    'renderDailyShop', 'renderUpgrades',
+    'openPackAnim', 'openCardModal', 'openDailyModal', 'openLevelModal',
+    'openTitlesModal', 'openHelp', 'openCatchModal', 'openMutPickModal',
+    'openFishIndexModal', 'openCardsIndexModal', 'openAvatarPickModal',
+    'doClick', 'moveBtn', 'startGame', 'startGameTick',
+    'checkAchievements', 'checkTutorial', 'advanceTutorial',
+    'currentTutStep', 'isTutClickStep', 'renderTutBanner',
+    'skipTut', 'restartTut', 'startTutTicker',
+    'showToast', 'floatText', 'floatTextAt',
+    'playClick', 'playResource', 'playRare', 'playAchievement', 'playLevelUp',
+    'initAudio', 'startMusic', 'stopMusic', 'nextTrack',
+    'getPackPrice', 'getPriceMultiplier',
+    'makeCardOfRarity', 'rollCardWithPity', 'registerCardStats',
+    'makeFishInstance', 'rollFishRarity',
+    'startCraft', 'claimCraft', 'speedupCraft', 'ensureCraftSlots',
+    'ensureQuests', 'ensureDailyShop', 'ensureBourse',
+    'startFishing', 'endFishing', 'sellAllCatch',
+    'applyMutationToFish', 'calcFishPrice',
+    'bourseBuy', 'bourseSell',
+    'tryUpgrade', 'tryPromo', 'applyRefCode', 'ensureRefCode',
+    'canClaimDaily', 'canClaimFreeCoins', 'canClaimFreeBuff',
+    'showLvlToast', 'addXP', 'xpForLevel',
+    'cardPoints', 'totalEquipPoints', 'getActiveCombos',
+    'containsBad', 'censorNick', 'isValidNick', 'normalizeText',
+    'getMaxEnergy', 'getUpgradeVal', 'getUpgradeLvl', 'applyEnergyRegen',
+    'switchTab', 'renderSlots', 'renderBuffs', 'applyBackground',
+    'genNPCs', 'playerTopValue', 'getActiveTitleObjs'
+  ];
+  const missing = [];
+  for(const fn of required){
+    try {
+      // eslint-disable-next-line no-eval
+      if(typeof eval(fn) !== 'function') missing.push(fn);
+    } catch(e){ missing.push(fn); }
+  }
+  if(missing.length === 0){
+    console.log(
+      '%c🐱 КОТОКАРТЫ v12 — ЗАПУЩЕНЫ ПОЛНОСТЬЮ',
+      'color:#ff6bcb;font-weight:900;font-size:15px;text-shadow:0 0 10px #ff6bcb',
+      '\n' +
+      '✅ Все ' + required.length + ' функций на месте\n' +
+      '🃏 Карт: ' + CARD_POOL.length + '\n' +
+      '🐟 Рыб: ' + FISH_DATA.length + '\n' +
+      '🧬 Мутаций: ' + MUTATIONS.length + '\n' +
+      '🌈 Комбо: ' + COMBOS.length + '\n' +
+      '🎵 Треков: ' + TRACKS.length + '\n' +
+      '🏅 Ачивок: ' + ACHIEVEMENTS.length + '\n' +
+      '🚫 Скрытых ников: ' + HIDDEN_NICKS.length
+    );
+  } else {
+    console.error(
+      '%c❌ ОТСУТСТВУЮТ ФУНКЦИИ:',
+      'color:#ff5a6b;font-weight:900;font-size:14px',
+      missing
+    );
+    console.warn('Если что-то падает — скинь этот список разработчику');
+  }
+})();
 
+/* ============================================================
+   ✅ ЛОГ ИНФО О ВЕРСИИ
+   ============================================================ */
+console.log(
+  '%c🐱 Котокарты v12',
+  'color:#ffd93d;font-weight:900;font-size:20px;text-shadow:0 0 8px #ffd93d'
+);
+console.log(
+  '%cСобрано из 7 частей. Чит-коды можно вводить тут:',
+  'color:#a0a0d0;font-size:12px'
+);
+console.log(
+  '%cstate.coins = 99999999; state.gold = 99999; save(); location.reload();',
+  'color:#4ad87a;font-weight:700;font-family:monospace;font-size:11px;background:#15101f;padding:4px 8px;border-radius:4px'
+);
+
+/* ============================================================
+   🎁 ЧИТ-КОД ПО УМОЛЧАНИЮ (что подсказать в консоли)
+   ============================================================ */
+window.cheat = function(){
+  console.log('🎁 ДОСТУПНЫЕ ЧИТЫ:');
+  console.log('  state.coins = 99999999; save(); location.reload();');
+  console.log('  state.gold = 99999; save(); location.reload();');
+  console.log('  state.lvl = 50; state.xpTotal = 99999999; save(); location.reload();');
+  console.log('  state.upgrades.energy_cap = 165; state.energy = 5000; save(); location.reload();');
+  console.log('  state.upgrades.craft_slots = 2; state.upgrades.mut_attempts = 9; save(); location.reload();');
+  console.log('  state.pityCounters = {legendary:49,diamond:199,mythic:499,secret:1499}; save();');
+  console.log('  state.rodsUnlocked = ["stick","bamboo","spinning","carbon","legendary"]; save();');
+  console.log('  state.invMax = 500; save();');
+  console.log('💡 После изменений — сохрани и перезагрузи: save(); location.reload();');
+};
+
+/* ============================================================
+   🎉 КОНЕЦ ВСЕХ 7 ЧАСТЕЙ
+   ============================================================ */
 </script>
 </body>
 </html>
