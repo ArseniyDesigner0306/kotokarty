@@ -2309,6 +2309,7 @@ function playAchievement(){ beep(660,0.15,0.18,'triangle'); setTimeout(()=>beep(
 function playDaily(){ beep(880,0.2,0.18,'triangle'); setTimeout(()=>beep(1100,0.2,0.18,'triangle'),150); setTimeout(()=>beep(1320,0.2,0.18,'triangle'),300); setTimeout(()=>beep(1760,0.4,0.20,'triangle'),450); }
 function playPromo(){ beep(660,0.12,0.16,'triangle'); setTimeout(()=>beep(990,0.12,0.16,'triangle'),100); setTimeout(()=>beep(1320,0.12,0.16,'triangle'),200); setTimeout(()=>beep(1980,0.3,0.18,'triangle'),300); }
 function playLvlUp(){ beep(523.25,0.15,0.20,'triangle'); setTimeout(()=>beep(659.25,0.15,0.20,'triangle'),100); setTimeout(()=>beep(783.99,0.15,0.20,'triangle'),200); setTimeout(()=>beep(1046.5,0.5,0.25,'triangle'),300); }
+function playLevelUp(){ playLvlUp(); }
 function playFishMiss(){ beep(300,0.15,0.13,'sawtooth'); setTimeout(()=>beep(200,0.25,0.10,'sawtooth'),100); }
 function playFishBite(){ beep(500,0.08,0.16,'square'); setTimeout(()=>beep(700,0.08,0.16,'square'),80); }
 function playFishStruggle(){ beep(400,0.2,0.10,'sawtooth'); }
@@ -6023,7 +6024,7 @@ document.body.addEventListener('touchmove', (e)=>{
     'currentTutStep', 'isTutClickStep', 'renderTutBanner',
     'skipTut', 'restartTut', 'startTutTicker',
     'showToast', 'floatText', 'floatTextAt',
-    'playClick', 'playResource', 'playRare', 'playAchievement', 'playLevelUp',
+    'playClick', 'playResource', 'playRare', 'playAchievement', 'playLvlUp',
     'initAudio', 'startMusic', 'stopMusic', 'nextTrack',
     'getPackPrice', 'getPriceMultiplier',
     'makeCardOfRarity', 'rollCardWithPity', 'registerCardStats',
