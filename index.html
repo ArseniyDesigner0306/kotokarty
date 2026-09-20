@@ -57,8 +57,8 @@ header{
 #nick{font-weight:700;color:var(--gold);font-size:13px;display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
 #lvlBadge{background:linear-gradient(135deg,var(--purple),#6b21a8);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;display:inline-flex;gap:3px;border:1px solid #c4b5fd55;color:#fff}
 #lvlBadge .lvl{color:var(--gold);font-size:13px;font-weight:800}
-#currencies{display:flex;gap:8px;font-size:11px;color:var(--txt-soft);flex-wrap:wrap}
-#currencies b{color:var(--txt)}
+#currencies{display:flex;gap:8px;font-size:11px;color:var(--txt-soft);flex-wrap:wrap}#currencies b{color:var(--txt)}
+.resIcon{width:1.1em;height:1.1em;vertical-align:-0.15em;display:inline-block;object-fit:contain}
 #soundBtns{display:flex;gap:3px}
 #soundBtns button{
   background:var(--panel2);border:none;color:var(--txt);border-radius:6px;
@@ -6005,6 +6005,65 @@ document.body.addEventListener('touchmove', (e)=>{
   if(e.target.closest('main, .modalBox, .avPickGrid, #openAnim')) return;
   if(e.cancelable) e.preventDefault();
 }, {passive:false});
+/* ============================================================
+   ЗАМЕНА ЭМОДЗИ РЕСУРСОВ НА КАРТИНКИ (автоматически везде)
+   ============================================================ */
+const RES_EMOJI_MAP = {
+  '🪙': 'assets/resources/res_coins.png',
+  '🥇': 'assets/resources/res_gold.png',
+  '🧪': 'assets/resources/res_essence.png',
+  '✨': 'assets/resources/res_mana.png'
+};
+
+function replaceResEmojiInNode(node){
+  if(!node) return;
+  if(node.nodeType === 3){
+    let text = node.nodeValue;
+    let changed = false;
+    for(const [emoji, src] of Object.entries(RES_EMOJI_MAP)){
+      if(text.includes(emoji)){
+        text = text.split(emoji).join('|||' + src + '|||');
+        changed = true;
+      }
+    }
+    if(changed){
+      const span = document.createElement('span');
+      const parts = text.split('|||');
+      parts.forEach(part => {
+        if(part.startsWith('assets/resources/')){
+          const img = document.createElement('img');
+          img.src = part;
+          img.className = 'resIcon';
+          img.alt = '';
+          span.appendChild(img);
+        } else if(part){
+          span.appendChild(document.createTextNode(part));
+        }
+      });
+      node.parentNode.replaceChild(span, node);
+    }
+  } else if(node.nodeType === 1){
+    if(node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+    if(node.classList && node.classList.contains('resIcon')) return;
+    Array.from(node.childNodes).forEach(replaceResEmojiInNode);
+  }
+}
+
+const _resObserver = new MutationObserver((mutations) => {
+  mutations.forEach(m => {
+    m.addedNodes.forEach(node => {
+      if(node.nodeType === 1 || node.nodeType === 3){
+        replaceResEmojiInNode(node);
+      }
+    });
+  });
+});
+
+function startResEmojiReplacer(){
+  replaceResEmojiInNode(document.body);
+  _resObserver.observe(document.body, { childList: true, subtree: true });
+}
+setTimeout(startResEmojiReplacer, 100);
 /* ============================================================
    ✅ ФИНАЛЬНАЯ САМОПРОВЕРКА — ищем пропавшие функции
    ============================================================ */
