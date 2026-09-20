@@ -945,7 +945,6 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 <input type="file" id="avatarFile" accept="image/*" style="display:none">
 <input type="file" id="bgFile" accept="image/*" style="display:none">
 <input type="file" id="musicFile" accept="audio/*" style="display:none">
-<input type="file" id="saveFile" accept=".json,application/json" style="display:none">
 
 <script>
 /* ============================================================
@@ -2106,45 +2105,6 @@ function load(){
     if(daysSince(state.dailyLast) > 1 && state.dailyStreak > 0){ state.dailyStreak = 0; }
 
   }catch(e){ console.error('load error:', e); state = defaultState(); }
-}
-
-/* ============================================================
-   ЭКСПОРТ / ИМПОРТ СЕЙВА
-   ============================================================ */
-function exportSave(){
-  try{
-    const data = JSON.stringify(state, null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kotokarty_save_${state.nick||'cat'}_${todayKey()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('📤 Сейв скачан!');
-  }catch(e){
-    alert('Ошибка экспорта: ' + e.message);
-  }
-}
-function importSave(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    try{
-      const data = JSON.parse(e.target.result);
-      if(!data || typeof data !== 'object') throw new Error('Неверный формат');
-      if(!confirm('⚠️ Загрузить сохранение?\n\nТекущий прогресс БУДЕТ ПОТЕРЯН!\n\nНик в сейве: ' + (data.nick||'—'))) return;
-      state = Object.assign(defaultState(), data);
-      save();
-      showToast('📥 Сейв загружен!');
-      setTimeout(()=>location.reload(), 800);
-    }catch(err){
-      alert('❌ Ошибка загрузки: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
 }
 
 /* ============================================================
@@ -5016,7 +4976,6 @@ function renderProfile(){
 
     '<div class="profileCard"><h3>🎵 Своя музыка</h3><button class="profileBtn btnPink" id="pickMusic">📁 Загрузить mp3</button>' + (state.customMusic ? '<button class="profileBtn ' + (state.customMusicOn ? 'btnGreen' : 'btnGray') + '" id="toggleCustomMusic">' + (state.customMusicOn ? '⏸ Выкл' : '▶️ Вкл') + '</button>' : '') + (state.customMusic ? '<button class="profileBtn btnGray" id="clearMusic">🗑 Удалить</button>' : '') + '<div style="font-size:11px;opacity:.6;margin-top:6px">Сейчас играет: <b>' + TRACKS[state.currentTrack||0].name + '</b> <button class="profileBtn btnGray" id="nextTrackBtn" style="margin-top:6px">⏭ Следующий трек</button></div></div>' +
 
-    '<div class="profileCard"><h3>💾 Сохранение</h3><button class="profileBtn btnGreen" id="exportBtn">📤 Скачать сейв</button><button class="profileBtn btnPurple" id="importBtn">📥 Загрузить сейв</button><div style="font-size:11px;opacity:.6;margin-top:6px">Сейв — JSON-файл. Сохрани его, если чистишь кэш браузера.</div></div>' +
 
     '<div class="profileCard"><h3>🔔 Уведомления</h3><button class="profileBtn btnGold" id="notifBtn">Настройки уведомлений</button></div>' +
 
@@ -5164,8 +5123,7 @@ const nameClick = $('profileNameClick');
   };
   if($('nextTrackBtn')) $('nextTrackBtn').onclick = ()=>{ initAudio(); nextTrack(); renderProfile(); };
 
-  $('exportBtn').onclick = exportSave;
-  $('importBtn').onclick = ()=>{ const f = $('saveFile'); if(f) f.click(); };
+
   $('notifBtn').onclick = ()=>{ renderNotifSettings(); openModal('notifModal'); };
 
   $('dailyProfileBtn').onclick = openDailyModal;
@@ -5504,11 +5462,7 @@ if($('musicFile')) $('musicFile').addEventListener('change', async (e)=>{
   }
   e.target.value = '';
 });
-if($('saveFile')) $('saveFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(file) importSave(file);
-  e.target.value = '';
-});
+
 
 /* ============================================================
    HELP
