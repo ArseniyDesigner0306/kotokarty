@@ -747,9 +747,23 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
 }
 /* Ландшафт на мобиле */
 @media(max-height:500px) and (orientation:landscape){
-  #playArea{height:160px}
-  #fishingArea{height:260px}
+  #playArea{height:140px}
+  #fishingArea{height:180px}
   .dailyRewards{max-width:400px;margin:10px auto}
+  #fishingPlay > div:last-child{
+    position:fixed;
+    bottom:calc(60px + env(safe-area-inset-bottom, 0px));
+    left:8px;right:8px;
+    z-index:60;
+    background:linear-gradient(180deg, transparent, var(--bg) 30%);
+    padding-top:8px;
+    display:flex;gap:8px;
+  }
+  #fishBottleBtn,#fishQuitBtn{
+    padding:10px 8px;
+    font-size:12px;
+    min-height:44px;
+  }
 }
 </style>
 </head>
@@ -3837,23 +3851,22 @@ if(fishingCanvas){
 
 if($('fishQuitBtn')) $('fishQuitBtn').addEventListener('click', ()=>{
   if(!state.fishing || !state.fishing.active) return;
-  if(!confirm('Закончить рыбалку?')) return;
   endFishing();
 });
 if($('fishBottleBtn')) $('fishBottleBtn').addEventListener('click', ()=>{
   if(!state.fishing || !state.fishing.active) return;
   const f = state.fishing;
   if((f.bottlesLeft||0) <= 0){
-    return alert('⚠️ Бутылки закончились!\n\nПрокачай «🍾 Бутылки энергии» в магазине → Прокачка рыбалки.');
+    notify('⚠️', 'Бутылки закончились', 'Прокачай «🍾 Бутылки» в магазине', '#f59e0b');
+    return;
   }
-  if(!confirm('Открыть бутылку? +' + BOTTLE_ENERGY_AMOUNT + '⚡\nОсталось бутылок: ' + f.bottlesLeft)) return;
   f.bottlesLeft--;
   const maxE = f.maxEnergy || getMaxEnergy();
   f.energy = Math.min(maxE, f.energy + BOTTLE_ENERGY_AMOUNT);
   playFishWin();
   floatTextAt('+' + BOTTLE_ENERGY_AMOUNT + '⚡', window.innerWidth/2, window.innerHeight/2, '#10b981');
   $('fishEnergy').textContent = '⚡ ' + Math.floor(f.energy);
-  alert('🍾 +' + BOTTLE_ENERGY_AMOUNT + '⚡ · Осталось бутылок: ' + f.bottlesLeft);
+  notify('🍾', 'Бутылка открыта', '+' + BOTTLE_ENERGY_AMOUNT + '⚡ · Осталось: ' + f.bottlesLeft, '#10b981');
 });
 if($('fishIndexBtn')) $('fishIndexBtn').addEventListener('click', openFishIndexModal);
 if($('colIndexBtn')) $('colIndexBtn').addEventListener('click', openCardsIndexModal);
