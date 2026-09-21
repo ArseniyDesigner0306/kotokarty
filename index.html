@@ -745,24 +745,19 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   .slot .em{font-size:18px}
   .slot .nm{font-size:8px}
 }
-/* Ландшафт на мобиле */
-@media(max-height:500px) and (orientation:landscape){
-  #playArea{height:140px}
-  #fishingArea{height:180px}
+@media(max-height:500px) and (orientation:landscape) and (hover:none){
   .dailyRewards{max-width:400px;margin:10px auto}
-  #fishingPlay > div:last-child{
-    position:fixed;
-    bottom:calc(60px + env(safe-area-inset-bottom, 0px));
-    left:8px;right:8px;
-    z-index:60;
-    background:linear-gradient(180deg, transparent, var(--bg) 30%);
-    padding-top:8px;
-    display:flex;gap:8px;
+  #tab-fishing.active #fishingPlay{
+    position:relative;
   }
-  #fishBottleBtn,#fishQuitBtn{
-    padding:10px 8px;
-    font-size:12px;
-    min-height:44px;
+  #tab-fishing.active #fishingPlay::before{
+    content:'📱 Поверни телефон вертикально — так рыбачить удобнее';
+    position:fixed;inset:0;z-index:9998;
+    background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    padding:40px;text-align:center;
+    font-size:16px;font-weight:700;color:var(--gold);
+    line-height:1.5;
   }
 }
 </style>
