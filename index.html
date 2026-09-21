@@ -709,7 +709,8 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   #fishingArea{height:340px}
   .cardGrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
   .rarGrid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px}
-  nav button{font-size:8px;min-width:52px;padding:6px 2px}
+  nav button{font-size:7px;min-width:34px;padding:6px 0}
+  nav button .navIcon{font-size:15px}
   nav button .navIcon{font-size:18px}
   main{padding:8px}
   .modal{padding:10px}
@@ -5810,7 +5811,6 @@ $$('.topTabs button').forEach(b=>{
     $$('.topTabs button').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     currentTopKind = b.dataset.top;
-    topCache = {points:null, lvl:null, coins:null};
     renderTop();
   };
 });
