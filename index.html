@@ -717,7 +717,8 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   #soundBtns button{min-width:30px;min-height:30px;padding:2px 5px;font-size:12px}
   #playArea{height:200px}
   #staticBtn{width:74px;height:74px;font-size:18px}
-  #movingBtn{width:54px;height:54px;font-size:12px}
+  #movingBtn{width:48px;height:48px;font-size:11px}
+  #ultraBtn{width:34px;height:34px;font-size:9px;top:130px}
   #ultraBtn{width:44px;height:44px;font-size:10px;top:130px}
   #fishingArea{height:340px}
   .cardGrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
@@ -3689,12 +3690,15 @@ function startFishingLoop(){
 function spawnFish(depthId, progress){
   const f = state.fishing;
   const depth = DEPTHS[depthId];
-  const count = 1 + Math.floor(Math.random() * 3);
-  for(let i = 0; i < count && f.fish.length < 10; i++){
+  const narrow = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
+  const maxFish = narrow ? 5 : 10;
+  const count = narrow ? (1 + Math.floor(Math.random() * 2)) : (1 + Math.floor(Math.random() * 3));
+  for(let i = 0; i < count && f.fish.length < maxFish; i++){
     const fish = makeFishInstance(depth.tierBonus + Math.floor(progress * 2));
     const canvas = $('fishingCanvas');
-    const radius = Math.max(14, 26 - FISH_RARITY_TIER[fish.rarity] * 1.8);
-    const speedMult = 45;
+    let radius = Math.max(14, 26 - FISH_RARITY_TIER[fish.rarity] * 1.8);
+    if(narrow) radius = Math.round(radius * 1.45);
+    const speedMult = narrow ? 30 : 45;
     const angle = Math.random() * Math.PI * 2;
     f.fish.push(Object.assign({}, fish, {
       x: 30 + Math.random() * (canvas.width - 60),
@@ -3703,7 +3707,7 @@ function spawnFish(depthId, progress){
       vy: Math.sin(angle) * fish.spd * speedMult * (0.7 + Math.random()*0.6),
       radius,
       bornAt: Date.now(),
-      lifetime: 3000 + Math.random() * 4000 - FISH_RARITY_TIER[fish.rarity] * 300
+      lifetime: narrow ? (4000 + Math.random() * 4000) : (3000 + Math.random() * 4000 - FISH_RARITY_TIER[fish.rarity] * 300)
     }));
   }
 }
@@ -3790,11 +3794,12 @@ function handleFishingClick(e){
     floatTextAt('⏱ ' + left + 'с', clientX, clientY, '#f59e0b');
     return;
   }
+    const tapBonus = (typeof isTouch !== 'undefined' && isTouch) ? 20 : 0;
   let closest = null, closestDist = Infinity;
   for(const fish of f.fish){
     const dx = fish.x - x, dy = fish.y - y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < fish.radius + 15 && dist < closestDist){ closest = fish; closestDist = dist; }
+    if(dist < fish.radius + 15 + tapBonus && dist < closestDist){ closest = fish; closestDist = dist; }
   }
   f.lastClick = now;
   if(!closest){
@@ -6162,8 +6167,13 @@ function startGame(){
   if(staticBtn) staticBtn.onclick = (e)=>doClick(1, e);
   if(movingBtn) movingBtn.onclick = (e)=>{ doClick(3, e); moveBtn(movingBtn, 1000); };
   if(ultraBtn) ultraBtn.onclick = (e)=>{ doClick(10, e); moveBtn(ultraBtn, 500); };
-  setInterval(()=>{ if(currentTab === 'click') moveBtn($('movingBtn'), 1000); }, 1000);
-  setInterval(()=>{ if(currentTab === 'click') moveBtn($('ultraBtn'), 500); }, 500);
+  const _isNarrow = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
+  const _moveEvery = _isNarrow ? 550 : 1000;
+  const _moveDur   = _isNarrow ? 320 : 1000;
+  const _ultraEvery = _isNarrow ? 200 : 500;
+  const _ultraDur   = _isNarrow ? 100 : 500;
+  setInterval(()=>{ if(currentTab === 'click') moveBtn($('movingBtn'), _moveDur); }, _moveEvery);
+  setInterval(()=>{ if(currentTab === 'click') moveBtn($('ultraBtn'), _ultraDur); }, _ultraEvery);
   setTimeout(()=>{ moveBtn($('movingBtn'), 0); moveBtn($('ultraBtn'), 0); }, 100);
 
   if(!state.tutorial.done){
