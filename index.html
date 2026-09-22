@@ -231,6 +231,14 @@ body.reduce-motion .card.vis-fire,body.reduce-motion .card.vis-ice,body.reduce-m
 body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animation:none}
 
 /* Редкости */
+.star-img{width:40px;height:40px;object-fit:contain;display:block;pointer-events:none}
+.star-img.sm{width:14px;height:14px}
+.star-img.xl{width:48px;height:48px}
+.star-lock{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:.4;filter:grayscale(1)}
+.star-lock.sm{width:14px;height:14px;font-size:8px}
+.star-lock.xl{width:48px;height:48px;font-size:26px}
+.star-row{display:flex;gap:6px;align-items:center;justify-content:center;margin:6px 0}
+.star-row.sm{gap:2px;margin:2px 0}
 .r-common{background:linear-gradient(160deg,#6b7280,#4b5563)}
 .r-uncommon{background:linear-gradient(160deg,#10b981,#065f46)}
 .r-rare{background:linear-gradient(160deg,#3b82f6,#1e3a8a)}
@@ -1262,7 +1270,10 @@ const RARITY = {
   'Эксклюзивная':{weight:0.002,points:50000,css:'r-exclusive', tier:5, color:'#ff1744'},
   'Крафтовая':   {weight:0,   points:30000, css:'r-craft',     tier:6, color:'#00ff88'}
 };
-const STAR_MULT = [1, 1.5, 2.5, 5, 10, 25];
+const STAR_MAX = 25;
+const STAR_PRICES = { common:[50,100,150,200,300], epic:[2000,3000,5000,8000,12000], legendary:[40000,70000,110000,160000,220000], mythic:[350000,550000,800000,1100000,1500000], secret:[1500000,2500000,4000000,6000000,9000000] };
+const STAR_CHANCES = { common:[1,0.95,0.90,0.85,0.80], epic:[0.80,0.75,0.70,0.65,0.60], legendary:[0.60,0.55,0.50,0.45,0.40], mythic:[0.30,0.27,0.24,0.21,0.18], secret:[0.15,0.13,0.11,0.09,0.07] };
+const STAR_PITY = { common:0, epic:5, legendary:8, mythic:12, secret:20 };
 const SLOT_PRICES = [0, 0, 10, 25, 50, 100];
 
 /* ============================================================
@@ -1814,6 +1825,7 @@ function defaultState(){
     bourse:{rate:BOURSE_BASE, lastChange:0, history:[]},
     titles:{unlocked:[], active:[]},
     energy:MAX_ENERGY_BASE, lastEnergyTick: Date.now(),
+    bottlesLeft: 1, lastBottleTick: Date.now(),
     upgrades:{energy_cap:0, energy_regen:0, energy_speed:0, fish_cd:0, luck_rarity:0, slow:0, size_luck:0, mut_luck:0, mut_attempts:0, bottle:0, craft_slots:0, inv_cap:0},
     currentRod:'stick', rodsUnlocked:['stick'],
     fishStats:{totalCaught:0, raritySeen:[], biggestSize:0, biggestWeight:0, earned:0, fishNamesSeen:[], fishRecords:{}},
@@ -1876,11 +1888,20 @@ function fmtWeight(kg){
   return kg.toFixed(3) + ' кг';
 }
 function cardPoints(card){
-  const sm = STAR_MULT[card.stars] || 1;
+  const stars = card.stars || 0;
   const rp = RARITY[card.rarity].points;
   const mp = (card.mutations||[]).reduce((s,id) => s + (MUT_BY_ID[id]?.points||0), 0);
   const cp = getActiveCombos(card.mutations||[]).reduce((s,c) => s + c.pts, 0);
-  return Math.round((rp + mp + cp) * sm);
+  const base = rp + mp + cp;
+  let pct = 0;
+  for(let i = 1; i <= stars; i++){
+    if(i <= 5)       pct += 0.05;
+    else if(i <= 10) pct += 0.15;
+    else if(i <= 15) pct += 0.35;
+    else if(i <= 20) pct += 0.80;
+    else             pct += 2.00;
+  }
+  return Math.round(base * (1 + pct));
 }
 function totalEquipPoints(){
   return state.equippedIds.reduce((sum,id) => {
@@ -1892,6 +1913,20 @@ function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth(
 function daysSince(ds){ if(!ds) return 999; const l=new Date(ds+' 00:00:00'); const n=new Date(); return Math.floor((n-l)/86400000); }
 function getRod(){ return RODS_BY_ID[state.currentRod] || RODS[0]; }
 function isCardOnCooldown(cardId){ return (state.cardCooldowns[cardId] || 0) > Date.now(); }
+function getStarEpoch(stars){ if(stars <= 5) return 'common'; if(stars <= 10) return 'epic'; if(stars <= 15) return 'legendary'; if(stars <= 20) return 'mythic'; return 'secret'; }
+function getStarInEpoch(stars){ if(stars === 0) return 0; return ((stars - 1) % 5) + 1; }
+function getStarMult(stars){ return 1 + (stars || 0) * 0.05; }
+function getStarNextLevel(stars){ return Math.min(STAR_MAX, (stars || 0) + 1); }
+function getStarPrice(stars){ if((stars||0) >= STAR_MAX) return Infinity; const next = getStarNextLevel(stars); return STAR_PRICES[getStarEpoch(next)][getStarInEpoch(next) - 1]; }
+function getStarChance(stars){ if((stars||0) >= STAR_MAX) return 0; const next = getStarNextLevel(stars); return STAR_CHANCES[getStarEpoch(next)][getStarInEpoch(next) - 1]; }
+function getStarPityNeed(stars){ return STAR_PITY[getStarEpoch(getStarNextLevel(stars))]; }
+function getStarBonusSlots(stars){ return Math.min(20, stars || 0); }
+function getStarImage(stars){ if(!stars || stars === 0) return 'assets/stars/star_common.png'; return 'assets/stars/star_' + getStarEpoch(stars) + '.png'; }
+function renderStar(stars, size){ const cls = size === 'sm' ? 'sm' : size === 'xl' ? 'xl' : ''; return '<img src="' + getStarImage(stars) + '" class="star-img ' + cls + '" alt="">'; }
+function renderStarLock(size){ const cls = size === 'sm' ? 'sm' : size === 'xl' ? 'xl' : ''; return '<div class="star-lock ' + cls + '">🔒</div>'; }
+function renderStarRow(stars, size){ const cls = size === 'sm' ? 'sm' : size === 'xl' ? 'xl' : ''; const s = stars || 0; const inEpoch = getStarInEpoch(s); const img = getStarImage(s); let html = '<div class="star-row' + (size === 'sm' ? ' sm' : '') + '">'; for(let i = 1; i <= 5; i++){ if(i <= inEpoch){ html += '<img src="' + img + '" class="star-img ' + cls + '" alt="">'; } else { html += '<div class="star-lock ' + cls + '">🔒</div>'; } } html += '</div>'; return html; }
+function renderStarProgress(card){ if(!card) return ''; const stars = card.stars || 0; const epoch = getStarEpoch(stars); const inEpoch = getStarInEpoch(stars); const epochNames = {common:'Обычная', epic:'Эпическая', legendary:'Легендарная', mythic:'Мифическая', secret:'Секретная'}; const epochIcons = {common:'⭐', epic:'💜', legendary:'💛', mythic:'🌋', secret:'🌈'}; let rowHTML = '<div class="star-row">'; for(let i = 1; i <= 5; i++){ if(i <= inEpoch) rowHTML += renderStar(stars, 'xl'); else rowHTML += renderStarLock('xl'); } rowHTML += '</div>'; if(stars >= STAR_MAX){ return '<div style="text-align:center;margin:8px 0"><div style="font-size:12px;opacity:.7;margin-bottom:6px">' + epochIcons[epoch] + ' ' + epochNames[epoch] + ' · МАКСИМУМ</div>' + rowHTML + '<div style="font-size:11px;color:var(--gold);margin-top:6px">🌈 25 / 25 звёзд</div></div>'; } const price = getStarPrice(stars); const chance = getStarChance(stars); const pityNeed = getStarPityNeed(stars); const pity = card.starPity || 0; const pityHTML = pityNeed > 0 ? '<div style="font-size:10px;opacity:.7;margin-top:4px">Гарантия: ' + pity + ' / ' + pityNeed + '</div>' : ''; return '<div style="text-align:center;margin:8px 0"><div style="font-size:12px;opacity:.7;margin-bottom:6px">' + epochIcons[epoch] + ' ' + epochNames[epoch] + ' · ' + inEpoch + ' / 5</div>' + rowHTML + '<div style="font-size:12px;margin-top:8px">Цена: <b style="color:var(--purple)">' + price + ' ✨</b> · Шанс: <b style="color:var(--gold)">' + Math.round(chance*100) + '%</b></div>' + pityHTML + '</div>'; }
+function tryUpgradeStar(card){ if(!card) return; const stars = card.stars || 0; if(stars >= STAR_MAX) return alert('Максимум 25 звёзд!'); const price = getStarPrice(stars); if(state.mana < price) return alert('Нужно ✨ ' + price + ' маны.'); const chance = getStarChance(stars); const pityNeed = getStarPityNeed(stars); const pity = card.starPity || 0; const guaranteed = pityNeed > 0 && (pity + 1) >= pityNeed; state.mana -= price; addXP(5); if(guaranteed || Math.random() < chance){ const oldBonus = getStarBonusSlots(stars); card.stars = getStarNextLevel(stars); const newBonus = getStarBonusSlots(card.stars); card.slots = Math.min(20, (card.slots||1) + Math.max(0, newBonus - oldBonus)); card.starPity = 0; if(card.stars > (state.starsMax||0)) state.starsMax = card.stars; playRare(); flashRare(); notify('⭐', 'Звезда!', 'Уровень ' + card.stars + ' / 25', '#ffd93d'); } else { card.starPity = pity + 1; const refund = Math.floor(price * 0.5); state.mana += refund; playFishMiss(); notify('💫', 'Провал', 'Возврат ' + refund + ' ✨', '#dc2626'); } save(); renderHeader(); openCardModal(card); renderCollection(); checkAchievements(); }
 function getCardCooldownLeft(cardId){ const until = state.cardCooldowns[cardId] || 0; return Math.max(0, until - Date.now()); }
 /* ============================================================
    ЦЕНЫ / ПРОГРЕСС
@@ -2024,6 +2059,24 @@ function getEnergyRegenSec(){
   const base = getUpgradeVal('energy_speed') || ENERGY_REGEN_SEC;
   return base / getPhaseRegenMult();
 }
+function getMaxBottles(){
+  return 1 + getUpgradeVal('bottle');
+}
+
+function regenBottles(){
+  const maxB = getMaxBottles();
+  if(state.bottlesLeft >= maxB){ state.lastBottleTick = Date.now(); return; }
+  const now = Date.now();
+  const last = state.lastBottleTick || now;
+  const elapsed = now - last;
+  const BOTTLE_CD_MS = 7 * 60 * 1000;
+  const ticks = Math.floor(elapsed / BOTTLE_CD_MS);
+  if(ticks > 0){
+    state.bottlesLeft = Math.min(maxB, state.bottlesLeft + ticks);
+    state.lastBottleTick = last + ticks * BOTTLE_CD_MS;
+  }
+}
+
 function applyEnergyRegen(){
   const now = Date.now();
   const last = state.lastEnergyTick || now;
@@ -2137,6 +2190,8 @@ function load(){
     UPGRADES.forEach(u=>{
       if(typeof state.upgrades[u.id] !== 'number') state.upgrades[u.id] = 0;
     });
+    if(typeof state.bottlesLeft !== 'number') state.bottlesLeft = 1 + (state.upgrades.bottle || 0);
+    if(typeof state.lastBottleTick !== 'number') state.lastBottleTick = Date.now();
     if(!state.fishStats || typeof state.fishStats !== 'object') state.fishStats = {totalCaught:0,raritySeen:[],biggestSize:0,biggestWeight:0,earned:0,fishNamesSeen:[],fishRecords:{}};
     if(!Array.isArray(state.fishStats.raritySeen)) state.fishStats.raritySeen = [];
     if(!Array.isArray(state.fishStats.fishNamesSeen)) state.fishStats.fishNamesSeen = [];
@@ -2155,11 +2210,11 @@ function load(){
     const now = Date.now();
     for(const k in state.cardCooldowns){ if(state.cardCooldowns[k] < now) delete state.cardCooldowns[k]; }
     state.collection.forEach(c=>{
-      if(!Array.isArray(c.mutations)) c.mutations = [];
+      if(!Array.isArray(c.mutations)) c.mutations = []; if(typeof c.stars !== 'number') c.stars = 0; if(c.stars > STAR_MAX) c.stars = STAR_MAX; if(typeof c.starPity !== 'number') c.starPity = 0;
       if(typeof c.stars !== 'number') c.stars = 0;
       if(c.activeVisual === undefined) c.activeVisual = null;
     });
-    state.equippedIds = state.equippedIds.slice(0, state.slotsMax);
+    let _ms = 0; state.collection.forEach(c=>{if((c.stars||0)>_ms)_ms=c.stars||0;}); if(_ms>(state.starsMax||0)) state.starsMax=_ms; state.equippedIds = state.equippedIds.slice(0, state.slotsMax);
     state.newCards = state.newCards.filter(id => state.collection.some(c => c.id === id));
     if(daysSince(state.dailyLast) > 1 && state.dailyStreak > 0){ state.dailyStreak = 0; }
 
@@ -2520,7 +2575,7 @@ function getEquippedCards(){
   return state.equippedIds.map(id => state.collection.find(c => c.id === id)).filter(Boolean);
 }
 function sumStat(key){
-  return getEquippedCards().reduce((s,c) => s + (c[key]||0), 0);
+  return getEquippedCards().reduce((s,c) => s + (c[key]||0) * getStarMult(c.stars||0), 0);
 }
 function isBuffActive(k){ return (state.buffs[k] || 0) > Date.now(); }
 function getIncomeMult(){
@@ -2694,6 +2749,7 @@ function startGameTick(){
     if(canClaimDaily()) renderHeader();
 
     applyEnergyRegen();
+    regenBottles();
 
     if($('tab-shop').classList.contains('active')){
       renderFreeBonuses();
@@ -2781,7 +2837,7 @@ function makeCardOfRarity(rarity, bonus){
     goldCh: pct(-15*luckMult, 30*luckMult),
     essCh:  pct(-15*luckMult, 30*luckMult),
     manaCh: pct(-15*luckMult, 30*luckMult),
-    cdMod, slots, mutations, stars,
+    cdMod, slots, mutations, stars, starPity: 0,
     activeVisual: null,
     createdAt: Date.now()
   };
@@ -2800,7 +2856,7 @@ function rollMutations(cardTier, slots){
   return picked;
 }
 function rollStars(cardTier){
-  const chances = [0,0.05,0.12,0.22,0.4,0.65,0.8,0.9,1,1];
+  return 0; const chances = [0,0.05,0.12,0.22,0.4,0.65,0.8,0.9,1,1];
   const chance = chances[cardTier] || 0;
   if(Math.random() > chance) return 0;
   const maxStars = cardTier>=6?5:cardTier>=4?4:cardTier>=2?2:1;
@@ -3104,7 +3160,7 @@ function claimBatch(cards){
     state.questStats.cardsByRarity[c.rarity] = (state.questStats.cardsByRarity[c.rarity]||0) + 1;
   });
   let xpGain = 0;
-  cards.forEach(c => { xpGain += 15 + Math.round(RARITY[c.rarity].points / 10); });
+  cards.forEach(c => { xpGain += Math.round((15 + RARITY[c.rarity].points / 10) * (1 + (c.stars||0) * 0.1)); });
   addXP(xpGain);
 
   closeBatchResult();
@@ -3261,7 +3317,7 @@ function openPackAnim(cards){
       state.questStats.cardsByRarity[c.rarity] = (state.questStats.cardsByRarity[c.rarity]||0) + 1;
     });
     let xpGain = 0;
-    cards.forEach(c => { xpGain += 15 + Math.round(RARITY[c.rarity].points / 10); });
+    cards.forEach(c => { xpGain += Math.round((15 + RARITY[c.rarity].points / 10) * (1 + (c.stars||0) * 0.1)); });
     addXP(xpGain);
 
     anim.classList.remove('open');
@@ -3306,7 +3362,7 @@ function buildCardVisual(card, opts){
   const muts = (card.mutations||[]).length ? '<div class="muts">' + card.mutations.map(id=>'<span>' + (MUT_BY_ID[id]?.icon||'?') + '</span>').join('') + '</div>' : '';
   const combos = getActiveCombos(card.mutations||[]);
   const combosHtml = combos.length ? '<div class="combo">' + combos.map(c=>c.icon).join(' ') + '</div>' : '<div></div>';
-  const starsHtml = card.stars>0 ? '<div class="stars">' + '★'.repeat(card.stars) + '</div>' : '<div></div>';
+  const starsHtml = (card.stars>0) ? renderStarRow(card.stars, 'sm') : '<div></div>';
   const eq = opts.equipped ? 'equipped' : '';
   const newBadge = opts.isNew ? '<div class="newBadge">NEW</div>' : '';
   const visEmoji = card.activeVisual ? (MUT_BY_ID[card.activeVisual]?.icon||'') : '';
@@ -3417,7 +3473,7 @@ function bulkDeleteConfirm(){
   if(n === 0) return;
   let refund = 0;
   state.collection.forEach(c => {
-    if(bulkSelected.has(c.id)) refund += Math.round(20 + RARITY[c.rarity].points * 0.5);
+    if(bulkSelected.has(c.id)) refund += Math.round((20 + RARITY[c.rarity].points * 0.5) * (1 + (c.stars||0) * 0.15));
   });
   if(!confirm('🗑 Удалить ' + n + ' карт?\n\nВернётся: 🪙 ' + refund + '\n\n⚠️ Отменить нельзя!')) return;
   ensureDailyStats();
@@ -3588,9 +3644,7 @@ function openCardModal(card){
     return '<div class="mutItem ' + (isVis?'active':'') + '" data-mut="' + m.id + '" ' + (canVis?'':'style="cursor:default"') + '><span class="ic">' + m.icon + '</span><span class="nm">' + m.name + '</span><span class="pts">+' + m.points + '</span><span class="rl">' + m.rname + '</span>' + (canVis?'<span class="vis">' + (isVis?'👁':'·') + '</span>':'') + '</div>';
   }).join('');
   const comboHTML = combos.length ? '<div class="comboList">' + combos.map(c=>'<div class="comboItem">' + c.icon + ' <b>' + c.name + '</b> · +' + c.pts + '</div>').join('') + '</div>' : '';
-  const starStr = card.stars>0
-    ? '<div style="text-align:center;color:var(--gold);font-size:20px;margin:6px 0">' + '★'.repeat(card.stars) + '☆'.repeat(5-card.stars) + '</div><div style="text-align:center;font-size:11px;color:var(--gold)">x' + STAR_MULT[card.stars] + ' к очкам</div>'
-    : '<div style="text-align:center;opacity:.5;font-size:12px;margin:6px 0">нет звёзд</div>';
+  const starStr = renderStarProgress(card);
   const slotPickHTML = isEq ? '' : '<div style="font-size:11px;opacity:.7;text-align:center;margin-top:10px;margin-bottom:4px">Куда экипировать?</div><div class="slotPickGrid">' + Array.from({length:state.slotsMax}).map((_,i)=>{
     const occupied = !!state.equippedIds[i];
     return '<button class="slotPick ' + (occupied?'':'free') + '" data-slot-i="' + i + '">' + (i+1) + (occupied?'🔄':'+') + '</button>';
@@ -3614,7 +3668,7 @@ function openCardModal(card){
     '<div class="statRow"><span class="lbl">✨ Шанс маны</span><span class="val ' + (card.manaCh>=0?'pos':'neg') + '">' + fmtPct(card.manaCh) + '</span></div>' +
     (isEq ? '<button class="btnUnequip" id="mUnequip" style="margin-top:14px">Снять</button>' : slotPickHTML) +
     '<button class="btnEss" id="mEss" ' + (state.essence<1?'disabled':'') + '>🧪 Наложить мутацию</button>' +
-    '<button class="btnMana" id="mMana" ' + (state.mana<1?'disabled':'') + '>✨ Наложить звезду</button>' +
+    '<button class="btnMana" id="mMana" ' + ((card.stars||0) >= STAR_MAX?'disabled':'') + '>' + ((card.stars||0) >= STAR_MAX ? '⭐ МАКСИМУМ · 25 / 25' : '⭐ Прокачать · ' + getStarPrice(card.stars||0) + ' ✨ · ' + Math.round(getStarChance(card.stars||0)*100) + '%') + '</button>' +
     '<button class="btnDismantle" id="mDismantle">Разобрать</button>' +
     '<button class="btnClose" id="mClose">Закрыть</button>';
 
@@ -3678,8 +3732,8 @@ function openCardModal(card){
     } else alert('Мана рассеялась.');
     save(); openCardModal(card); renderCollection(); checkAchievements();
   };
-  $('mDismantle').onclick = ()=>{
-    const baseReward = Math.round(20 + RARITY[card.rarity].points*0.5);
+  $('mMana').onclick = ()=>tryUpgradeStar(card); $('mDismantle').onclick = ()=>{
+    const baseReward = Math.round((20 + RARITY[card.rarity].points*0.5) * (1 + (card.stars||0) * 0.15));
     if(!state.quickDismantle){ if(!confirm('Разобрать ' + card.name + '?')) return; }
     ensureDailyStats();
     state.coins += baseReward;
@@ -3788,6 +3842,11 @@ function rollFishRarity(depthTier){
   weights.u  = Math.max(1, weights.u - shift*2);
   weights.r  += shift*1.5; weights.sr += shift*1.2; weights.e += shift*0.8;
   weights.l  += shift*0.4; weights.d += shift*0.2; weights.m += shift*0.1; weights.s += shift*0.05;
+  /* 🚫 Реальное обнуление по глубине (после shift) */
+  if(depthTier <= 2){ weights.l=0; weights.d=0; weights.m=0; weights.s=0; }
+  else if(depthTier <= 3){ weights.d=0; weights.m=0; weights.s=0; }
+  else if(depthTier <= 4){ weights.m=0; weights.s=0; }
+  else if(depthTier <= 5){ weights.s=0; }
   const luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus;
   if(luck > 0){
     const boost = 1 + luck/100;
@@ -3947,7 +4006,6 @@ function startFishing(depthId){
     fish: [], lastSpawn: 0, spawnInterval: 800, caught: [],
     lastClick: 0, lastAnyClick: 0, clickCd: getFishCD() * 1000,
     mutAttempts: 1 + getUpgradeVal('mut_attempts'),
-    bottlesLeft: getUpgradeVal('bottle'),
     hookCooldown: 0,
     lastEventSpawn: Date.now(),
 nextEventDelay: 15000 + Math.random() * 20000
@@ -3955,6 +4013,24 @@ nextEventDelay: 15000 + Math.random() * 20000
   showFishingPlay();
   startFishingLoop();
 }
+function updateFishBottleBtn(){
+  const btn = $('fishBottleBtn');
+  if(!btn) return;
+  regenBottles();
+  const maxB = getMaxBottles();
+  const left = state.bottlesLeft;
+  if(left > 0){
+    btn.textContent = '🍾 Бутылка (+50⚡) · ' + left + '/' + maxB;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  } else {
+    const cdLeft = (state.lastBottleTick || Date.now()) + 7*60*1000 - Date.now();
+    btn.textContent = '🍾 КД ' + fmtTime(Math.max(1, Math.ceil(cdLeft/1000)));
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+  }
+}
+
 function showFishingPlay(){
   const lobby = $('fishingLobby'), play = $('fishingPlay');
   if(!lobby || !play) return;
@@ -4095,14 +4171,23 @@ function startFishingLoop(){
         ctx.beginPath(); ctx.arc(fish.x, fish.y, r + 6 + Math.sin(now/200)*3, 0, Math.PI*2); ctx.stroke();
         ctx.globalAlpha = alpha;
       } else {
-        ctx.fillStyle = '#ffffff';
+        const _tierIdx = FISH_RARITY_TIER[fish.rarity];
+        const _baseCost = FISH_ENERGY_COST[_tierIdx] || 5;
+        const _actualCost = Math.max(_baseCost, Math.round(_baseCost * (0.8 + fish.size * 0.2)));
+        const _cantAfford = f.energy < _actualCost;
+
+        ctx.globalAlpha = _cantAfford ? alpha * 0.35 : alpha;
+        ctx.fillStyle = _cantAfford ? '#888888' : '#ffffff';
         ctx.font = 'bold ' + Math.round(r*1.4) + 'px system-ui';
-        ctx.fillText('?', fish.x, fish.y);
+        ctx.fillText(_cantAfford ? '🔒' : '?', fish.x, fish.y);
+        ctx.globalAlpha = alpha;
         if(fish.mutations && fish.mutations.length){
           const mi = MUT_BY_ID[fish.mutations[0]]?.icon || '';
           if(mi){
+            ctx.globalAlpha = _cantAfford ? alpha * 0.35 : alpha;
             ctx.font = Math.round(r*1.3) + 'px system-ui';
             ctx.fillText(mi, fish.x + r*0.9, fish.y - r*0.9);
+            ctx.globalAlpha = alpha;
           }
         }
       }
@@ -4136,6 +4221,7 @@ function startFishingLoop(){
       hookHudEl.remove(); hookHudEl = null;
     }
     $('fishTimer').textContent = fmtTime(Math.ceil(timeLeft/1000));
+    if(Math.floor(now / 1000) !== Math.floor((now - 16) / 1000)) updateFishBottleBtn();
     $('fishEnergy').textContent = '⚡ ' + Math.floor(f.energy);
     $('fishEnergy').style.color = f.energy <= 10 ? '#dc2626' : (f.energy <= 25 ? '#f59e0b' : '#10b981');
     fishingAnimId = requestAnimationFrame(loop);
@@ -4332,10 +4418,25 @@ function handleFishingClick(e){
   }
     const tapBonus = (typeof isTouch !== 'undefined' && isTouch) ? 20 : 0;
   let closest = null, closestDist = Infinity;
+  let fallbackCost = Infinity;
   for(const fish of f.fish){
     const dx = fish.x - x, dy = fish.y - y;
     const dist = Math.sqrt(dx*dx + dy*dy);
-    if(dist < fish.radius + 15 + tapBonus && dist < closestDist){ closest = fish; closestDist = dist; }
+    if(dist < fish.radius + 15 + tapBonus){
+      const _tIdx = FISH_RARITY_TIER[fish.rarity];
+      const _base = FISH_ENERGY_COST[_tIdx] || 5;
+      const _real = Math.max(_base, Math.round(_base * (0.8 + fish.size * 0.2)));
+      if(f.energy >= _real){
+        if(dist < closestDist){ closest = fish; closestDist = dist; }
+      } else if(_real < fallbackCost){
+        fallbackCost = _real;
+      }
+    }
+  }
+  if(!closest && fallbackCost < Infinity){
+    floatTextAt('🔒 Нужно ⚡' + fallbackCost, clientX, clientY, '#dc2626');
+    playFishMiss();
+    return;
   }
   f.lastClick = now;
   if(!closest){
@@ -4379,17 +4480,25 @@ if($('fishQuitBtn')) $('fishQuitBtn').addEventListener('click', ()=>{
 if($('fishBottleBtn')) $('fishBottleBtn').addEventListener('click', ()=>{
   if(!state.fishing || !state.fishing.active) return;
   const f = state.fishing;
-  if((f.bottlesLeft||0) <= 0){
-    notify('⚠️', 'Бутылки закончились', 'Прокачай «🍾 Бутылки» в магазине', '#f59e0b');
+  regenBottles();
+  const maxB = getMaxBottles();
+  if(state.bottlesLeft <= 0){
+    const cdLeft = (state.lastBottleTick || Date.now()) + 7*60*1000 - Date.now();
+    notify('⏳', 'Бутылка на КД', 'Следующая через ' + fmtTime(Math.max(1, Math.ceil(cdLeft/1000))), '#f59e0b');
     return;
   }
-  f.bottlesLeft--;
+  state.bottlesLeft--;
+  if(state.bottlesLeft === maxB - 1 && state.lastBottleTick === 0) state.lastBottleTick = Date.now();
+  if(state.bottlesLeft < maxB - 1 || (Date.now() - (state.lastBottleTick||0)) > 7*60*1000){
+    state.lastBottleTick = Date.now();
+  }
   const maxE = f.maxEnergy || getMaxEnergy();
   f.energy = Math.min(maxE, f.energy + BOTTLE_ENERGY_AMOUNT);
   playFishWin();
   floatTextAt('+' + BOTTLE_ENERGY_AMOUNT + '⚡', window.innerWidth/2, window.innerHeight/2, '#10b981');
   $('fishEnergy').textContent = '⚡ ' + Math.floor(f.energy);
-  notify('🍾', 'Бутылка открыта', '+' + BOTTLE_ENERGY_AMOUNT + '⚡ · Осталось: ' + f.bottlesLeft, '#10b981');
+  notify('🍾', 'Бутылка открыта', '+' + BOTTLE_ENERGY_AMOUNT + '⚡ · Осталось: ' + state.bottlesLeft + '/' + maxB, '#10b981');
+  updateFishBottleBtn();
 });
 if($('fishIndexBtn')) $('fishIndexBtn').addEventListener('click', openFishIndexModal);
 if($('colIndexBtn')) $('colIndexBtn').addEventListener('click', openCardsIndexModal);
@@ -6256,28 +6365,42 @@ if($('musicFile')) $('musicFile').addEventListener('change', async (e)=>{
    ============================================================ */
 function openHelp(){
   let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button><h2>❓ Справка</h2>';
+
   html += '<div class="sectionTitle">🎮 Об игре</div>';
-  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:8px 0">Кликер + коллекционка карт Симбы и Алисы + рыбалка + биржа + крафт. ' + CARD_POOL.length + ' карт, 90 видов рыб, 4 крафтовые карты.</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:8px 0">Кликер + коллекционка карт + рыбалка + биржа + крафт. ' + CARD_POOL.length + ' карт, ' + FISH_DATA.length + ' рыб, 12 мутаций, 7 комбо.</div>';
+
+  html += '<div class="sectionTitle">🌗 День и ночь</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Цикл 10 мин день + 10 мин ночь. Идёт даже при закрытой вкладке.</div>';
+  html += '<div class="legendRow"><div class="ic">☀️</div><div class="txt"><b>День</b><small>+15% монет · −15% КД · рыба мельче и медленнее</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🌙</div><div class="txt"><b>Ночь</b><small>×2 мутации рыб · рыба крупнее и быстрее · +12% апгрейд редкости карт</small></div></div>';
 
   html += '<div class="sectionTitle">👆 Кликер</div>';
   html += '<div class="legendRow"><div class="ic">🟣</div><div class="txt"><b>Статичная</b><small>x1 · Не двигается</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🔵</div><div class="txt"><b>Движущаяся</b><small>x3 · Прыгает</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🟠</div><div class="txt"><b>Ультра</b><small>x10 · Меняет размер</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🔵</div><div class="txt"><b>Движущаяся</b><small>x3 · Прыгает по экрану</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🟠</div><div class="txt"><b>Ультра</b><small>x10 · Мелкая, быстрая, меняет размер</small></div></div>';
 
   html += '<div class="sectionTitle">🪙 Ресурсы</div>';
-  html += '<div class="legendRow"><div class="ic">🪙</div><div class="txt"><b>Монеты</b><small>С клика, продажи</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🥇</div><div class="txt"><b>Золото</b><small>~1% с клика + редкие рыбы</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🧪</div><div class="txt"><b>Эссенсия</b><small>~2% с клика · мутации карт</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">✨</div><div class="txt"><b>Мана</b><small>~0.2% с клика · звёзды</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🪙</div><div class="txt"><b>Монеты</b><small>С клика, продажи карт и рыб</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🥇</div><div class="txt"><b>Золото</b><small>~1% с клика · с редких рыб · биржа</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🧪</div><div class="txt"><b>Эссенция</b><small>~2% с клика · мутации карт</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">✨</div><div class="txt"><b>Мана</b><small>~0.2% с клика · прокачка звёзд карт</small></div></div>';
+
+  html += '<div class="sectionTitle">🎴 Карты и инвентарь</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Всего ' + CARD_POOL.length + ' видов. Дубликаты копятся.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0"><b>Инвентарь:</b> старт 50 слотов. Прокачка в 🛒 Магазин → 🎣 Прокачка → <b>📦 Размер инвентаря</b> (+25/ур., макс 500).</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0"><b>Массовое удаление:</b> в коллекции жми <b>🗑 Режим удаления</b>, выбирай галочками, удаляй пачкой с возвратом монет.</div>';
 
   html += '<div class="sectionTitle">📦 Пакеты</div>';
   PACKS.forEach(p=>{
-    html += '<div class="chanceRow"><span>' + p.name + ' · ' + p.desc + '</span><b>' + (p.currency==='coins'?'🪙 '+p.base:'🥇 '+p.base) + '</b></div>';
-    html += '<div style="font-size:10px;opacity:.6;padding:2px 0 6px 0">' + p.chances.map(([r,c])=>r+' '+c+'%').join(' · ') + '</div>';
+    const priceStr = p.currency === 'coins' ? '🪙 ' + p.base : '🥇 ' + p.base;
+    const freeTag = (p.id === 'classic') ? ' <span style="color:#10b981;font-weight:700">(первый БЕСПЛАТНО)</span>' : '';
+    html += '<div class="chanceRow"><span>' + p.name + ' · ' + p.desc + '</span><b>' + priceStr + '</b></div>';
+    html += '<div style="font-size:10px;opacity:.6;padding:2px 0 6px 0">' + p.chances.map(([r,c])=>r+' '+c+'%').join(' · ') + freeTag + '</div>';
   });
+  html += '<div style="font-size:11px;opacity:.75;padding:6px 0">💡 <b>Батч:</b> на карточке пакета выбор ×1/×5/×10/МАКС или своё число. 1 пакет — старая анимация, 2+ — сеткой.</div>';
 
   html += '<div class="sectionTitle">🎯 Pity (4 счётчика)</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Растут с каждым пакетом. <b>Лега+</b>: 50 → гарант. <b>Алмаз+</b>: 200. <b>Мифик+</b>: 500. <b>Секрет+</b>: 1500. Сбрасываются при выпадении.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Лега+: 50 · Алмаз+: 200 · Мифик+: 500 · Секрет+: 1500. Сбрасываются при выпадении.</div>';
 
   html += '<div class="sectionTitle">📊 Шансы карт</div>';
   Object.entries(RARITY).forEach(([n,r])=>{
@@ -6286,26 +6409,54 @@ function openHelp(){
 
   html += '<div class="sectionTitle">🧬 Мутации карт</div>';
   MUTATIONS.forEach(m=>{
-    html += '<div class="legendRow"><div class="ic">' + m.icon + '</div><div class="txt"><b>' + m.name + '</b> · +' + m.points + '<small>' + m.rname + '</small></div></div>';
+    html += '<div class="legendRow"><div class="ic">' + m.icon + '</div><div class="txt"><b>' + m.name + '</b> · +' + m.points + '<small>' + m.rname + ' · ×' + (m.fishMult||1) + ' к рыбам</small></div></div>';
   });
 
   html += '<div class="sectionTitle">⚡ Комбо</div>';
   COMBOS.forEach(c=>{
-    html += '<div class="legendRow"><div class="ic">' + c.icon + '</div><div class="txt"><b>' + c.name + '</b> · +' + c.pts + '<small>' + c.pair.map(id=>MUT_BY_ID[id]?.icon).join(' + ') + '</small></div></div>';
+    html += '<div class="legendRow"><div class="ic">' + c.icon + '</div><div class="txt"><b>' + c.name + '</b> · +' + c.pts + '<small>' + c.pair.map(id=>MUT_BY_ID[id]?.icon).join('+') + ' · ×' + c.fishMult + ' к рыбам</small></div></div>';
   });
 
-  html += '<div class="sectionTitle">⭐ Звёзды</div>';
-  html += '<div class="legendRow"><div class="ic">★</div><div class="txt"><b>Множители</b><small>1★ x1.5 · 2★ x2.5 · 3★ x5 · 4★ x10 · 5★ x25</small></div></div>';
+  html += '<div class="sectionTitle">⭐ Звёзды карт</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">У каждой карты <b>25 уровней звёзд</b> — 5 эпох по 5 уровней. Каждая звезда даёт всё больше очков: ⭐ 1-5 = +5% · 💜 6-10 = +15% · 💛 11-15 = +35% · 🌋 16-20 = +80% · 🌈 21-25 = +200% за каждую. Также +1 слот мутации.</div>';
+  html += '<div class="legendRow"><div class="ic">⭐</div><div class="txt"><b>Обычная</b> · ур. 1-5<small>50 · 100 · 150 · 200 · 300 ✨<br>Шанс: 100 · 95 · 90 · 85 · 80%</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">💜</div><div class="txt"><b>Эпическая</b> · ур. 6-10<small>2К · 3К · 5К · 8К · 12К ✨<br>Шанс: 80 · 75 · 70 · 65 · 60% · Гарантия 5</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">💛</div><div class="txt"><b>Легендарная</b> · ур. 11-15<small>40К · 70К · 110К · 160К · 220К ✨<br>Шанс: 60 · 55 · 50 · 45 · 40% · Гарантия 8</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🌋</div><div class="txt"><b>Мифическая</b> · ур. 16-20<small>350К · 550К · 800К · 1.1М · 1.5М ✨<br>Шанс: 30 · 27 · 24 · 21 · 18% · Гарантия 12</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🌈</div><div class="txt"><b>Секретная</b> · ур. 21-25<small>1.5М · 2.5М · 4М · 6М · 9М ✨<br>Шанс: 15 · 13 · 11 · 9 · 7% · Гарантия 20</small></div></div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">⚠️ <b>Провал</b> — возврат 50% маны +1 к счётчику гарантии. На <b>последнем уровне гарантии</b> звезда ложится 100%.</div>';
 
   html += '<div class="sectionTitle">⚒️ Крафт</div>';
   CRAFT_RECIPES.forEach(r=>{
     const mandatory = r.mandatory.map(n=>'• '+n).join('<br>');
     const sac = r.sacrifice.map(s=>s.count+'× '+s.rarity).join(', ');
-    html += '<div style="background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid var(--purple)"><div style="font-size:13px;font-weight:700;color:var(--purple)">'+r.icon+' '+r.name+'</div><div style="font-size:10px;opacity:.7;margin-top:4px;line-height:1.5"><b>Обязательные:</b><br>'+mandatory+'</div><div style="font-size:10px;opacity:.7;margin-top:6px"><b>Жертва:</b> '+sac+'</div><div style="font-size:11px;opacity:.9;margin-top:6px">🪙 '+r.baseCoins+' · ⏱ '+r.timeMinH+'–'+r.timeMaxH+' ч</div></div>';
+    html += '<div style="background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid var(--purple)"><div style="font-size:13px;font-weight:700;color:var(--purple)">'+r.icon+' '+r.name+'</div><div style="font-size:10px;opacity:.7;margin-top:4px;line-height:1.5"><b>Обязательные:</b><br>'+mandatory+'</div><div style="font-size:10px;opacity:.7;margin-top:6px"><b>Жертва:</b> '+sac+'</div><div style="font-size:11px;opacity:.9;margin-top:6px">🪙 '+r.baseCoins+' · ⏱ '+r.timeMinH+'–'+r.timeMaxH+' ч · ×1.5 цена за каждый следующий</div></div>';
   });
 
   html += '<div class="sectionTitle">🎣 Рыбалка</div>';
-  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Тратится ⚡ на каждую рыбу. Глубины по 60 сек.</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Раунд 60 сек. Тапаешь по рыбе → цепляешь → тапаешь ещё → вываживаешь. Тратится ⚡.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">🚫 Не хватает энергии → рыба серая с <b>🔒</b>, тап не сработает.</div>';
+
+  html += '<div class="sectionTitle">🌊 Глубины</div>';
+  DEPTHS.forEach(d=>{
+    html += '<div class="chanceRow"><span>' + d.emoji + ' ' + d.name + '</span><b>⚡ ' + d.recommend + '+</b></div>';
+  });
+
+  html += '<div class="sectionTitle">🧬 Мутации рыб</div>';
+  html += '<div class="legendRow"><div class="ic">🟢</div><div class="txt"><b>Пруд</b><small>1% шанс, 1 мутация</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🟣</div><div class="txt"><b>Озеро</b><small>8% шанс, до 2</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🔴</div><div class="txt"><b>Глубина</b><small>15% шанс, до 2</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">⚫</div><div class="txt"><b>Бездна</b><small>25% шанс, до 3 (68%/24%/8%)</small></div></div>';
+
+  html += '<div class="sectionTitle">🎁 События на рыбалке</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Раз в 20-35 сек, ловится за 1 тап без энергии:</div>';
+  html += '<div class="legendRow"><div class="ic">🐟</div><div class="txt"><b>Золотая рыбка</b><small>+500🪙 · +1🥇</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">📦</div><div class="txt"><b>Сундук</b><small>+200🪙 · +1🧪</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🥾</div><div class="txt"><b>Ботинок</b><small>−5⚡</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🎁</div><div class="txt"><b>Подарок</b><small>+1✨ (5%)</small></div></div>';
+
+  html += '<div class="sectionTitle">🍾 Бутылки энергии</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Мгновенно +50⚡. Хранятся в профиле, не сбрасываются при выходе. Максимум = 1 + уровень прокачки. Реген +1/7 мин, КД 7 мин после использования.</div>';
 
   html += '<div class="sectionTitle">🎋 Удочки</div>';
   RODS.forEach(r=>{
@@ -6314,10 +6465,22 @@ function openHelp(){
   });
 
   html += '<div class="sectionTitle">💱 Биржа</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Курс меняется каждые 30 минут. Спред 12%. Купи дёшево — продай дорого.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Курс меняется каждые 30 мин. Спред 12%. Лимит 100 за раз.</div>';
+
+  html += '<div class="sectionTitle">📈 Уровни</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Максимум ' + MAX_LVL + '. Открывают вкладки (🔒 в навигации). XP за всё: клики, пакеты, рыбалка, крафт, квесты.</div>';
 
   html += '<div class="sectionTitle">🔗 Рефералы</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Поделись кодом в профиле. За каждого друга — бонус.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Код в профиле. За друга +5 000🪙 · +5🥇 · +3🧪.</div>';
+
+  html += '<div class="sectionTitle">🎁 Ежедневный бонус</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">7-дневный цикл, пропуск сбрасывает серию. До 5000🪙 + золото + эссенция + мана.</div>';
+
+  html += '<div class="sectionTitle">📋 Задания дня</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">3 задания (лёгкое/среднее/сложное). Обновление в 12:00 и 00:00 МСК.</div>';
+
+  html += '<div class="sectionTitle">🏪 Магазин дня</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">4 карты за золото. Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК.</div>';
 
   html += '<div style="height:14px"></div>';
   html += '<button class="profileBtn btnGold" onclick="closeModal(\'helpModal\');restartTut()">🎓 Пройти обучение заново</button>';
