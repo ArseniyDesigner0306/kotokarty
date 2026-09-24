@@ -227,8 +227,64 @@ body.reduce-motion .card .mut-visual span{animation:none;opacity:.5}
 .card.vis-crown{box-shadow:0 0 30px #ffd700,inset 0 0 20px #ffd70055}
 .card.vis-rainbow{animation:rainbowGlow 3s linear infinite}
 @keyframes rainbowGlow{0%{box-shadow:0 0 30px #ff0000}20%{box-shadow:0 0 30px #ff9900}40%{box-shadow:0 0 30px #ffff00}60%{box-shadow:0 0 30px #00ff00}80%{box-shadow:0 0 30px #0088ff}100%{box-shadow:0 0 30px #9900ff}}
+/* ==== Визуалы новых мутаций ==== */
+.card.vis-poison{animation:mutPoison 2s ease-in-out infinite}
+@keyframes mutPoison{0%,100%{box-shadow:0 0 20px #22c55e,inset 0 0 15px #22c55e55}50%{box-shadow:0 0 45px #a3e635,inset 0 0 30px #a3e63588}}
+.card.vis-smoke{animation:mutSmoke 3s ease-in-out infinite}
+@keyframes mutSmoke{0%,100%{box-shadow:0 0 20px #9ca3af55,inset 0 0 20px #6b728055}50%{box-shadow:0 0 40px #d1d5db88,inset 0 0 30px #9ca3af88}}
+.card.vis-water{animation:mutWater 2.5s ease-in-out infinite}
+@keyframes mutWater{0%,100%{box-shadow:0 0 22px #3b82f6,inset 0 0 18px #3b82f655}50%{box-shadow:0 0 45px #60a5fa,inset 0 0 30px #60a5fa88}}
+.card.vis-wind{animation:mutWind 1.4s linear infinite}
+@keyframes mutWind{0%,100%{box-shadow:0 0 25px #67e8f9,inset 0 0 20px #67e8f955}50%{box-shadow:0 0 45px #a5f3fc,inset 0 0 30px #a5f3fc88}}
+.card.vis-earth{animation:mutEarth 2.2s ease-in-out infinite}
+@keyframes mutEarth{0%,100%{box-shadow:0 0 20px #a16207,inset 0 0 20px #a1620755}50%{box-shadow:0 0 40px #ca8a04,inset 0 0 30px #ca8a0488}}
+.card.vis-sand{animation:mutSand 2.6s ease-in-out infinite}
+@keyframes mutSand{0%,100%{box-shadow:0 0 20px #d4a373,inset 0 0 15px #d4a37355}50%{box-shadow:0 0 42px #eab308,inset 0 0 28px #eab30888}}
+.card.vis-magnet{animation:mutMagnet 1.2s ease-in-out infinite}
+@keyframes mutMagnet{0%,100%{box-shadow:0 0 22px #ef4444,inset 0 0 18px #ef444455}50%{box-shadow:0 0 45px #3b82f6,inset 0 0 30px #3b82f688}}
+.card.vis-blood{animation:mutBlood 1.6s ease-in-out infinite}
+@keyframes mutBlood{0%,100%{box-shadow:0 0 25px #991b1b,inset 0 0 20px #991b1b66}50%{box-shadow:0 0 50px #dc2626,inset 0 0 35px #dc262699}}
+.card.vis-bone{animation:mutBone 3s ease-in-out infinite}
+@keyframes mutBone{0%,100%{box-shadow:0 0 20px #e5e7eb66,inset 0 0 20px #d1d5db55}50%{box-shadow:0 0 40px #f9fafb,inset 0 0 30px #e5e7eb88}}
+.card.vis-light{animation:mutLight 1.8s ease-in-out infinite}
+@keyframes mutLight{0%,100%{box-shadow:0 0 30px #fde047,inset 0 0 22px #fde04777}50%{box-shadow:0 0 60px #fef08a,inset 0 0 40px #fef08aaa}}
+.card.vis-acid{animation:mutAcid 1.5s ease-in-out infinite}
+@keyframes mutAcid{0%,100%{box-shadow:0 0 22px #84cc16,inset 0 0 18px #84cc1666}50%{box-shadow:0 0 45px #bef264,inset 0 0 30px #bef26488}}
+.card.vis-ghost{animation:mutGhost 2.4s ease-in-out infinite}
+@keyframes mutGhost{0%,100%{box-shadow:0 0 25px #c4b5fd66,inset 0 0 20px #a78bfa44;opacity:.9}50%{box-shadow:0 0 50px #ddd6fe,inset 0 0 35px #c4b5fd88;opacity:1}}
+.card.vis-nature{animation:mutNature 2.4s ease-in-out infinite}
+@keyframes mutNature{0%,100%{box-shadow:0 0 22px #16a34a,inset 0 0 18px #16a34a66}50%{box-shadow:0 0 45px #4ade80,inset 0 0 30px #4ade8088}}
+.card.vis-robot{animation:mutRobot 1s steps(2) infinite}
+@keyframes mutRobot{0%{box-shadow:0 0 25px #06b6d4,inset 0 0 20px #06b6d455}50%{box-shadow:0 0 45px #22d3ee,inset 0 0 30px #22d3ee88}}
+.card.vis-eye{animation:mutEye 2.8s ease-in-out infinite}
+@keyframes mutEye{0%,100%{box-shadow:0 0 25px #8b5cf6,inset 0 0 20px #8b5cf655}50%{box-shadow:0 0 55px #c4b5fd,inset 0 0 40px #a78bfa99}}
+.card.vis-angel{animation:mutAngel 2s ease-in-out infinite}
+@keyframes mutAngel{0%,100%{box-shadow:0 0 30px #fef3c7,inset 0 0 25px #fef3c788}50%{box-shadow:0 0 60px #fff,inset 0 0 45px #fef3c7cc}}
+.card.vis-demon{animation:mutDemon 1.3s ease-in-out infinite}
+@keyframes mutDemon{0%,100%{box-shadow:0 0 30px #7f1d1d,inset 0 0 25px #7f1d1d88}50%{box-shadow:0 0 55px #dc2626,inset 0 0 40px #dc2626aa}}
+.card.vis-star{animation:mutStar 1.6s ease-in-out infinite}
+@keyframes mutStar{0%,100%{box-shadow:0 0 25px #fbbf24,inset 0 0 20px #fbbf2477}50%{box-shadow:0 0 55px #fde68a,inset 0 0 40px #fde68aaa}}
+.card.vis-void{animation:mutVoid 2.5s ease-in-out infinite}
+@keyframes mutVoid{0%,100%{box-shadow:0 0 30px #000,inset 0 0 35px #000000dd;filter:brightness(.85)}50%{box-shadow:0 0 55px #4c1d95,inset 0 0 45px #4c1d95aa;filter:brightness(.95)}}
+.card.vis-time{animation:mutTime 2.4s ease-in-out infinite}
+@keyframes mutTime{0%,100%{box-shadow:0 0 25px #f59e0b,inset 0 0 22px #f59e0b66}50%{box-shadow:0 0 50px #fbbf24,inset 0 0 35px #fbbf2488}}
+.card.vis-dragon{animation:mutDragon 1.4s ease-in-out infinite}
+@keyframes mutDragon{0%,100%{box-shadow:0 0 30px #dc2626,inset 0 0 25px #dc262688}50%{box-shadow:0 0 60px #f97316,inset 0 0 45px #f97316aa}}
+.card.vis-cosmic{animation:mutCosmic 3.2s linear infinite}
+@keyframes mutCosmic{0%{box-shadow:0 0 30px #a855f7,inset 0 0 25px #a855f788}33%{box-shadow:0 0 50px #3b82f6,inset 0 0 40px #3b82f6aa}66%{box-shadow:0 0 50px #06b6d4,inset 0 0 40px #06b6d4aa}100%{box-shadow:0 0 30px #a855f7,inset 0 0 25px #a855f788}}
+.card.vis-chaos{animation:mutChaos 1s linear infinite}
+@keyframes mutChaos{0%{box-shadow:0 0 25px #ef4444,inset 0 0 20px #ef444488}25%{box-shadow:0 0 40px #a855f7,inset 0 0 30px #a855f7aa}50%{box-shadow:0 0 40px #3b82f6,inset 0 0 30px #3b82f6aa}75%{box-shadow:0 0 40px #22c55e,inset 0 0 30px #22c55eaa}100%{box-shadow:0 0 25px #ef4444,inset 0 0 20px #ef444488}}
+
 body.reduce-motion .card.vis-fire,body.reduce-motion .card.vis-ice,body.reduce-motion .card.vis-thunder,
-body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animation:none}
+body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow,
+body.reduce-motion .card.vis-poison,body.reduce-motion .card.vis-smoke,body.reduce-motion .card.vis-water,
+body.reduce-motion .card.vis-wind,body.reduce-motion .card.vis-earth,body.reduce-motion .card.vis-sand,
+body.reduce-motion .card.vis-magnet,body.reduce-motion .card.vis-blood,body.reduce-motion .card.vis-bone,
+body.reduce-motion .card.vis-light,body.reduce-motion .card.vis-acid,body.reduce-motion .card.vis-ghost,
+body.reduce-motion .card.vis-nature,body.reduce-motion .card.vis-robot,body.reduce-motion .card.vis-eye,
+body.reduce-motion .card.vis-angel,body.reduce-motion .card.vis-demon,body.reduce-motion .card.vis-star,
+body.reduce-motion .card.vis-void,body.reduce-motion .card.vis-time,body.reduce-motion .card.vis-dragon,
+body.reduce-motion .card.vis-cosmic,body.reduce-motion .card.vis-chaos{animation:none}
 
 /* Редкости */
 .star-img{width:40px;height:40px;object-fit:contain;display:block;pointer-events:none}
@@ -1425,40 +1481,40 @@ function cover(name){ return COVERS[name] || {emoji:'🐱', tint:'#555'}; }
    ============================================================ */
 const MUTATIONS = [
   /* TIER 0 — Обычные (8) — ×1.15-1.5 */
-  {id:'poison', icon:'☠️', name:'Ядовитый',     tier:0, rname:'Обычная',     percent:15,  visual:null,      fishMult:1.15, fishName:'Ядовитая'},
-  {id:'smoke',  icon:'💨', name:'Дымный',       tier:0, rname:'Обычная',     percent:15,  visual:null,      fishMult:1.15, fishName:'Копчёная'},
-  {id:'water',  icon:'💧', name:'Водный',       tier:0, rname:'Обычная',     percent:20,  visual:null,      fishMult:1.2,  fishName:'Мокрая'},
-  {id:'wind',   icon:'🌪️', name:'Ветряной',     tier:0, rname:'Обычная',     percent:20,  visual:null,      fishMult:1.2,  fishName:'Быстрая'},
-  {id:'earth',  icon:'🪨', name:'Каменный',     tier:0, rname:'Обычная',     percent:30,  visual:null,      fishMult:1.3,  fishName:'Тяжёлая'},
+  {id:'poison', icon:'☠️', name:'Ядовитый',     tier:0, rname:'Обычная',     percent:15,  visual:'poison',  fishMult:1.15, fishName:'Ядовитая'},
+  {id:'smoke',  icon:'💨', name:'Дымный',       tier:0, rname:'Обычная',     percent:15,  visual:'smoke',   fishMult:1.15, fishName:'Копчёная'},
+  {id:'water',  icon:'💧', name:'Водный',       tier:0, rname:'Обычная',     percent:20,  visual:'water',   fishMult:1.2,  fishName:'Мокрая'},
+  {id:'wind',   icon:'🌪️', name:'Ветряной',     tier:0, rname:'Обычная',     percent:20,  visual:'wind',    fishMult:1.2,  fishName:'Быстрая'},
+  {id:'earth',  icon:'🪨', name:'Каменный',     tier:0, rname:'Обычная',     percent:30,  visual:'earth',   fishMult:1.3,  fishName:'Тяжёлая'},
   {id:'ice',    icon:'❄️', name:'Ледяной',      tier:0, rname:'Обычная',     percent:35,  visual:'ice',     fishMult:1.35, fishName:'Мороженая'},
   {id:'thunder',icon:'⚡', name:'Грозовой',     tier:0, rname:'Обычная',     percent:40,  visual:'thunder', fishMult:1.4,  fishName:'Электрическая'},
   {id:'fire',   icon:'🔥', name:'Огненный',     tier:0, rname:'Обычная',     percent:50,  visual:'fire',    fishMult:1.5,  fishName:'Жареная'},
   /* TIER 1 — Редкие (10) — ×1.3-1.6 */
-  {id:'sand',   icon:'🏜️', name:'Песочный',     tier:1, rname:'Редкая',      percent:30,  visual:null,      fishMult:1.3,  fishName:'Песчаная'},
-  {id:'magnet', icon:'🧲', name:'Магнитный',    tier:1, rname:'Редкая',      percent:35,  visual:null,      fishMult:1.35, fishName:'Магнитная'},
-  {id:'blood',  icon:'🩸', name:'Кровавый',     tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Кровавая'},
-  {id:'bone',   icon:'💀', name:'Костяной',     tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Костлявая'},
-  {id:'light',  icon:'☀️', name:'Светлый',      tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Светящаяся'},
-  {id:'acid',   icon:'🧪', name:'Кислотный',    tier:1, rname:'Редкая',      percent:45,  visual:null,      fishMult:1.45, fishName:'Кислая'},
+  {id:'sand',   icon:'🏜️', name:'Песочный',     tier:1, rname:'Редкая',      percent:30,  visual:'sand',    fishMult:1.3,  fishName:'Песчаная'},
+  {id:'magnet', icon:'🧲', name:'Магнитный',    tier:1, rname:'Редкая',      percent:35,  visual:'magnet',  fishMult:1.35, fishName:'Магнитная'},
+  {id:'blood',  icon:'🩸', name:'Кровавый',     tier:1, rname:'Редкая',      percent:40,  visual:'blood',   fishMult:1.4,  fishName:'Кровавая'},
+  {id:'bone',   icon:'💀', name:'Костяной',     tier:1, rname:'Редкая',      percent:40,  visual:'bone',    fishMult:1.4,  fishName:'Костлявая'},
+  {id:'light',  icon:'☀️', name:'Светлый',      tier:1, rname:'Редкая',      percent:40,  visual:'light',   fishMult:1.4,  fishName:'Светящаяся'},
+  {id:'acid',   icon:'🧪', name:'Кислотный',    tier:1, rname:'Редкая',      percent:45,  visual:'acid',    fishMult:1.45, fishName:'Кислая'},
   {id:'radio',  icon:'☢️', name:'Радиоактивный',tier:1, rname:'Редкая',      percent:50,  visual:'radio',   fishMult:1.5,  fishName:'Мутант'},
-  {id:'ghost',  icon:'👻', name:'Призрачный',   tier:1, rname:'Редкая',      percent:50,  visual:null,      fishMult:1.5,  fishName:'Призрачная'},
+  {id:'ghost',  icon:'👻', name:'Призрачный',   tier:1, rname:'Редкая',      percent:50,  visual:'ghost',   fishMult:1.5,  fishName:'Призрачная'},
   {id:'crystal',icon:'💎', name:'Кристальный',  tier:1, rname:'Редкая',      percent:55,  visual:'crystal', fishMult:1.55, fishName:'Кристальная'},
   {id:'shadow', icon:'🌑', name:'Теневой',      tier:1, rname:'Редкая',      percent:60,  visual:'shadow',  fishMult:1.6,  fishName:'Тёмная'},
   /* TIER 2 — Эпические (8) — ×1.6-1.8 */
-  {id:'nature', icon:'🌿', name:'Природный',    tier:2, rname:'Эпическая',   percent:60,  visual:null,      fishMult:1.6,  fishName:'Живая'},
-  {id:'robot',  icon:'🤖', name:'Механический', tier:2, rname:'Эпическая',   percent:60,  visual:null,      fishMult:1.6,  fishName:'Механическая'},
-  {id:'eye',    icon:'👁️', name:'Всевидящий',   tier:2, rname:'Эпическая',   percent:70,  visual:null,      fishMult:1.7,  fishName:'Всевидящая'},
-  {id:'angel',  icon:'😇', name:'Ангельский',   tier:2, rname:'Эпическая',   percent:70,  visual:null,      fishMult:1.7,  fishName:'Святая'},
-  {id:'demon',  icon:'😈', name:'Демонический', tier:2, rname:'Эпическая',   percent:75,  visual:null,      fishMult:1.75, fishName:'Демоническая'},
-  {id:'star',   icon:'⭐', name:'Звёздный',     tier:2, rname:'Эпическая',   percent:75,  visual:null,      fishMult:1.75, fishName:'Звёздная'},
+  {id:'nature', icon:'🌿', name:'Природный',    tier:2, rname:'Эпическая',   percent:60,  visual:'nature',  fishMult:1.6,  fishName:'Живая'},
+  {id:'robot',  icon:'🤖', name:'Механический', tier:2, rname:'Эпическая',   percent:60,  visual:'robot',   fishMult:1.6,  fishName:'Механическая'},
+  {id:'eye',    icon:'👁️', name:'Всевидящий',   tier:2, rname:'Эпическая',   percent:70,  visual:'eye',     fishMult:1.7,  fishName:'Всевидящая'},
+  {id:'angel',  icon:'😇', name:'Ангельский',   tier:2, rname:'Эпическая',   percent:70,  visual:'angel',   fishMult:1.7,  fishName:'Святая'},
+  {id:'demon',  icon:'😈', name:'Демонический', tier:2, rname:'Эпическая',   percent:75,  visual:'demon',   fishMult:1.75, fishName:'Демоническая'},
+  {id:'star',   icon:'⭐', name:'Звёздный',     tier:2, rname:'Эпическая',   percent:75,  visual:'star',    fishMult:1.75, fishName:'Звёздная'},
   {id:'wing',   icon:'🪽', name:'Крылатый',     tier:2, rname:'Эпическая',   percent:80,  visual:'wing',    fishMult:1.8,  fishName:'Летающая'},
-  {id:'void',   icon:'🕳️', name:'Пустотный',    tier:2, rname:'Эпическая',   percent:80,  visual:null,      fishMult:1.8,  fishName:'Пустотная'},
+  {id:'void',   icon:'🕳️', name:'Пустотный',    tier:2, rname:'Эпическая',   percent:80,  visual:'void',    fishMult:1.8,  fishName:'Пустотная'},
   /* TIER 3 — Легендарные (6) — ×2.0-2.2 */
   {id:'crown',  icon:'👑', name:'Королевский',  tier:3, rname:'Легендарная', percent:100, visual:'crown',   fishMult:2.0,  fishName:'Королевская'},
-  {id:'time',   icon:'⏳', name:'Временной',    tier:3, rname:'Легендарная', percent:100, visual:null,      fishMult:2.0,  fishName:'Древняя'},
-  {id:'dragon', icon:'🐉', name:'Драконий',     tier:3, rname:'Легендарная', percent:110, visual:null,      fishMult:2.1,  fishName:'Драконья'},
-  {id:'cosmic', icon:'🌌', name:'Космический',  tier:3, rname:'Легендарная', percent:110, visual:null,      fishMult:2.1,  fishName:'Космическая'},
-  {id:'chaos',  icon:'🌀', name:'Хаотический',  tier:3, rname:'Легендарная', percent:115, visual:null,      fishMult:2.15, fishName:'Хаотичная'},
+  {id:'time',   icon:'⏳', name:'Временной',    tier:3, rname:'Легендарная', percent:100, visual:'time',    fishMult:2.0,  fishName:'Древняя'},
+  {id:'dragon', icon:'🐉', name:'Драконий',     tier:3, rname:'Легендарная', percent:110, visual:'dragon',  fishMult:2.1,  fishName:'Драконья'},
+  {id:'cosmic', icon:'🌌', name:'Космический',  tier:3, rname:'Легендарная', percent:110, visual:'cosmic',  fishMult:2.1,  fishName:'Космическая'},
+  {id:'chaos',  icon:'🌀', name:'Хаотический',  tier:3, rname:'Легендарная', percent:115, visual:'chaos',   fishMult:2.15, fishName:'Хаотичная'},
   {id:'rainbow',icon:'🌈', name:'Радужный',     tier:3, rname:'Легендарная', percent:120, visual:'rainbow', fishMult:2.2,  fishName:'Радужная'}
 ];
 const MUT_BY_ID = {}; MUTATIONS.forEach(m => MUT_BY_ID[m.id] = m);
