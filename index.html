@@ -669,7 +669,7 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   white-space:nowrap;min-height:44px;transition:.15s;
 }
 .upgradeBtn:active{transform:scale(.96)}
-.upgradeBtn:disabled{background:var(--panel2);opacity:.5;cursor:not-allowed}
+.upgradeBtn:disabled{background:#6b7280;opacity:.7;cursor:not-allowed;color:#fff}
 .upgradeBtn .priceStr{display:block;font-size:10px;opacity:.9;margin-top:1px}
 
 /* ============ КРАФТ ============ */
@@ -767,6 +767,18 @@ body.reduce-motion .card.vis-radio,body.reduce-motion .card.vis-rainbow{animatio
   .slot .em{font-size:18px}
   .slot .nm{font-size:8px}
 }
+/* ============ 🎉 ВИЗУАЛ СОБЫТИЙ (только рамка, фон — в canvas) ============ */
+body.event-radiation #fishingArea{box-shadow:0 0 30px #22c55e88,inset 0 0 20px #22c55e44}
+body.event-iceage #fishingArea{box-shadow:0 0 30px #7dd3fc88,inset 0 0 20px #7dd3fc44}
+body.event-apocalypse #fishingArea{box-shadow:0 0 30px #a855f788,inset 0 0 20px #a855f744}
+body.event-fire #fishingArea{box-shadow:0 0 30px #f9731688,inset 0 0 20px #f9731644}
+body.event-crystal #fishingArea{box-shadow:0 0 30px #a5b4fc88,inset 0 0 20px #a5b4fc44}
+body.event-radiation #playArea{box-shadow:0 0 30px #22c55e88,inset 0 0 20px #22c55e44}
+body.event-iceage #playArea{box-shadow:0 0 30px #7dd3fc88,inset 0 0 20px #7dd3fc44}
+body.event-apocalypse #playArea{box-shadow:0 0 30px #a855f788,inset 0 0 20px #a855f744}
+body.event-fire #playArea{box-shadow:0 0 30px #f9731688,inset 0 0 20px #f9731644}
+body.event-crystal #playArea{box-shadow:0 0 30px #a5b4fc88,inset 0 0 20px #a5b4fc44}
+
 /* ============ ДЕНЬ / НОЧЬ ============ */
 body.is-night #playArea,
 body.is-night #fishingArea{
@@ -812,6 +824,7 @@ body.is-night #fishingArea{
     <span>🧪 <b id="essence">0</b></span>
     <span>✨ <b id="mana">0</b></span>
     <span id="phaseIndicator" style="font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:default">☀️ 10:00</span>
+    <span id="eventBar" style="display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer"></span>
   </div>
   <div class="header-actions">
     <button id="themeToggle" title="Тема">🌙</button>
@@ -838,6 +851,7 @@ body.is-night #fishingArea{
     <div id="cdInfo">КД: 1.2 сек</div>
     <div style="font-size:11px;opacity:.6;margin-bottom:4px">Слоты: <b id="slotCount">1</b>/5</div>
     <div id="slotsRow"></div>
+    <div id="botBar" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:none;cursor:pointer;align-items:center;gap:10px"></div>
     <div id="buffsRow"></div>
   </div>
 
@@ -847,6 +861,7 @@ body.is-night #fishingArea{
       <button data-shop="packs" class="active">📦 Пакеты</button>
       <button data-shop="daily">🏪 Магазин дня</button>
       <button data-shop="fishing">🎣 Прокачка</button>
+      <button data-shop="bots">🤖 Боты</button>
     </div>
     <div class="shopView active" id="shopView-packs">
       <div id="packsContainer"></div>
@@ -860,8 +875,8 @@ body.is-night #fishingArea{
     </div>
     <div class="shopView" id="shopView-daily"><div id="dailyShopContainer"></div></div>
     <div class="shopView" id="shopView-fishing"><div id="upgradesContainer"></div></div>
+    <div class="shopView" id="shopView-bots"><div id="botsContainer"></div></div>
   </div>
-
   <!-- ====== БИРЖА ====== -->
   <div class="tab" id="tab-bourse">
     <div id="bourseHeader"></div>
@@ -1010,7 +1025,7 @@ body.is-night #fishingArea{
    КОНСТАНТЫ
    ============================================================ */
 const BASE_CLICK = 5, BASE_CD = 1.2;
-const GOLD_CH = 0.01, ESS_CH = 0.02, MANA_CH = 0.002;
+const GOLD_CH = 0.01, ESS_CH = 0.02, MANA_CH = 0.01;
 const MAX_LVL = 500;
 const UNLOCK_LVL = { fishing: 3, bourse: 5, craft: 0 };
 const MAX_ENERGY_BASE = 50;
@@ -1023,14 +1038,79 @@ const ENERGY_REGEN_SEC = 3;
 const HARD_CLICK_MS = 300;
 const FISH_ENERGY_COST = [5,10,20,40,80,150,350,700,1500];
 const FISH_GOLD_REWARD = {l:1, d:2, m:5, s:15};
+const FISH_MANA_REWARD = {c:0.05, u:0.1, r:0.5, sr:2, e:5, l:20, d:100, m:500, s:5000};
 const BOTTLE_ENERGY_AMOUNT = 50;
 const BOURSE_BASE = 500;
-const BOURSE_UPDATE_MS = 30*60*1000;
+const BOURSE_UPDATE_MS = 15*60*1000;
 const BOURSE_SPREAD = 0.12;
 const BOURSE_CEIL = 1500;
 const BOURSE_FLOOR = 150;
 const BOURSE_HISTORY_MAX = 2000;
 const DAILY_SHOP_HOURS = [7, 12, 16, 20, 23];
+/* ============================================================
+   🎉 СОБЫТИЯ ДНЯ
+   ============================================================ */
+const EVENT_TYPES = {
+  /* ============ 🟢 CLASS 1: БАФЫ (8) ============ */
+  coinfall:   {name:'Монетопад',       icon:'💰', color:'#ffd93d', class:1, desc:'×2 монеты со всех кликов'},
+  manastorm:  {name:'Мана-шторм',      icon:'✨', color:'#a855f7', class:1, desc:'×3 мана с кликов и рыбы'},
+  reflex:     {name:'Кошачий рефлекс', icon:'⚡', color:'#3b82f6', class:1, desc:'−50% КД, ульта ×15, кнопки быстрее'},
+  alchemy:    {name:'Алхимия',         icon:'🧪', color:'#10b981', class:1, desc:'×2 эссенция с кликов + рыба даёт эссенцию'},
+  bite:       {name:'Бешеный клёв',    icon:'🎣', color:'#06b6d4', class:1, desc:'Рыба: спавн ×1.5, скорость ×1.5, до 15 в воде'},
+  luckycat:   {name:'Кот-везунчик',    icon:'🍀', color:'#22c55e', class:1, desc:'×2 все шансы + шанс апгрейда редкости ×25%'},
+  bourseup:   {name:'Подъём биржи',    icon:'📈', color:'#10b981', class:1, desc:'Курс ×2 мгновенно'},
+  boursedown: {name:'Спад биржи',      icon:'📉', color:'#dc2626', class:1, desc:'Курс ÷2 мгновенно'},
+
+  /* ============ 🧬 CLASS 2: МОНО-МУТАЦИИ (10) ============ */
+  mutFire:    {name:'Огненный шторм',   icon:'🔥', color:'#dc2626', class:2, desc:'Все рыбы — Жареные (Огненный)', mut:{fixed:['fire']}},
+  mutIce:     {name:'Ледниковый период',icon:'❄️', color:'#06b6d4', class:2, desc:'Все рыбы — Мороженые (Ледяной)', mut:{fixed:['ice']}},
+  mutThunder: {name:'Грозовой фронт',   icon:'⚡', color:'#fbbf24', class:2, desc:'Все рыбы — Электрические', mut:{fixed:['thunder']}},
+  mutRadio:   {name:'Радиация',         icon:'☢️', color:'#22c55e', class:2, desc:'Все рыбы — Мутанты (Радиоактивный)', mut:{fixed:['radio']}},
+  mutCrystal: {name:'Кристальный шторм',icon:'💎', color:'#a5b4fc', class:2, desc:'Все рыбы — Кристальные', mut:{fixed:['crystal']}},
+  mutShadow:  {name:'Затмение',         icon:'🌑', color:'#6b7280', class:2, desc:'Все рыбы — Тёмные', mut:{fixed:['shadow']}},
+  mutEye:     {name:'Всевидящее око',   icon:'👁️', color:'#8b5cf6', class:2, desc:'Все рыбы — Всевидящие', mut:{fixed:['eye']}},
+  mutWing:    {name:'Вознесение',       icon:'🪽', color:'#e0e7ff', class:2, desc:'Все рыбы — Летающие', mut:{fixed:['wing']}},
+  mutCrown:   {name:'Королевская охота',icon:'👑', color:'#ffd93d', class:2, desc:'Все рыбы — Королевские', mut:{fixed:['crown']}},
+  mutRainbow: {name:'Радужный разлом',  icon:'🌈', color:'#ec4899', class:2, desc:'Все рыбы — Радужные', mut:{fixed:['rainbow']}},
+
+  /* ============ ⚡ CLASS 2: КОМБО-ИВЕНТЫ (4) ============ */
+  comboSteam:  {name:'Паровой ивент',    icon:'💨', color:'#e5e7eb', class:2, desc:'Все рыбы — Пар (🔥+❄️)', mut:{fixed:['fire','ice']}},
+  comboStorm:  {name:'Штормовой ивент',  icon:'🌩️', color:'#3b82f6', class:2, desc:'Все рыбы — Шторм (⚡+🌪️)', mut:{fixed:['thunder','wind']}},
+  comboHole:   {name:'Чёрная дыра',      icon:'🕳️', color:'#1f2937', class:2, desc:'Все рыбы — Чёрная дыра (☢️+🌑)', mut:{fixed:['radio','shadow']}},
+  comboDivine: {name:'Божественный пир', icon:'⚜️', color:'#ffd700', class:2, desc:'Все рыбы — Божественный (👑+🌈)', mut:{fixed:['crown','rainbow']}},
+
+  /* ============ 🎲 CLASS 2: РАНДОМ (2) ============ */
+  mutRandom1: {name:'Хаос мутаций',      icon:'🎲', color:'#a855f7', class:2, desc:'Каждая рыба — 1 случайная мутация', mut:{random:1}},
+  mutRandom3: {name:'Джако-мутации',     icon:'🎰', color:'#ec4899', class:2, desc:'Каждая рыба — 3 случайных мутации', mut:{random:3}},
+
+  /* ============ ☢️ CLASS 3: МЕГА (5) ============ */
+  megaRadio:    {name:'Радиационный всплеск', icon:'☢️', color:'#22c55e', class:3, desc:'Вода зелёная · все рыбы Мутанты · размер ×1.5', mut:{fixed:['radio']}, visual:'radiation', sizeMult:1.5, bgTop:'#4ade80', bgBot:'#052e16'},
+  megaIce:      {name:'Ледниковый период',    icon:'❄️', color:'#7dd3fc', class:3, desc:'Вода голубая · все рыбы Мороженые · скорость ×0.5 · спавн ×1.5', mut:{fixed:['ice']}, visual:'iceage', speedMult:0.5, spawnMult:1.5, bgTop:'#bae6fd', bgBot:'#0c4a6e'},
+  megaApoc:     {name:'Мутационный апокалипсис', icon:'🧬', color:'#a855f7', class:3, desc:'Фон фиолетовый · каждая рыба — 1-5 случайных мутаций', mut:{random:1, randomMax:5}, visual:'apocalypse', bgTop:'#c084fc', bgBot:'#3b0764'},
+  megaFire:     {name:'Подводный пожар',      icon:'🔥', color:'#f97316', class:3, desc:'Вода оранжевая · все рыбы Жареные · скорость ×2 · быстро исчезают', mut:{fixed:['fire']}, visual:'fire', speedMult:2, lifetimeMult:0.5, bgTop:'#fb923c', bgBot:'#7c2d12'},
+  megaCrystal:  {name:'Кристальный шторм',    icon:'💎', color:'#a5b4fc', class:3, desc:'Вода прозрачная · все рыбы Кристальные · скорость ×0.7 · размер ×1.5', mut:{fixed:['crystal']}, visual:'crystal', speedMult:0.7, sizeMult:1.5, bgTop:'#e0e7ff', bgBot:'#1e1b4b'},
+
+  /* ============ 🐟 CLASS 2: АУКЦИОН (1) ============ */
+  auction: {name:'Рыбный аукцион', icon:'🐟', color:'#3b82f6', class:2, desc:'Продай рыбу с уловом ×3 цены (10 мин)', auction:true}
+};
+const EVENT_DAY_START = 6;
+const EVENT_DAY_END = 24;
+const EVENT_GAP_MIN = 3;
+const EVENT_GAP_MAX = 10;
+const EVENT_DURATION_MIN = 6;
+const EVENT_DURATION_MAX = 12;
+const BOTS = [
+  {level:1,  name:'Сонный',        icon:'😴', interval:10,  price:10000},
+  {level:2,  name:'Ленивый',       icon:'😪', interval:9,   price:100000},
+  {level:3,  name:'Просыпающийся', icon:'😌', interval:8,   price:1000000},
+  {level:4,  name:'Бодрый',        icon:'😃', interval:7,   price:10000000},
+  {level:5,  name:'Весёлый',       icon:'😊', interval:6,   price:100000000},
+  {level:6,  name:'Быстрый',       icon:'😼', interval:5,   price:1000000000},
+  {level:7,  name:'Шустрый',       icon:'⚡', interval:4,   price:10000000000},
+  {level:8,  name:'Молниеносный',  icon:'🌩️', interval:3,   price:100000000000},
+  {level:9,  name:'Бешеный',       icon:'🔥', interval:2.5, price:1000000000000},
+  {level:10, name:'Божественный',  icon:'👑', interval:2,   price:10000000000000}
+];
 const BUFF_DURATION = 60;
 const FREE_COIN_AMOUNT = 100, FREE_COIN_CD = 60, FREE_BUFF_CD = 300;
 const VERSION = 9;
@@ -1344,29 +1424,72 @@ function cover(name){ return COVERS[name] || {emoji:'🐱', tint:'#555'}; }
    МУТАЦИИ И КОМБО
    ============================================================ */
 const MUTATIONS = [
-  {id:'fire',   icon:'🔥', name:'Огненный',     tier:0, rname:'Обычная',     points:20,  visual:'fire',    fishMult:2.5, fishName:'Жареная'},
-  {id:'ice',    icon:'❄️', name:'Ледяной',      tier:0, rname:'Обычная',     points:20,  visual:'ice',     fishMult:1.8, fishName:'Мороженая'},
-  {id:'poison', icon:'☠️', name:'Ядовитый',     tier:0, rname:'Обычная',     points:20,  visual:null,      fishMult:1.3, fishName:'Ядовитая'},
-  {id:'thunder',icon:'⚡', name:'Грозовой',     tier:0, rname:'Обычная',     points:20,  visual:'thunder', fishMult:2.0, fishName:'Электрическая'},
-  {id:'wind',   icon:'🌪️', name:'Ветряной',     tier:1, rname:'Редкая',      points:50,  visual:null,      fishMult:1.5, fishName:'Быстрая'},
-  {id:'radio',  icon:'☢️', name:'Радиоактивный',tier:1, rname:'Редкая',      points:50,  visual:'radio',   fishMult:2.2, fishName:'Мутант'},
-  {id:'shadow', icon:'🌑', name:'Теневой',      tier:1, rname:'Редкая',      points:50,  visual:'shadow',  fishMult:2.8, fishName:'Тёмная'},
-  {id:'crystal',icon:'💎', name:'Кристальный',  tier:1, rname:'Редкая',      points:50,  visual:'crystal', fishMult:2.5, fishName:'Кристальная'},
-  {id:'eye',    icon:'👁️', name:'Всевидящий',   tier:2, rname:'Эпическая',   points:150, visual:null,      fishMult:3.0, fishName:'Всевидящая'},
-  {id:'wing',   icon:'🪽', name:'Крылатый',     tier:2, rname:'Эпическая',   points:150, visual:'wing',    fishMult:3.5, fishName:'Летающая'},
-  {id:'crown',  icon:'👑', name:'Королевский',  tier:3, rname:'Легендарная', points:500, visual:'crown',   fishMult:5.0, fishName:'Королевская'},
-  {id:'rainbow',icon:'🌈', name:'Радужный',     tier:3, rname:'Легендарная', points:500, visual:'rainbow', fishMult:6.0, fishName:'Радужная'}
+  /* TIER 0 — Обычные (8) — ×1.15-1.5 */
+  {id:'poison', icon:'☠️', name:'Ядовитый',     tier:0, rname:'Обычная',     percent:15,  visual:null,      fishMult:1.15, fishName:'Ядовитая'},
+  {id:'smoke',  icon:'💨', name:'Дымный',       tier:0, rname:'Обычная',     percent:15,  visual:null,      fishMult:1.15, fishName:'Копчёная'},
+  {id:'water',  icon:'💧', name:'Водный',       tier:0, rname:'Обычная',     percent:20,  visual:null,      fishMult:1.2,  fishName:'Мокрая'},
+  {id:'wind',   icon:'🌪️', name:'Ветряной',     tier:0, rname:'Обычная',     percent:20,  visual:null,      fishMult:1.2,  fishName:'Быстрая'},
+  {id:'earth',  icon:'🪨', name:'Каменный',     tier:0, rname:'Обычная',     percent:30,  visual:null,      fishMult:1.3,  fishName:'Тяжёлая'},
+  {id:'ice',    icon:'❄️', name:'Ледяной',      tier:0, rname:'Обычная',     percent:35,  visual:'ice',     fishMult:1.35, fishName:'Мороженая'},
+  {id:'thunder',icon:'⚡', name:'Грозовой',     tier:0, rname:'Обычная',     percent:40,  visual:'thunder', fishMult:1.4,  fishName:'Электрическая'},
+  {id:'fire',   icon:'🔥', name:'Огненный',     tier:0, rname:'Обычная',     percent:50,  visual:'fire',    fishMult:1.5,  fishName:'Жареная'},
+  /* TIER 1 — Редкие (10) — ×1.3-1.6 */
+  {id:'sand',   icon:'🏜️', name:'Песочный',     tier:1, rname:'Редкая',      percent:30,  visual:null,      fishMult:1.3,  fishName:'Песчаная'},
+  {id:'magnet', icon:'🧲', name:'Магнитный',    tier:1, rname:'Редкая',      percent:35,  visual:null,      fishMult:1.35, fishName:'Магнитная'},
+  {id:'blood',  icon:'🩸', name:'Кровавый',     tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Кровавая'},
+  {id:'bone',   icon:'💀', name:'Костяной',     tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Костлявая'},
+  {id:'light',  icon:'☀️', name:'Светлый',      tier:1, rname:'Редкая',      percent:40,  visual:null,      fishMult:1.4,  fishName:'Светящаяся'},
+  {id:'acid',   icon:'🧪', name:'Кислотный',    tier:1, rname:'Редкая',      percent:45,  visual:null,      fishMult:1.45, fishName:'Кислая'},
+  {id:'radio',  icon:'☢️', name:'Радиоактивный',tier:1, rname:'Редкая',      percent:50,  visual:'radio',   fishMult:1.5,  fishName:'Мутант'},
+  {id:'ghost',  icon:'👻', name:'Призрачный',   tier:1, rname:'Редкая',      percent:50,  visual:null,      fishMult:1.5,  fishName:'Призрачная'},
+  {id:'crystal',icon:'💎', name:'Кристальный',  tier:1, rname:'Редкая',      percent:55,  visual:'crystal', fishMult:1.55, fishName:'Кристальная'},
+  {id:'shadow', icon:'🌑', name:'Теневой',      tier:1, rname:'Редкая',      percent:60,  visual:'shadow',  fishMult:1.6,  fishName:'Тёмная'},
+  /* TIER 2 — Эпические (8) — ×1.6-1.8 */
+  {id:'nature', icon:'🌿', name:'Природный',    tier:2, rname:'Эпическая',   percent:60,  visual:null,      fishMult:1.6,  fishName:'Живая'},
+  {id:'robot',  icon:'🤖', name:'Механический', tier:2, rname:'Эпическая',   percent:60,  visual:null,      fishMult:1.6,  fishName:'Механическая'},
+  {id:'eye',    icon:'👁️', name:'Всевидящий',   tier:2, rname:'Эпическая',   percent:70,  visual:null,      fishMult:1.7,  fishName:'Всевидящая'},
+  {id:'angel',  icon:'😇', name:'Ангельский',   tier:2, rname:'Эпическая',   percent:70,  visual:null,      fishMult:1.7,  fishName:'Святая'},
+  {id:'demon',  icon:'😈', name:'Демонический', tier:2, rname:'Эпическая',   percent:75,  visual:null,      fishMult:1.75, fishName:'Демоническая'},
+  {id:'star',   icon:'⭐', name:'Звёздный',     tier:2, rname:'Эпическая',   percent:75,  visual:null,      fishMult:1.75, fishName:'Звёздная'},
+  {id:'wing',   icon:'🪽', name:'Крылатый',     tier:2, rname:'Эпическая',   percent:80,  visual:'wing',    fishMult:1.8,  fishName:'Летающая'},
+  {id:'void',   icon:'🕳️', name:'Пустотный',    tier:2, rname:'Эпическая',   percent:80,  visual:null,      fishMult:1.8,  fishName:'Пустотная'},
+  /* TIER 3 — Легендарные (6) — ×2.0-2.2 */
+  {id:'crown',  icon:'👑', name:'Королевский',  tier:3, rname:'Легендарная', percent:100, visual:'crown',   fishMult:2.0,  fishName:'Королевская'},
+  {id:'time',   icon:'⏳', name:'Временной',    tier:3, rname:'Легендарная', percent:100, visual:null,      fishMult:2.0,  fishName:'Древняя'},
+  {id:'dragon', icon:'🐉', name:'Драконий',     tier:3, rname:'Легендарная', percent:110, visual:null,      fishMult:2.1,  fishName:'Драконья'},
+  {id:'cosmic', icon:'🌌', name:'Космический',  tier:3, rname:'Легендарная', percent:110, visual:null,      fishMult:2.1,  fishName:'Космическая'},
+  {id:'chaos',  icon:'🌀', name:'Хаотический',  tier:3, rname:'Легендарная', percent:115, visual:null,      fishMult:2.15, fishName:'Хаотичная'},
+  {id:'rainbow',icon:'🌈', name:'Радужный',     tier:3, rname:'Легендарная', percent:120, visual:'rainbow', fishMult:2.2,  fishName:'Радужная'}
 ];
 const MUT_BY_ID = {}; MUTATIONS.forEach(m => MUT_BY_ID[m.id] = m);
+/* 🎲 Веса по тирам: чем выше — тем реже */
+const MUT_WEIGHTS = {0: 100, 1: 40, 2: 12, 3: 3};
 
 const COMBOS = [
-  {id:'steam',    pair:['fire','ice'],              name:'Пар',          pts:100,  icon:'💨',  fishMult:5},
-  {id:'storm',    pair:['thunder','wind'],          name:'Шторм',        pts:120,  icon:'🌩️', fishMult:5},
-  {id:'blackhole',pair:['radio','shadow'],          name:'Чёрная дыра',  pts:200,  icon:'🕳️', fishMult:8},
-  {id:'insight',  pair:['crystal','eye'],           name:'Прозрение',    pts:200,  icon:'🔮',  fishMult:8},
-  {id:'archangel',pair:['wing','crown'],            name:'Архангел',     pts:500,  icon:'😇',  fishMult:12},
-  {id:'divine',   pair:['crown','rainbow'],         name:'Божественный', pts:1000, icon:'⚜️', fishMult:20},
-  {id:'plasma',   pair:['fire','thunder','radio'],  name:'Плазма',       pts:300,  icon:'☄️', fishMult:10}
+  /* 🟢 Двойные (17) */
+  {id:'steam',      pair:['fire','ice'],          name:'Пар',                percent:80,  pts:100,  icon:'💨',  fishMult:1.8},
+  {id:'storm',      pair:['thunder','wind'],      name:'Шторм',              percent:80,  pts:120,  icon:'🌩️', fishMult:1.8},
+  {id:'vampire',    pair:['shadow','blood'],      name:'Вампиризм',          percent:80,  pts:250,  icon:'🗡️', fishMult:1.8},
+  {id:'magma',      pair:['fire','earth'],        name:'Магма',              percent:100, pts:300,  icon:'🔥',  fishMult:2.0},
+  {id:'abszero',    pair:['ice','void'],          name:'Абсолютный ноль',    percent:100, pts:300,  icon:'❄️', fishMult:2.0},
+  {id:'overload',   pair:['thunder','radio'],     name:'Перегрузка',         percent:100, pts:300,  icon:'⚡',  fishMult:2.0},
+  {id:'blackhole',  pair:['radio','shadow'],      name:'Чёрная дыра',        percent:120, pts:200,  icon:'🕳️', fishMult:2.2},
+  {id:'insight',    pair:['crystal','eye'],       name:'Прозрение',          percent:120, pts:200,  icon:'🔮',  fishMult:2.2},
+  {id:'ascension',  pair:['eye','wing'],          name:'Вознесение',         percent:120, pts:300,  icon:'🕊️', fishMult:2.2},
+  {id:'reaction',   pair:['radio','crystal'],     name:'Реакция',            percent:130, pts:400,  icon:'⚗️', fishMult:2.3},
+  {id:'singular',   pair:['shadow','void'],       name:'Сингулярность',      percent:140, pts:350,  icon:'🌀',  fishMult:2.4},
+  {id:'astral',     pair:['void','cosmic'],       name:'Астрал',             percent:150, pts:500,  icon:'🌌',  fishMult:2.5},
+  {id:'paradox',    pair:['time','chaos'],        name:'Временной парадокс', percent:150, pts:500,  icon:'⏰',  fishMult:2.5},
+  {id:'archangel',  pair:['wing','crown'],        name:'Архангел',           percent:150, pts:500,  icon:'😇',  fishMult:2.5},
+  {id:'dragonawake',pair:['dragon','chaos'],      name:'Пробуждение дракона',percent:160, pts:550,  icon:'🐲',  fishMult:2.6},
+  {id:'absolute',   pair:['crystal','crown'],     name:'Абсолют',            percent:180, pts:600,  icon:'💠',  fishMult:2.8},
+  {id:'divine',     pair:['crown','rainbow'],     name:'Божественный',       percent:200, pts:1000, icon:'⚜️', fishMult:3.0},
+  /* 🔴 Тройные (5) */
+  {id:'plasma',     pair:['fire','thunder','radio'],       name:'Плазма',         percent:150, pts:300,  icon:'☄️', fishMult:2.5},
+  {id:'armageddon', pair:['fire','radio','shadow'],        name:'Армагеддон',     percent:250, pts:700,  icon:'☄️', fishMult:3.5},
+  {id:'quantum',    pair:['thunder','crystal','eye'],      name:'Квантовый',      percent:250, pts:700,  icon:'⚛️', fishMult:3.5},
+  {id:'darkmatter', pair:['void','shadow','cosmic'],       name:'Тёмная материя', percent:280, pts:900,  icon:'🕳️', fishMult:3.8},
+  {id:'apotheosis', pair:['crown','rainbow','wing'],       name:'Апофеоз',        percent:300, pts:1200, icon:'🌟', fishMult:4.0}
 ];
 function getActiveCombos(m){ return COMBOS.filter(c => c.pair.every(p => m.includes(p))); }
 
@@ -1579,10 +1702,10 @@ function maxSizeMultForTier(tier){
 /* Удочки */
 const RODS = [
   {id:'stick',    icon:'🪵', name:'Палка',        desc:'Стартовая',                          rarityBonus:0,   weightBonus:0,   hookPower:0,  cost:0,      currency:'free',  cursor:'🪵'},
-  {id:'bamboo',   icon:'🎋', name:'Бамбук',       desc:'+10% редких, +10% вес',              rarityBonus:10,  weightBonus:10,  hookPower:5,  cost:30000,  currency:'coins', cursor:'🎋'},
-  {id:'spinning', icon:'🎣', name:'Спиннинг',     desc:'+25% редких, +25% вес, +15% вываж.', rarityBonus:25,  weightBonus:25,  hookPower:15, cost:50,     currency:'gold',  cursor:'🎣'},
-  {id:'carbon',   icon:'⚙️', name:'Карбон',       desc:'+50% редких, +50% вес, +35% вываж.', rarityBonus:50,  weightBonus:50,  hookPower:35, cost:200,    currency:'gold',  cursor:'⚙️'},
-  {id:'legendary',icon:'🌟', name:'Легендарная',  desc:'+100% редких, +100% вес, +60% вываж.',rarityBonus:100,weightBonus:100,hookPower:60, cost:800,    currency:'gold',  cursor:'🌟'}
+  {id:'bamboo',   icon:'🎋', name:'Бамбук',       desc:'+10% редких, +10% вес',              rarityBonus:10,  weightBonus:10,  hookPower:5,  cost:60000,  currency:'coins', cursor:'🎋'},
+  {id:'spinning', icon:'🎣', name:'Спиннинг',     desc:'+25% редких, +25% вес, +15% вываж.', rarityBonus:25,  weightBonus:25,  hookPower:15, cost:100,    currency:'gold',  cursor:'🎣'},
+  {id:'carbon',   icon:'⚙️', name:'Карбон',       desc:'+50% редких, +50% вес, +35% вываж.', rarityBonus:50,  weightBonus:50,  hookPower:35, cost:400,    currency:'gold',  cursor:'⚙️'},
+  {id:'legendary',icon:'🌟', name:'Легендарная',  desc:'+100% редких, +100% вес, +60% вываж.',rarityBonus:100,weightBonus:100,hookPower:60, cost:1600,   currency:'gold',  cursor:'🌟'}
 ];
 const RODS_BY_ID = {}; RODS.forEach(r => RODS_BY_ID[r.id] = r);
 
@@ -1598,7 +1721,8 @@ const UPGRADES = [
   {id:'mut_luck',     icon:'🧬', name:'Удача мутаций',     desc:'+1% к шансу мутаций',          maxLvl:30,  cost:lvl=>Math.round(800*Math.pow(1.25,lvl)+lvl*150),        getVal:lvl=>lvl*1},
   {id:'mut_attempts', icon:'🔮', name:'Попытки мутаций',   desc:'+1 попытка за раунд',          maxLvl:9,   cost:lvl=>Math.round(5000*Math.pow(1.8,lvl)),                getVal:lvl=>1+lvl},
   {id:'bottle',       icon:'🍾', name:'Бутылки энергии',   desc:'+1 бутылка за раунд (+50⚡)',  maxLvl:4,   cost:lvl=>Math.round(2000*Math.pow(2,lvl)),                  getVal:lvl=>lvl},
-  {id:'inv_cap',      icon:'📦', name:'Размер инвентаря',  desc:'+25 слотов (макс 500)',         maxLvl:18,  cost:lvl=>Math.round(500*Math.pow(1.45,lvl)+lvl*300),        getVal:lvl=>Math.min(500, 50+lvl*25)}
+  {id:'inv_cap',      icon:'📦', name:'Размер инвентаря',  desc:'+25 слотов (макс 500)',         maxLvl:18,  cost:lvl=>Math.round(500*Math.pow(1.45,lvl)+lvl*300),        getVal:lvl=>Math.min(500, 50+lvl*25)},
+  {id:'craft_slots',  icon:'⚒️', name:'Слоты крафта',      desc:'+1 слот крафта (макс 3)',       maxLvl:2,   cost:lvl=>Math.round(5000*Math.pow(2,lvl)),                    getVal:lvl=>1+lvl}
 ];
 const UPGRADES_BY_ID = {}; UPGRADES.forEach(u => UPGRADES_BY_ID[u.id] = u);
 
@@ -1842,6 +1966,11 @@ function defaultState(){
     lastSeenDailyShop:0,
     lastSeenQuests:0,
     worldStartTime: Date.now(),
+    pendingRefFromUrl: null,
+    bots: {level: 0, lastClick: 0},
+    events: {dayKey:'', schedule:[], active:null},
+    eventSounds: true,
+    crystals: {},
     version: VERSION
   };
 }
@@ -1889,19 +2018,27 @@ function fmtWeight(kg){
 }
 function cardPoints(card){
   const stars = card.stars || 0;
-  const rp = RARITY[card.rarity].points;
-  const mp = (card.mutations||[]).reduce((s,id) => s + (MUT_BY_ID[id]?.points||0), 0);
-  const cp = getActiveCombos(card.mutations||[]).reduce((s,c) => s + c.pts, 0);
-  const base = rp + mp + cp;
-  let pct = 0;
-  for(let i = 1; i <= stars; i++){
-    if(i <= 5)       pct += 0.05;
-    else if(i <= 10) pct += 0.15;
-    else if(i <= 15) pct += 0.35;
-    else if(i <= 20) pct += 0.80;
-    else             pct += 2.00;
+  const basePoints = RARITY[card.rarity].points;
+  /* 🧬 Мутации дают проценты */
+  const mutPercent = (card.mutations||[]).reduce((s,id) => s + (MUT_BY_ID[id]?.percent||0), 0);
+  /* ⚡ Комбо — макс 2, с diminishing returns */
+  const combos = getActiveCombos(card.mutations||[]).slice(0, 2);
+  let comboPercent = 0;
+  if(combos.length > 0){
+    const percents = combos.map(c => c.percent).sort((a,b) => b - a);
+    comboPercent = percents[0] + percents.slice(1).reduce((s,v) => s + v, 0) * 0.5;
   }
-  return Math.round(base * (1 + pct));
+  const multiplier = 1 + mutPercent/100 + comboPercent/100;
+  /* ⭐ Множитель звёзд */
+  let starPct = 0;
+  for(let i = 1; i <= stars; i++){
+    if(i <= 5)       starPct += 0.05;
+    else if(i <= 10) starPct += 0.15;
+    else if(i <= 15) starPct += 0.35;
+    else if(i <= 20) starPct += 0.80;
+    else             starPct += 2.00;
+  }
+  return Math.round(basePoints * multiplier * (1 + starPct));
 }
 function totalEquipPoints(){
   return state.equippedIds.reduce((sum,id) => {
@@ -1972,6 +2109,7 @@ function getXpThisLevel(){ return xpForLevel(state.lvl + 1) - xpForLevel(state.l
 function addXP(amount){
   if(amount <= 0) return;
   state.xpTotal += amount;
+  if(typeof topCache !== 'undefined') topCache = {points:null, lvl:null, coins:null};
   const newLvl = getLvlFromXp(state.xpTotal);
   if(newLvl > state.lvl){
     const diff = newLvl - state.lvl;
@@ -2124,16 +2262,57 @@ function showToast(msg){
 function save(){
   if(resetting) return;
   try{
+    if(!state || typeof state !== 'object') return;
+    if(!Array.isArray(state.collection)) return;
+    if(typeof state.coins !== 'number') return;
+    
+    const now = Date.now();
+    const lastBak = state._lastBackupTs || 0;
+    const needRotate = (now - lastBak) > 5 * 60 * 1000;
+    
+    if(needRotate){
+      try{
+        const cur  = localStorage.getItem(SAVE_KEY);
+        const bak1 = localStorage.getItem(SAVE_KEY + '_bak1');
+        const bak2 = localStorage.getItem(SAVE_KEY + '_bak2');
+        if(bak2) localStorage.setItem(SAVE_KEY + '_bak3', bak2);
+        if(bak1) localStorage.setItem(SAVE_KEY + '_bak2', bak1);
+        if(cur)  localStorage.setItem(SAVE_KEY + '_bak1', cur);
+        state._lastBackupTs = now;
+      }catch(e){ console.warn('backup rotate failed:', e); }
+    }
+    
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
     showToast();
   }catch(e){ console.error('save error:', e); }
 }
+function tryParseSave(raw){
+  if(!raw) return null;
+  try{
+    const p = JSON.parse(raw);
+    if(!p || typeof p !== 'object') return null;
+    if(!Array.isArray(p.collection)) return null;
+    if(typeof p.coins !== 'number') return null;
+    if(typeof p.lvl !== 'number') return null;
+    return p;
+  }catch(e){ return null; }
+}
+
 function load(){
   try {
     let raw = localStorage.getItem(SAVE_KEY);
     if(!raw) raw = localStorage.getItem('kotokarty');
-    if(!raw){ state = defaultState(); return; }
-    const p = JSON.parse(raw);
+    let p = tryParseSave(raw);
+    if(!p){
+      const b1 = tryParseSave(localStorage.getItem(SAVE_KEY + '_bak1'));
+      const b2 = tryParseSave(localStorage.getItem(SAVE_KEY + '_bak2'));
+      const b3 = tryParseSave(localStorage.getItem(SAVE_KEY + '_bak3'));
+      p = b1 || b2 || b3;
+      if(p){
+        console.warn('%c⚠️ Основной сейв повреждён — восстановлен из бэкапа', 'color:#f59e0b;font-weight:700');
+      }
+    }
+    if(!p){ state = defaultState(); return; }
     state = Object.assign(defaultState(), p);
 
     ['collection','equippedIds','newCards','raritySeen','mutationsSeen','combosSeen','namesSeen',
@@ -2204,7 +2383,16 @@ function load(){
     if(!state.tutorial || typeof state.tutorial !== 'object') state.tutorial = {step:0,done:false,clicks:{base:null,target:null}};
     if(!state.tutorial.clicks) state.tutorial.clicks = {base:null, target:null};
     if(typeof state.tutorial.step !== 'number') state.tutorial.step = 0;
-    if(typeof state.tutorial.done !== 'boolean') state.tutorial.done = false;
+    if(typeof state.tutorial.done !== 'boolean') state.tutorial.done = false;    if(!state.bots || typeof state.bots !== 'object') state.bots = {level: 0, lastClick: 0};
+    if(typeof state.bots.level !== 'number') state.bots.level = 0;
+    if(typeof state.bots.lastClick !== 'number') state.bots.lastClick = 0;
+    if(!state.crystals || typeof state.crystals !== 'object') state.crystals = {};
+    if(typeof state.eventSounds !== 'boolean') state.eventSounds = true;
+    if(!state.events || typeof state.events !== 'object') state.events = {dayKey:'', schedule:[], active:null};
+    if(!Array.isArray(state.events.schedule)) state.events.schedule = [];
+    if(typeof state.events.dayKey !== 'string') state.events.dayKey = '';
+    if(state.events.active !== null && typeof state.events.active !== 'object') state.events.active = null;
+    if(state.pendingRefFromUrl === undefined) state.pendingRefFromUrl = null;
 
     if(state.fishing) state.fishing = null;
     const now = Date.now();
@@ -2425,6 +2613,53 @@ function playFishStruggle(){ beep(400,0.2,0.10,'sawtooth'); }
 function playFishReel(){ beep(800,0.05,0.10,'square'); }
 function playFishWin(){ beep(800,0.1,0.16,'triangle'); setTimeout(()=>beep(1200,0.1,0.16,'triangle'),80); setTimeout(()=>beep(1600,0.1,0.16,'triangle'),160); setTimeout(()=>beep(2200,0.35,0.20,'triangle'),240); }
 function playFishBreak(){ beep(250,0.3,0.15,'sawtooth'); setTimeout(()=>beep(150,0.4,0.12,'sawtooth'),150); }
+/* 🎉 Джинглы событий */
+function playEventSound(type){
+  if(!state.eventSounds) return;
+  const cfg = EVENT_TYPES[type];
+  if(!cfg) return;
+  switch(type){
+    case 'coinfall':
+      beep(880,0.08,0.14,'triangle'); setTimeout(()=>beep(1320,0.08,0.14,'triangle'),60);
+      setTimeout(()=>beep(1760,0.15,0.16,'triangle'),120); break;
+    case 'manastorm':
+      beep(660,0.15,0.12,'sine'); setTimeout(()=>beep(990,0.15,0.14,'sine'),100);
+      setTimeout(()=>beep(1320,0.20,0.14,'sine'),200); break;
+    case 'reflex':
+      beep(1200,0.05,0.14,'square'); setTimeout(()=>beep(1600,0.05,0.14,'square'),50);
+      setTimeout(()=>beep(2000,0.10,0.14,'square'),100); break;
+    case 'alchemy':
+      beep(523,0.12,0.12,'triangle'); setTimeout(()=>beep(784,0.12,0.12,'triangle'),80);
+      setTimeout(()=>beep(1046,0.18,0.14,'triangle'),160); break;
+    case 'bite':
+      beep(600,0.06,0.15,'square'); setTimeout(()=>beep(900,0.06,0.15,'square'),60);
+      setTimeout(()=>beep(1400,0.10,0.15,'square'),120); break;
+    case 'luckycat':
+      beep(1046,0.1,0.14,'triangle'); setTimeout(()=>beep(1318,0.1,0.14,'triangle'),80);
+      setTimeout(()=>beep(1568,0.25,0.16,'triangle'),160); break;
+    case 'bourseup':
+      beep(523,0.1,0.15,'triangle'); setTimeout(()=>beep(784,0.1,0.15,'triangle'),80);
+      setTimeout(()=>beep(1046,0.2,0.16,'triangle'),160); break;
+    case 'boursedown':
+      beep(1046,0.1,0.14,'sawtooth'); setTimeout(()=>beep(784,0.1,0.14,'sawtooth'),80);
+      setTimeout(()=>beep(523,0.25,0.14,'sawtooth'),160); break;
+    case 'auction':
+      beep(660,0.08,0.12,'square'); setTimeout(()=>beep(880,0.08,0.12,'square'),80);
+      setTimeout(()=>beep(1100,0.20,0.14,'square'),160); break;
+    default:
+      if(cfg.class === 3){
+        /* Мега — эпичный джингл */
+        beep(392,0.2,0.18,'triangle'); setTimeout(()=>beep(523,0.2,0.18,'triangle'),150);
+        setTimeout(()=>beep(784,0.2,0.18,'triangle'),300); setTimeout(()=>beep(1046,0.5,0.22,'triangle'),450);
+      } else if(cfg.mut){
+        /* Мутационные — "магический" звук */
+        beep(880,0.1,0.14,'sine'); setTimeout(()=>beep(1174,0.1,0.14,'sine'),80);
+        setTimeout(()=>beep(1568,0.25,0.16,'sine'),160);
+      } else {
+        beep(880,0.12,0.14,'triangle'); setTimeout(()=>beep(1320,0.15,0.14,'triangle'),100);
+      }
+  }
+}
 
 function playMusicNote(){
   if(!audioCtx || !state.musicOn){ musicTimer = null; return; }
@@ -2586,6 +2821,7 @@ function getIncomeMult(){
 function getCD(){
   let cd = BASE_CD * Math.max(0.2, 1 - sumStat('cdMod')/100);
   if(isBuffActive('cd')) cd *= 0.5;
+  if(isEventActive('reflex')) cd *= 0.5;
   cd *= getPhaseCDMult();
   return Math.max(0.2, cd);
 }
@@ -2739,6 +2975,210 @@ function trackBalance(){
 }
 
 /* ============================================================
+   🎉 СОБЫТИЯ ДНЯ — ЯДРО
+   ============================================================ */
+function getEventDayKey(){
+  const msk = getMskNow();
+  return msk.getFullYear()+'-'+String(msk.getMonth()+1).padStart(2,'0')+'-'+String(msk.getDate()).padStart(2,'0');
+}
+
+function generateDaySchedule(){
+  const msk = getMskNow();
+  const dayStart = new Date(msk);
+  dayStart.setHours(EVENT_DAY_START, 0, 0, 0);
+  const dayEnd = new Date(msk);
+  dayEnd.setHours(EVENT_DAY_END, 0, 0, 0);
+  if(dayEnd <= dayStart) dayEnd.setDate(dayEnd.getDate() + 1);
+
+  /* 🎯 Собираем пул с гарантией типов (не по копиям, а по минимуму) */
+  const buffs = ['coinfall','manastorm','reflex','alchemy','bite','luckycat','bourseup','boursedown'];
+  const commonMut = ['mutFire','mutIce','mutThunder','mutRadio','mutCrystal','mutShadow','mutEye','mutWing'];
+  const coolTypes = ['mutCrown','mutRainbow','comboDivine'];
+  const commonCombo = ['comboSteam','comboStorm','comboHole'];
+  const megaTypes = ['megaRadio','megaIce','megaApoc','megaFire','megaCrystal'];
+
+  /* Считаем примерную длину расписания (для прикидки пропорций) */
+  const approxDurMin = (EVENT_DURATION_MIN + EVENT_DURATION_MAX) / 2;
+  const approxGapMin = (EVENT_GAP_MIN + EVENT_GAP_MAX) / 2;
+  const dayMin = (dayEnd - dayStart) / 60000;
+  const approxCount = Math.floor(dayMin / (approxDurMin + approxGapMin));
+
+  /* Пропорции: бафы 55%, обычные моно 22%, комбо 5%, рандом 4%, аукцион 4%, крутые 5%, мега 5% */
+  const pool = [];
+  const addN = (arr, n) => { for(let i = 0; i < n; i++) pool.push(pick(arr)); };
+  addN(buffs,      Math.round(approxCount * 0.55));
+  addN(commonMut,  Math.round(approxCount * 0.22));
+  addN(commonCombo,Math.max(1, Math.round(approxCount * 0.03)));
+  addN(['mutRandom1','mutRandom3'], Math.max(1, Math.round(approxCount * 0.04)));
+  addN(['auction'],  Math.max(1, Math.round(approxCount * 0.03)));
+  /* 🎯 Крутые и мега — по 2-3 штуки ЖЁСТКО */
+  addN(coolTypes, 2);
+  addN(megaTypes, 2);
+
+  /* Шаффл */
+  for(let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  /* Собираем расписание */
+  const schedule = [];
+  let prevType = null;
+  let idx = 0;
+  let t = dayStart.getTime() + Math.random() * 5 * 60 * 1000;
+  const endT = dayEnd.getTime();
+  while(t < endT){
+    if(idx >= pool.length) idx = 0; /* если закончился — начинаем сначала (но не часто) */
+    let type = pool[idx++];
+    /* Не даём подряд одинаковым */
+    if(type === prevType && idx < pool.length){
+      const swap = pool[idx];
+      pool[idx] = type;
+      type = swap;
+    }
+    prevType = type;
+    const durMin = EVENT_DURATION_MIN + Math.random() * (EVENT_DURATION_MAX - EVENT_DURATION_MIN);
+    const gapMin = EVENT_GAP_MIN + Math.random() * (EVENT_GAP_MAX - EVENT_GAP_MIN);
+    const startsAt = t;
+    const endsAt = t + durMin * 60 * 1000;
+    schedule.push({type, startsAt, endsAt, done: false});
+    t = endsAt + gapMin * 60 * 1000;
+  }
+  return schedule;
+}
+function ensureEvents(){
+  if(!state.events || typeof state.events !== 'object') state.events = {dayKey:'', schedule:[], active:null};
+  const today = getEventDayKey();
+  if(state.events.dayKey !== today || !Array.isArray(state.events.schedule) || !state.events.schedule.length){
+    state.events.dayKey = today;
+    state.events.schedule = generateDaySchedule();
+    state.events.active = null;
+    save();
+  }
+}
+
+function isEventActive(type){
+  const a = state.events && state.events.active;
+  if(!a || !a.type || a.endsAt <= Date.now()) return false;
+  if(type) return a.type === type;
+  return true;
+}
+
+function checkEventSchedule(){
+  ensureEvents();
+  const now = Date.now();
+  if(state.events.active && state.events.active.endsAt <= now){
+    state.events.active = null;
+    clearEventVisual();
+    save();
+  }
+  if(state.events.active) return;
+  const mskH = getMskNow().getHours();
+  if(mskH < EVENT_DAY_START) return;
+  for(const ev of state.events.schedule){
+    if(ev.done) continue;
+    if(now >= ev.startsAt && now < ev.endsAt){
+      ev.done = true;
+      state.events.active = {type: ev.type, endsAt: ev.endsAt, startedAt: ev.startsAt};
+      save();
+      onEventStart(ev.type);
+      return;
+    }
+    if(now >= ev.endsAt){ ev.done = true; }
+  }
+}
+
+function onEventStart(type){
+  const cfg = EVENT_TYPES[type];
+  if(!cfg) return;
+  notify(cfg.icon, 'Событие: ' + cfg.name, cfg.desc || '', cfg.color);
+  playEventSound(type);
+  if(type === 'bourseup'){
+    state.bourse.rate = Math.min(BOURSE_CEIL, Math.round(state.bourse.rate * 2));
+    save();
+  } else if(type === 'boursedown'){
+    state.bourse.rate = Math.max(BOURSE_FLOOR, Math.round(state.bourse.rate * 0.5));
+    save();
+  }
+  /* 🎨 Применяем визуальный фильтр */
+  applyEventVisual(cfg);
+}
+
+function applyEventVisual(cfg){
+  document.body.classList.remove('event-radiation','event-iceage','event-apocalypse','event-fire','event-crystal');
+  if(cfg && cfg.visual){
+    document.body.classList.add('event-' + cfg.visual);
+  }
+}
+
+function clearEventVisual(){
+  document.body.classList.remove('event-radiation','event-iceage','event-apocalypse','event-fire','event-crystal');
+}
+
+function renderEventBar(){
+  const el = $('eventBar');
+  if(!el) return;
+  const a = state.events && state.events.active;
+  if(!a){
+    const schedule = (state.events && state.events.schedule) || [];
+    const next = schedule.find(e => !e.done && e.startsAt > Date.now());
+    if(next && EVENT_TYPES[next.type]){
+      const cfg = EVENT_TYPES[next.type];
+      const left = next.startsAt - Date.now();
+      const m = Math.floor(left / 60000);
+      el.style.display = 'inline-block';
+      el.style.color = 'var(--txt-dim)';
+      el.style.borderColor = 'var(--border)';
+      el.innerHTML = 'След.: ' + cfg.name + ' · ' + m + 'м';
+      el.onclick = openEventScheduleModal;
+    } else {
+      el.style.display = 'none';
+    }
+    return;
+  }
+  const cfg = EVENT_TYPES[a.type];
+  if(!cfg){ el.style.display = 'none'; return; }
+  const leftSec = Math.max(0, Math.ceil((a.endsAt - Date.now()) / 1000));
+  const m = Math.floor(leftSec / 60);
+  const s = leftSec % 60;
+  el.style.display = 'inline-block';
+  el.style.color = cfg.color;
+  el.style.borderColor = cfg.color + '66';
+  el.innerHTML = cfg.name + ' · ' + m + ':' + String(s).padStart(2,'0');
+  el.onclick = openEventScheduleModal;
+}
+
+function openEventScheduleModal(){
+  ensureEvents();
+  const schedule = state.events.schedule || [];
+  const now = Date.now();
+  const active = state.events.active;
+  const msk = getMskNow();
+  const dateStr = msk.getDate()+'.'+String(msk.getMonth()+1).padStart(2,'0')+'.'+msk.getFullYear();
+  const completedCount = schedule.filter(e => e.endsAt < now).length;
+  let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button>';
+  html += '<h2>🎉 События дня</h2>';
+  html += '<div style="text-align:center;font-size:12px;opacity:.7;margin-bottom:14px">' + dateStr + ' · ' + schedule.length + ' событий · прошло: ' + completedCount + '</div>';
+  html += '<div style="max-height:60vh;overflow-y:auto">';
+  schedule.forEach(ev => {
+    const cfg = EVENT_TYPES[ev.type];
+    if(!cfg) return;
+    const d = new Date(ev.startsAt);
+    const timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    let status = '⏳';
+    let color = 'var(--txt-dim)';
+    if(ev.endsAt < now){ status = '✅'; }
+    else if(active && active.type === ev.type && active.startedAt === ev.startsAt){ status = '🟢 АКТИВНО'; color = cfg.color; }
+    const classTag = cfg.class === 2 ? '<span style="background:#a855f733;color:#a855f7;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">МУТАЦИЯ</span>' : '';
+    html += '<div style="padding:8px 10px;background:var(--panel);border-radius:8px;margin-bottom:4px;border-left:3px solid ' + cfg.color + '"><div style="display:flex;justify-content:space-between;align-items:center"><div><span style="font-size:11px;opacity:.6;margin-right:6px">' + timeStr + '</span><span style="font-size:13px;font-weight:700;color:' + color + '">' + cfg.icon + ' ' + cfg.name + '</span>' + classTag + '</div><span style="font-size:10px;color:' + color + '">' + status + '</span></div><div style="font-size:10px;opacity:.6;margin-top:3px">' + (cfg.desc || '') + '</div></div>';
+  });
+  html += '</div>';
+  html += '<button class="btnClose" onclick="closeModal(\'helpModal\')" style="margin-top:12px">Закрыть</button>';
+  $('helpContent').innerHTML = html;
+  openModal('helpModal');
+}
+
+/* ============================================================
    ГЛАВНЫЙ ЦИКЛ (тик 1 сек)
    ============================================================ */
 function startGameTick(){
@@ -2747,6 +3187,22 @@ function startGameTick(){
     renderPhaseIndicator();
     checkPhaseChange();
     if(canClaimDaily()) renderHeader();
+
+    /* 🤖 Бот-автокликер */
+    if(state.bots && state.bots.level > 0){
+      if(currentTab === 'click' && !document.hidden){
+        const botCfg = BOTS[state.bots.level - 1];
+        if(botCfg){
+          const intervalMs = botCfg.interval * 1000;
+          const last = state.bots.lastClick || 0;
+          if(Date.now() - last >= intervalMs){
+            state.bots.lastClick = Date.now();
+            botClick();
+          }
+        }
+      }
+      renderBotBar();
+    }
 
     applyEnergyRegen();
     regenBottles();
@@ -2767,6 +3223,8 @@ function startGameTick(){
     ensureBourse();
     tickCrafts();
     trackBalance();
+    checkEventSchedule();
+    renderEventBar();
 
     checkCraftNotifs();
     checkFishingNotifs();
@@ -2856,11 +3314,7 @@ function rollMutations(cardTier, slots){
   return picked;
 }
 function rollStars(cardTier){
-  return 0; const chances = [0,0.05,0.12,0.22,0.4,0.65,0.8,0.9,1,1];
-  const chance = chances[cardTier] || 0;
-  if(Math.random() > chance) return 0;
-  const maxStars = cardTier>=6?5:cardTier>=4?4:cardTier>=2?2:1;
-  return Math.floor(rnd(1, maxStars+1));
+  return 0;
 }
 function rollCardWithPity(pack){
   bumpAllPityCounters();
@@ -2872,6 +3326,10 @@ function rollCardWithPity(pack){
     rarity = rollRarityFromChances(pack.chances);
     /* 🌙 Ночью 12% шанс апгрейда редкости на +1 тир */
     if(isNight() && Math.random() < 0.12){
+      rarity = bumpRarityUp(rarity);
+    }
+    /* 🍀 Кот-везунчик — шанс апгрейда редкости */
+    if(isEventActive('luckycat') && Math.random() < 0.25){
       rarity = bumpRarityUp(rarity);
     }
   } else {
@@ -3641,10 +4099,9 @@ function openCardModal(card){
     const m = MUT_BY_ID[id];
     const isVis = card.activeVisual === m.id;
     const canVis = !!m.visual;
-    return '<div class="mutItem ' + (isVis?'active':'') + '" data-mut="' + m.id + '" ' + (canVis?'':'style="cursor:default"') + '><span class="ic">' + m.icon + '</span><span class="nm">' + m.name + '</span><span class="pts">+' + m.points + '</span><span class="rl">' + m.rname + '</span>' + (canVis?'<span class="vis">' + (isVis?'👁':'·') + '</span>':'') + '</div>';
+    return '<div class="mutItem ' + (isVis?'active':'') + '" data-mut="' + m.id + '" ' + (canVis?'':'style="cursor:default"') + '><span class="ic">' + m.icon + '</span><span class="nm">' + m.name + '</span><span class="pts">+' + m.percent + '%</span><span class="rl">' + m.rname + '</span>' + (canVis?'<span class="vis">' + (isVis?'👁':'·') + '</span>':'') + '</div>';
   }).join('');
-  const comboHTML = combos.length ? '<div class="comboList">' + combos.map(c=>'<div class="comboItem">' + c.icon + ' <b>' + c.name + '</b> · +' + c.pts + '</div>').join('') + '</div>' : '';
-  const starStr = renderStarProgress(card);
+  const comboHTML = combos.length ? '<div class="comboList">' + combos.slice(0,2).map(c=>'<div class="comboItem">' + c.icon + ' <b>' + c.name + '</b> · +' + c.percent + '%</div>').join('') + (combos.length > 2 ? '<div style="font-size:10px;opacity:.5;margin-top:4px">остальные ' + (combos.length-2) + ' не учитываются (макс 2)</div>' : '') + '</div>' : '';  const starStr = renderStarProgress(card);
   const slotPickHTML = isEq ? '' : '<div style="font-size:11px;opacity:.7;text-align:center;margin-top:10px;margin-bottom:4px">Куда экипировать?</div><div class="slotPickGrid">' + Array.from({length:state.slotsMax}).map((_,i)=>{
     const occupied = !!state.equippedIds[i];
     return '<button class="slotPick ' + (occupied?'':'free') + '" data-slot-i="' + i + '">' + (i+1) + (occupied?'🔄':'+') + '</button>';
@@ -3869,7 +4326,9 @@ function makeFishInstance(depthTier){
 
   const range = FISH_WEIGHT_RANGE[r] || FISH_WEIGHT_RANGE.c;
   const weightLuck = (1 + getUpgradeVal('size_luck')/100 + getRod().weightBonus/100) * getPhaseFishSizeMult();
-  let rawWeight = rnd(range[0], range[1]) * weightLuck;
+  /* 🎲 Перекос к мелким: квадрат рандома даёт ~65% мелких, ~10% крупных */
+  const _t = Math.pow(Math.random(), 2.2);
+  let rawWeight = (range[0] + (range[1] - range[0]) * _t) * weightLuck;
 
   const maxW = range[1] * weightLuck;
   const ratio = Math.max(0, Math.min(1, rawWeight / maxW));
@@ -3881,8 +4340,7 @@ function makeFishInstance(depthTier){
   else if(ratio <= 0.93) size = 2.0;
   else                   size = 3.0;
 
-  const priceMult = tier >= 5 ? Math.min(size, 1.5) : Math.min(size, 2.5);
-  const price = Math.round(base.price * priceMult);
+  const price = base.price;
   const slowMult = 1 - getUpgradeVal('slow')/100;
   const raritySpeedMult = 1 + tier * 0.22;
   const spd = Math.max(0.3, base.spd * slowMult * raritySpeedMult * (0.85 + Math.random()*0.3));
@@ -3894,37 +4352,48 @@ function makeFishInstance(depthTier){
   };
 }
 function rollFishMutations(depthTier, fishRarity){
-  const chances = {0:0.01, 1:0.04, 3:0.08, 5:0.15, 7:0.25};
-  const maxes   = {0:1,    1:1,    3:2,    5:2,    7:3};
-  let chance = chances[depthTier] || 0;
-  let maxMut = maxes[depthTier] || 0;
-  if(chance <= 0) return [];
-  chance *= getPhaseMutationMult();
-  if(Math.random() >= chance) return [];
-
-  /* 🎲 Сколько мутаций выпадет — 1, 2 или 3 (чем больше, тем реже) */
-  let count = 1;
-  if(maxMut >= 3){
-    const r = Math.random();
-    if(r < 0.08)       count = 3;   // 8% на 3
-    else if(r < 0.32)  count = 2;   // 24% на 2
-    else               count = 1;   // 68% на 1
-  } else if(maxMut === 2){
-    count = Math.random() < 0.30 ? 2 : 1;   // 30% на 2, 70% на 1
-  }
-  /* maxMut === 1 — всегда 1, ничего менять не надо */
+  /* 🎉 Мутации рыб выдаются ТОЛЬКО во время мутационных ивентов */
+  const a = state.events && state.events.active;
+  if(!a || !a.type) return [];
+  const cfg = EVENT_TYPES[a.type];
+  if(!cfg || !cfg.mut) return [];
 
   const rTier = FISH_RARITY_TIER[fishRarity] || 0;
   const maxTier = rTier >= 5 ? 3 : rTier >= 4 ? 2 : rTier >= 2 ? 1 : 0;
-  const pool = MUTATIONS.filter(m => m.tier <= maxTier);
-  if(!pool.length) return [];
-  const out = [];
-  for(let i = 0; i < count && pool.length; i++){
-    const idx = Math.floor(Math.random() * pool.length);
-    out.push(pool[idx].id);
-    pool.splice(idx, 1);
+
+  /* 🎯 Фиксированные мутации (моно / комбо) */
+  if(cfg.mut.fixed){
+    return cfg.mut.fixed.filter(mid => MUT_BY_ID[mid] && MUT_BY_ID[mid].tier <= maxTier);
   }
-  return out;
+
+  /* 🎲 Случайные мутации */
+  if(cfg.mut.random){
+    let count = cfg.mut.random;
+    /* 🧬 Апокалипсис: 1-5 мутаций случайно */
+    if(cfg.mut.randomMax){
+      count = 1 + Math.floor(Math.random() * (cfg.mut.randomMax));
+      if(count < 1) count = 1;
+      if(count > cfg.mut.randomMax) count = cfg.mut.randomMax;
+    }
+    const pool = MUTATIONS.filter(m => m.tier <= maxTier);
+    const out = [];
+    const copy = pool.slice();
+    for(let i = 0; i < count && copy.length; i++){
+      let totalW = 0;
+      for(const m of copy) totalW += (typeof MUT_WEIGHTS !== 'undefined' && MUT_WEIGHTS[m.tier]) || 1;
+      let r = Math.random() * totalW;
+      let idx = 0;
+      for(let j = 0; j < copy.length; j++){
+        r -= (typeof MUT_WEIGHTS !== 'undefined' && MUT_WEIGHTS[copy[j].tier]) || 1;
+        if(r < 0){ idx = j; break; }
+      }
+      out.push(copy[idx].id);
+      copy.splice(idx, 1);
+    }
+    return out;
+  }
+
+  return [];
 }
 
 /* ============================================================
@@ -4134,9 +4603,14 @@ function startFishingLoop(){
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const depth = DEPTHS[f.depthId];
+    let bgTop = depth.bgTop, bgBot = depth.bgBot;
+    /* 🎉 Перекраска фона под мега-событие */
+    const _evtA = state.events && state.events.active;
+    const _evtC = _evtA ? EVENT_TYPES[_evtA.type] : null;
+    if(_evtC && _evtC.bgTop && _evtC.bgBot){ bgTop = _evtC.bgTop; bgBot = _evtC.bgBot; }
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, depth.bgTop);
-    grad.addColorStop(1, depth.bgBot);
+    grad.addColorStop(0, bgTop);
+    grad.addColorStop(1, bgBot);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 0.1;
@@ -4296,14 +4770,23 @@ function spawnFish(depthId, progress){
   const f = state.fishing;
   const depth = DEPTHS[depthId];
   const narrow = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
-  const maxFish = narrow ? 5 : 10;
-  const count = narrow ? (1 + Math.floor(Math.random() * 2)) : (1 + Math.floor(Math.random() * 3));
+  /* 🎉 Множители от активного события */
+  const evtCfg = (state.events && state.events.active) ? EVENT_TYPES[state.events.active.type] : null;
+  const spawnMult = (evtCfg && evtCfg.spawnMult) ? evtCfg.spawnMult : 1;
+  let maxFish = narrow ? 5 : 10;
+  if(isEventActive('bite')) maxFish = narrow ? 7 : 15;
+  if(isEventActive('megaIce')) maxFish = narrow ? 8 : 18;
+  let count = narrow ? (1 + Math.floor(Math.random() * 2)) : (1 + Math.floor(Math.random() * 3));
+  count = Math.max(1, Math.round(count * spawnMult));
   for(let i = 0; i < count && f.fish.length < maxFish; i++){
     const fish = makeFishInstance(depth.tierBonus, depth.tierBonus);
     const canvas = $('fishingCanvas');
     let radius = Math.max(14, 26 - FISH_RARITY_TIER[fish.rarity] * 1.8);
     if(narrow) radius = Math.round(radius * 1.45);
-    const speedMult = (narrow ? 30 : 45) * getPhaseFishSpeedMult();
+    if(evtCfg && evtCfg.sizeMult) radius = Math.round(radius * evtCfg.sizeMult);
+    let speedMult = (narrow ? 30 : 45) * getPhaseFishSpeedMult();
+    if(isEventActive('bite')) speedMult *= 1.5;
+    if(evtCfg && evtCfg.speedMult) speedMult *= evtCfg.speedMult;
     const angle = Math.random() * Math.PI * 2;
     f.fish.push(Object.assign({}, fish, {
       x: 30 + Math.random() * (canvas.width - 60),
@@ -4312,7 +4795,7 @@ function spawnFish(depthId, progress){
       vy: Math.sin(angle) * fish.spd * speedMult * (0.7 + Math.random()*0.6),
       radius,
       bornAt: Date.now(),
-      lifetime: narrow ? (4000 + Math.random() * 4000) : (3000 + Math.random() * 4000 - FISH_RARITY_TIER[fish.rarity] * 300)
+      lifetime: Math.round((narrow ? (4000 + Math.random() * 4000) : (3000 + Math.random() * 4000 - FISH_RARITY_TIER[fish.rarity] * 300)) * (evtCfg && evtCfg.lifetimeMult ? evtCfg.lifetimeMult : 1))
     }));
   }
 }
@@ -4363,6 +4846,19 @@ function handleFishingClick(e){
         if(goldReward > 0){
           state.gold += goldReward; state.goldEarned += goldReward;
           floatTextAt('+' + goldReward + '🥇', clientX, clientY + 30, '#ffd93d');
+        }
+        let manaReward = FISH_MANA_REWARD[fishData.rarity] || 0;
+        if(isEventActive('manastorm')) manaReward *= 3;
+        if(manaReward > 0){
+          state.mana += manaReward; state.manaEarned += manaReward;
+          const manaStr = manaReward >= 1 ? '+' + Math.round(manaReward) : '+' + manaReward;
+          floatTextAt(manaStr + '✨', clientX, clientY + 60, '#a855f7');
+        }
+        /* 🧪 Алхимия — рыба даёт эссенцию */
+        if(isEventActive('alchemy')){
+          const essReward = +(0.5 + FISH_RARITY_TIER[fishData.rarity] * 0.5).toFixed(1);
+          state.essence += essReward; state.essEarned += essReward;
+          floatTextAt('+' + essReward + '🧪', clientX, clientY + 90, '#10b981');
         }
         state.fishStats.totalCaught = (state.fishStats.totalCaught||0) + 1;
         if(!state.fishStats.raritySeen.includes(fishData.rarity)) state.fishStats.raritySeen.push(fishData.rarity);
@@ -4524,14 +5020,27 @@ function calcFishPrice(f){
   const fish = FISH_BY_ID[f.fishId];
   if(!fish) return 0;
   let price = fish.price;
+  /* 🐟 Аукцион — временный множитель, применяется снаружи, тут только база */
+  /* 📏 Вес → цена: ×0.9–1.15 (мягкое влияние) */
+  const range = FISH_WEIGHT_RANGE[f.rarity] || FISH_WEIGHT_RANGE.c;
+  const avgW = (range[0] + range[1]) / 2;
+  const weightMult = Math.max(0.9, Math.min(1.15, f.weight / avgW));
+  price *= weightMult;
+  /* 🏆 Бонус за рекорд вида: +10% */
+  const rec = state.fishStats?.fishRecords?.[f.fishId];
+  if(rec && Math.abs(rec.weight - f.weight) < 0.001){
+    price *= 1.1;
+  }
   (f.mutations||[]).forEach(mid => {
     const m = MUT_BY_ID[mid];
     if(m && m.fishMult) price *= m.fishMult;
   });
-  const combos = getActiveCombos(f.mutations||[]);
+  /* ⚡ Комбо — макс 2 */
+  const combos = getActiveCombos(f.mutations||[]).slice(0, 2);
   combos.forEach(c => { if(c.fishMult) price *= c.fishMult; });
   return Math.round(price);
 }
+
 function openCatchModal(){
   const pc = state.pendingCatch;
   if(!pc){ renderFishing(); return; }
@@ -4541,8 +5050,10 @@ function openCatchModal(){
     openModal('catchModal');
     return;
   }
-  const totalPrice = caught.reduce((s, f) => s + calcFishPrice(f), 0);
-  let html = '<button class="modalX" onclick="closeCatchModal()">✕</button><h2>🎣 Улов (' + caught.length + ')</h2><div style="text-align:center;font-size:12px;opacity:.7;margin-bottom:10px">Тапни рыбу — наложить мутацию</div><div style="max-height:50vh;overflow-y:auto;margin-bottom:12px">';
+  const aucMult = isEventActive('auction') ? getAuctionMult(caught.length) : 1;
+  const totalPrice = Math.round(caught.reduce((s, f) => s + calcFishPrice(f), 0) * aucMult);
+  const aucNotice = aucMult > 1 ? '<div style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);color:#fff;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;font-weight:700;text-align:center">🐟 АУКЦИОН! Цены ×' + aucMult + '</div>' : '';
+  let html = '<button class="modalX" onclick="closeCatchModal()">✕</button><h2>🎣 Улов (' + caught.length + ')</h2>' + aucNotice + '<div style="text-align:center;font-size:12px;opacity:.7;margin-bottom:10px">Тапни рыбу — наложить мутацию</div><div style="max-height:50vh;overflow-y:auto;margin-bottom:12px">';
   caught.forEach((f, i)=>{
     const fish = FISH_BY_ID[f.fishId];
     const rarClass = {c:'fishRarity-c',u:'fishRarity-u',r:'fishRarity-r',sr:'fishRarity-sr',e:'fishRarity-e',l:'fishRarity-l',d:'fishRarity-d',m:'fishRarity-m',s:'fishRarity-s'}[f.rarity];
@@ -4562,6 +5073,8 @@ function sellAllCatch(){
   if(!pc){ closeCatchModal(); return; }
   let total = 0;
   pc.caught.forEach(f => { total += calcFishPrice(f); });
+  const aucMult = isEventActive('auction') ? getAuctionMult(pc.caught.length) : 1;
+  total = Math.round(total * aucMult);
   if(total > 0){
     state.coins += total; state.coinsEarned += total;
     state.fishStats.earned = (state.fishStats.earned||0) + total;
@@ -4574,7 +5087,17 @@ function sellAllCatch(){
   closeCatchModal();
   if(total > 0) alert('Продано: +' + total);
 }
+function getAuctionMult(count){
+  if(count >= 20) return 3;
+  if(count >= 15) return 2.5;
+  if(count >= 10) return 2;
+  if(count >= 5)  return 1.5;
+  return 1;
+}
+
 function closeCatchModal(){
+  state.pendingCatch = null;
+  save();
   closeModal('catchModal');
   renderFishing();
 }
@@ -4630,11 +5153,15 @@ function applyMutationToFish(mid){
   if(!cardWithMut) return alert('Карта с этой мутацией в КД!');
   const cdMs = (60 + Math.random() * 14 * 60) * 1000;
   const cdMin = Math.round(cdMs / 60000);
-  if(!confirm('Использовать ' + m.icon + ' ' + m.name + '?\n\n⚠️ Карта «' + cardWithMut.name + '» снимется с экипировки и уйдёт в КД на ' + cdMin + ' мин.\nШанс успеха: 50%.')) return;
+  /* 🎲 Шанс зависит от tier мутации */
+  const MUT_APPLY_CHANCE = {0: 0.5, 1: 0.35, 2: 0.2, 3: 0.1};
+  const applyChance = MUT_APPLY_CHANCE[m.tier] !== undefined ? MUT_APPLY_CHANCE[m.tier] : 0.5;
+  const chancePct = Math.round(applyChance * 100);
+  if(!confirm('Использовать ' + m.icon + ' ' + m.name + '?\n\n⚠️ Карта «' + cardWithMut.name + '» снимется с экипировки и уйдёт в КД на ' + cdMin + ' мин.\nШанс успеха: ' + chancePct + '%.')) return;
   pc.mutAttempts--;
   state.equippedIds = state.equippedIds.filter(id => id !== cardWithMut.id);
   state.cardCooldowns[cardWithMut.id] = Date.now() + cdMs;
-  if(Math.random() < 0.5){
+  if(Math.random() < applyChance){
     fish.mutations = fish.mutations || [];
     fish.mutations.push(mid);
     playRare(); flashRare();
@@ -4723,10 +5250,16 @@ function ensureBourse(){
   let prevDir = state.bourse.history[0]?.dir || 0;
   for(let i = 0; i < cycles; i++){
     let dir;
-    if(prevDir !== 0 && Math.random() < 0.65) dir = prevDir;
+    /* 55% сохранение тренда (было 65%) — больше разворотов */
+    if(prevDir !== 0 && Math.random() < 0.55) dir = prevDir;
     else dir = Math.random() < 0.5 ? -1 : 1;
-    const change = dir * (0.05 + Math.random()*0.20);
-    rate = Math.round(rate * (1 + change));
+    /* Больше разброс изменения: 5-30% */
+    const change = dir * (0.05 + Math.random()*0.25);
+    rate = rate * Math.exp(change);
+    /* Мягкое притяжение к базе */
+    if(rate < BOURSE_BASE * 0.75) rate += (BOURSE_BASE - rate) * 0.03;
+    if(rate > BOURSE_BASE * 1.25) rate -= (rate - BOURSE_BASE) * 0.03;
+    rate = Math.round(rate);
     rate = Math.max(BOURSE_FLOOR, Math.min(BOURSE_CEIL, rate));
     lastT += BOURSE_UPDATE_MS;
     state.bourse.history.unshift({t:lastT, r:rate, dir});
@@ -4795,7 +5328,7 @@ function renderBourse(){
     const buyPrice = Math.round(rate * (1 + BOURSE_SPREAD/2));
   const sellPrice = Math.round(rate * (1 - BOURSE_SPREAD/2));
 
-  const LIMIT = 100;
+  const LIMIT = 10000;
   const maxBuy = Math.min(LIMIT, Math.floor(state.coins / buyPrice));
   const maxSell = Math.min(LIMIT, state.gold);
 
@@ -4815,6 +5348,7 @@ function renderBourse(){
         '<button class="bourseQuick" data-v="1" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">1</button>' +
         '<button class="bourseQuick" data-v="10" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">10</button>' +
         '<button class="bourseQuick" data-v="50" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">50</button>' +
+        '<button class="bourseQuick" data-v="100" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">100</button>' +
         '<button class="bourseQuick" data-v="max" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--gold);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">МАКС</button>' +
       '</div>' +
       '<div id="buyTotal" style="font-size:12px;text-align:center;opacity:.7;margin-bottom:8px">Итого: 🪙 0</div>' +
@@ -4834,6 +5368,7 @@ function renderBourse(){
         '<button class="bourseQuickSell" data-v="1" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">1</button>' +
         '<button class="bourseQuickSell" data-v="10" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">10</button>' +
         '<button class="bourseQuickSell" data-v="50" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">50</button>' +
+        '<button class="bourseQuickSell" data-v="100" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">100</button>' +
         '<button class="bourseQuickSell" data-v="max" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--gold);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">МАКС</button>' +
       '</div>' +
       '<div id="sellTotal" style="font-size:12px;text-align:center;opacity:.7;margin-bottom:8px">Получишь: 🪙 0</div>' +
@@ -5153,34 +5688,44 @@ function renderCraft(){
 /* ============================================================
    МАГАЗИН ДНЯ
    ============================================================ */
-const DAILY_SHOP_GOLD_PRICE = {
-  'Обычная':3,'Необычная':6,'Редкая':15,'Супер редкая':40,
-  'Эпическая':100,'Легендарная':280,'Алмазная':700,
-  'Мифическая':1800,'Секретная':5000
+const DAILY_SHOP_BASE = {
+  'Обычная':1,'Необычная':2,'Редкая':5,'Супер редкая':12,
+  'Эпическая':25,'Легендарная':60,'Алмазная':150,
+  'Мифическая':400,'Секретная':1000,'Эксклюзивная':2500
 };
-const DAILY_SHOP_WEIGHTS = {
-  'Обычная':3, 'Необычная':10, 'Редкая':30, 'Супер редкая':25,
-  'Эпическая':18, 'Легендарная':9, 'Алмазная':3,
-  'Мифическая':1.2, 'Секретная':0.4
-};
-function rollDailyShopRarity(){
-  let total = 0;
-  const entries = Object.entries(DAILY_SHOP_WEIGHTS);
-  for(const [n,w] of entries) total += w;
-  let r = Math.random() * total;
-  for(const [n,w] of entries){ r -= w; if(r < 0) return n; }
-  return 'Обычная';
-}
-function makeDailyShopCard(){
-  const rarity = rollDailyShopRarity();
+const DAILY_SHOP_SLOTS = [
+  {rarities:['Редкая','Супер редкая'],    starsMin:1, starsMax:3, mutMin:0, mutMax:1},
+  {rarities:['Супер редкая','Эпическая'], starsMin:2, starsMax:4, mutMin:1, mutMax:1},
+  {rarities:['Эпическая','Легендарная'],  starsMin:2, starsMax:5, mutMin:1, mutMax:2},
+  {rarities:['Легендарная','Алмазная'],   starsMin:3, starsMax:6, mutMin:1, mutMax:2},
+  {rarities:['Алмазная','Мифическая'],    starsMin:4, starsMax:7, mutMin:2, mutMax:3},
+  {rarities:['Мифическая','Секретная'],   starsMin:5, starsMax:8, mutMin:2, mutMax:3}
+];
+const DAILY_SHOP_STAR_MULT = [1, 1.3, 1.7, 2.2, 3, 4, 5.5, 7];
+const DAILY_SHOP_MUT_MULT = [1, 1.3, 1.7, 2.5];
+const DAILY_SHOP_PRICE_CAP = 8000;
+function makeDailyShopCard(slotIdx){
+  const slot = DAILY_SHOP_SLOTS[slotIdx] || DAILY_SHOP_SLOTS[0];
+  const rarity = pick(slot.rarities);
   const pool = CARD_POOL.filter(c => c.rarity === rarity);
-  const base = pick(pool);
-  const slots = 5 + Math.floor(rnd(0,4));
-  let stars = 0;
-  if(Math.random() < 0.6){ stars = 1; for(let i=1;i<5;i++){ if(Math.random() < 0.5) stars++; else break; } }
-  const price = DAILY_SHOP_GOLD_PRICE[rarity] || 100;
+  const base = pool.length ? pick(pool) : pick(CARD_POOL);
+  const slots = 6 + Math.floor(rnd(0, 5));
+  const stars = slot.starsMin + Math.floor(Math.random() * (slot.starsMax - slot.starsMin + 1));
+  const mutCount = slot.mutMin + Math.floor(Math.random() * (slot.mutMax - slot.mutMin + 1));
+  const tier = RARITY[base.rarity].tier;
+  const allowed = MUTATIONS.filter(m => m.tier <= Math.min(tier, 3));
+  const mutations = [];
+  const mutPool = [...allowed];
+  for(let i = 0; i < mutCount && mutPool.length; i++){
+    const idx = Math.floor(Math.random() * mutPool.length);
+    mutations.push(mutPool.splice(idx, 1)[0].id);
+  }
+  const starMult = DAILY_SHOP_STAR_MULT[Math.min(stars, 8) - 1] || 1;
+  const mutMult = DAILY_SHOP_MUT_MULT[Math.min(mutCount, 3)] || 1;
+  let price = Math.round((DAILY_SHOP_BASE[rarity] || 100) * starMult * mutMult);
+  if(price > DAILY_SHOP_PRICE_CAP) price = DAILY_SHOP_PRICE_CAP;
   return {
-    id: uid(), name: base.name, rarity, slots, stars, mutations: [],
+    id: uid(), name: base.name, rarity, slots, stars, mutations,
     income: pct(-20,40), goldCh: pct(-15,30), essCh: pct(-15,30), manaCh: pct(-15,30),
     cdMod: +(rnd(-30,50)).toFixed(1), activeVisual: null,
     price, currency: 'gold', sold: false, createdAt: Date.now()
@@ -5190,7 +5735,7 @@ function ensureDailyShop(){
   const cycle = getMskCycleKey();
   if(state.dailyShopCycle !== cycle || !state.dailyShop || !Array.isArray(state.dailyShop.items) || !state.dailyShop.items.length){
     state.dailyShopCycle = cycle;
-    state.dailyShop = {items: [makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard(), makeDailyShopCard()]};
+    state.dailyShop = {items: [0,1,2,3,4,5].map(i => makeDailyShopCard(i))};
     state.lastSeenDailyShop = 0;
     save();
   }
@@ -5214,7 +5759,7 @@ function renderDailyShop(){
     const photo = img
       ? '<img src="' + img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.outerHTML=\'<div style=&quot;font-size:36px&quot;>' + cov.emoji + '</div>\'">'
       : '<div style="font-size:36px">' + cov.emoji + '</div>';
-    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + c.rarity + ' · ' + c.slots + ' слотов ' + (c.stars>0?'· '+'★'.repeat(c.stars):'') + '</div></div><button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'var(--panel2)') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.5) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceStr + '</button></div>';
+    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + c.rarity + ' · ' + c.slots + ' слотов ' + (c.stars>0?'· '+'★'.repeat(c.stars):'') + '</div></div><button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'#6b7280') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.7) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceStr + '</button></div>';
   });
   cont.innerHTML = html;
   cont.querySelectorAll('.dailyShopBuy').forEach(btn => { btn.onclick = ()=>buyDailyShopCard(+btn.dataset.i); });
@@ -5258,6 +5803,106 @@ function renderUpgrades(){
 }
 
 /* ============================================================
+   🤖 БОТЫ-АВТОКЛИКЕРЫ
+   ============================================================ */
+function botClick(){
+  if(!state.bots || !state.bots.level) return;
+  if(currentTab !== 'click') return;
+  if(document.hidden) return;
+  ensureDailyStats();
+  const base = getBaseClick();
+  const earned = Math.max(1, Math.round(base * 1));
+  const luckMult = isBuffActive('luck') ? 2 : 1;
+  const goldBonus = (1 + sumStat('goldCh')/100) * luckMult;
+  const essBonus = (1 + sumStat('essCh')/100) * luckMult;
+  const manaBonus = (1 + sumStat('manaCh')/100) * luckMult;
+  state.coins += earned; state.coinsEarned += earned; state.totalClicks++;
+  state.dailyStats.clicks++; state.dailyStats.coins += earned;
+  state.questStats.clicks = (state.questStats.clicks||0) + 1;
+  state.questStats.coinsEarned = (state.questStats.coinsEarned||0) + earned;
+  if(Math.random() < GOLD_CH*goldBonus){ state.gold += 1; state.goldEarned += 1; }
+  if(Math.random() < ESS_CH*essBonus){ state.essence += 0.5; state.essEarned += 0.5; }
+  if(Math.random() < MANA_CH*manaBonus){ state.mana += 1; state.manaEarned += 1; }
+  addXP(1);
+  const btn = $('staticBtn');
+  if(btn){
+    const r = btn.getBoundingClientRect();
+    floatTextAt('+' + earned, r.left + r.width/2 + (Math.random()-0.5)*50, r.top - 10, '#a0a0a0');
+  }
+  renderHeader();
+}
+
+function renderBotBar(){
+  const el = $('botBar');
+  if(!el) return;
+  if(!state.bots || !state.bots.level){
+    el.style.display = 'none';
+    return;
+  }
+  const b = BOTS[state.bots.level - 1];
+  if(!b){ el.style.display = 'none'; return; }
+  const last = state.bots.lastClick || 0;
+  const left = Math.max(0, Math.ceil((b.interval * 1000 - (Date.now() - last)) / 1000));
+  el.style.display = 'flex';
+  el.innerHTML = '<span style="font-size:22px">' + b.icon + '</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">Бот: ' + b.name + '</div><div style="font-size:10px;opacity:.7">Клик через ' + left + ' сек</div></div><span style="font-size:11px;color:var(--gold)">🤖</span>';
+  el.onclick = ()=>{
+    switchTab('shop');
+    setTimeout(()=>{
+      const tab = document.querySelector('.shopTabs button[data-shop="bots"]');
+      if(tab) tab.click();
+    }, 100);
+  };
+}
+
+function renderBots(){
+  const cont = $('botsContainer'); if(!cont) return;
+  const cur = (state.bots && state.bots.level) || 0;
+  let html = '<div style="background:var(--panel);border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--border);font-size:12px"><div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">🤖 Бот-автокликер</div><div style="opacity:.75;line-height:1.5">Бот кликает за тебя, пока открыта вкладка «Клик». Каждый уровень — быстрее. Клик бота = твой обычный клик (монеты, золото, мана, XP).</div></div>';
+  BOTS.forEach((b, i)=>{
+    const lvl = i + 1;
+    const isOwned = cur >= lvl;
+    const isNext = cur + 1 === lvl;
+    const canBuy = isNext && state.coins >= b.price;
+    let bg, border, badge, btnHTML;
+    if(isOwned){
+      bg = 'linear-gradient(135deg,rgba(16,185,129,.25),rgba(5,95,70,.25))';
+      border = 'var(--green)';
+      badge = '✅ Куплен';
+      btnHTML = '';
+    } else if(isNext){
+      bg = 'var(--panel)';
+      border = 'var(--gold)';
+      badge = '⬇️ Следующий';
+      btnHTML = '<button class="botBuyBtn" ' + (canBuy?'':'disabled') + ' style="width:100%;margin-top:8px;padding:10px;border-radius:8px;border:none;background:' + (canBuy?'linear-gradient(135deg,var(--green),#065f46)':'#6b7280') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canBuy?'pointer':'not-allowed') + ';opacity:' + (canBuy?1:.7) + ';min-height:44px">Купить за 🪙 ' + fmtBig(b.price) + '</button>';
+    } else {
+      bg = 'var(--panel)';
+      border = 'var(--border)';
+      badge = '🔒';
+      btnHTML = '<div style="font-size:10px;color:var(--txt-dim);text-align:center;margin-top:6px">Сначала купи уровень ' + (cur + 1) + '</div>';
+    }
+    html += '<div style="background:' + bg + ';border:2px solid ' + border + ';border-radius:12px;padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:10px;align-items:center;min-width:0"><div style="font-size:32px">' + b.icon + '</div><div style="min-width:0"><div style="font-size:14px;font-weight:700">' + b.name + '</div><div style="font-size:11px;opacity:.75">Клик раз в ' + b.interval + ' сек</div></div></div><div style="font-size:10px;font-weight:700;white-space:nowrap">' + badge + '</div></div>' + btnHTML + '</div>';
+  });
+  cont.innerHTML = html;
+  const btn = cont.querySelector('.botBuyBtn');
+  if(btn) btn.onclick = buyBot;
+}
+
+function buyBot(){
+  const cur = (state.bots && state.bots.level) || 0;
+  if(cur >= BOTS.length) return alert('Максимум!');
+  const next = BOTS[cur];
+  if(state.coins < next.price) return alert('Не хватает монет! Нужно 🪙 ' + next.price);
+  if(!confirm(next.icon + ' ' + next.name + ' — купить за 🪙 ' + next.price + '?\n\nКлик раз в ' + next.interval + ' сек. Работает только при открытой вкладке «Клик».')) return;
+  state.coins -= next.price;
+  if(!state.bots) state.bots = {level: 0, lastClick: 0};
+  state.bots.level = cur + 1;
+  state.bots.lastClick = 0;
+  playRare(); flashRare();
+  save(); renderHeader(); renderBots(); renderBotBar(); checkAchievements();
+  notify('🤖', 'Бот куплен!', next.icon + ' ' + next.name + ' · клик раз в ' + next.interval + ' сек', '#a855f7');
+}
+
+/* ============================================================
    ФУНКЦИИ УВЕДОМЛЕНИЙ
    ============================================================ */
 function checkCraftNotifs(){
@@ -5282,8 +5927,8 @@ function checkDailyNotifs(){
 function checkShopNotifs(){
   const cycle = getMskCycleKey();
   if(state.lastSeenDailyShop !== cycle && state.lastSeenDailyShop !== 0){
-    sendNotif('shop', '🛒 Магазин обновился', '4 новых карты ждут');
-    notify('🛒', 'Магазин дня обновился!', '4 новые карты ждут', '#10b981');
+    sendNotif('shop', '🛒 Магазин обновился', '6 новых карт ждут');
+    notify('🛒', 'Магазин дня обновился!', '6 новых карт ждут', '#10b981');
     state.lastSeenDailyShop = cycle;
     save();
   } else if(state.lastSeenDailyShop === 0){
@@ -5521,6 +6166,9 @@ const BAD_ROOTS = [
   'шлюх','шлюш','залуп','манда','уебан','уеб','уёб',
   'идиот','кретин','критин','козел','козёл','казел',
   'чмо','чмош','лошар','лошара','тварь','падла','гнида','урод',
+  'негр','нигер','ниггер','нига',
+  'фил','зоофил','некрофил','педофил','копрофил',
+  'жид','хач','чурка','чурбан',
   'дроч','минет','онан','подъеб','приеб','наеб','отъеб','разъеб','заеб','впизд',
   'fuck','fuk','fck','shit','sh1t','bitch','asshole','dick','cock','pussy',
   'cunt','whore','nigg','bastard','porn','sex','rape','penis','vagina',
@@ -5544,7 +6192,7 @@ function normalizeText(str){
   for(const ch of str){
     out += CHAR_MAP[ch] !== undefined ? CHAR_MAP[ch] : ch;
   }
-  return out.replace(/[^а-я]/g, '').replace(/(.)\1+/g, '$1');
+  return out.replace(/(.)\1+/g, '$1');
 }
 function containsBad(str){
   const norm = normalizeText(str);
@@ -5804,6 +6452,7 @@ function doClick(mult, e){
     }, 100*(i+1));
   });
   renderHeader(); checkAchievements(); startCooldown();
+  if(typeof topCache !== 'undefined') topCache = {points:null, lvl:null, coins:null};
 }
 function moveBtn(el, dur){
   if(!el) return;
@@ -5862,6 +6511,8 @@ function renderProfile(){
 
 
     '<div class="profileCard"><h3>🔔 Уведомления</h3><button class="profileBtn btnGold" id="notifBtn">Настройки уведомлений</button></div>' +
+
+    '<div class="profileCard"><h3>🎵 Звуки событий</h3><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><span style="font-size:13px">Включены</span><input type="checkbox" id="eventSoundsToggle" ' + (state.eventSounds?'checked':'') + ' style="width:auto;accent-color:var(--purple);transform:scale(1.3)"></div></div>' +
 
     '<div class="profileCard"><h3>🎁 Ежедневный бонус</h3><div class="profileRow"><span class="lbl">Серия</span><span class="val">' + (state.dailyStreak || 0) + ' 🔥</span></div><button class="profileBtn btnPink" id="dailyProfileBtn">' + (canClaimDaily() ? '🎁 Забрать' : '🌙 Завтра') + '</button></div>' +
 
@@ -6021,6 +6672,8 @@ const nameClick = $('profileNameClick');
 
 
   $('notifBtn').onclick = ()=>{ renderNotifSettings(); openModal('notifModal'); };
+  const _evsT = $('eventSoundsToggle');
+  if(_evsT) _evsT.onchange = (e)=>{ state.eventSounds = e.target.checked; save(); };
 
   $('dailyProfileBtn').onclick = openDailyModal;
   $('autoSellToggle').onchange = (e)=>{ state.autoSellEnabled = e.target.checked; save(); renderProfile(); };
@@ -6383,7 +7036,7 @@ function openHelp(){
   html += '<div class="legendRow"><div class="ic">🪙</div><div class="txt"><b>Монеты</b><small>С клика, продажи карт и рыб</small></div></div>';
   html += '<div class="legendRow"><div class="ic">🥇</div><div class="txt"><b>Золото</b><small>~1% с клика · с редких рыб · биржа</small></div></div>';
   html += '<div class="legendRow"><div class="ic">🧪</div><div class="txt"><b>Эссенция</b><small>~2% с клика · мутации карт</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">✨</div><div class="txt"><b>Мана</b><small>~0.2% с клика · прокачка звёзд карт</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">✨</div><div class="txt"><b>Мана</b><small>~1% с клика · <b>с каждой рыбы</b> (обычная 0.05 → секретная 5000) · прокачка звёзд</small></div></div>';
 
   html += '<div class="sectionTitle">🎴 Карты и инвентарь</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Всего ' + CARD_POOL.length + ' видов. Дубликаты копятся.</div>';
@@ -6402,6 +7055,10 @@ function openHelp(){
   html += '<div class="sectionTitle">🎯 Pity (4 счётчика)</div>';
   html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Лега+: 50 · Алмаз+: 200 · Мифик+: 500 · Секрет+: 1500. Сбрасываются при выпадении.</div>';
 
+  html += '<div class="sectionTitle">📐 Формула очков карты</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0"><b>очки = база_редкости × (1 + %мутаций + %комбо) × (1 + %звёзд)</b></div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Редкость — база. Мутации и комбо дают проценты сверху. Комбо учитывается <b>макс 2</b> (с diminishing returns: первое 100%, остальные 50%). Звёзды — множитель сверху.</div>';
+  html += '<div class="sectionTitle">📊 Шансы карт</div>';
   html += '<div class="sectionTitle">📊 Шансы карт</div>';
   Object.entries(RARITY).forEach(([n,r])=>{
     html += '<div class="chanceRow"><span>' + n + '</span><b>' + r.weight + '%</b></div>';
@@ -6409,12 +7066,12 @@ function openHelp(){
 
   html += '<div class="sectionTitle">🧬 Мутации карт</div>';
   MUTATIONS.forEach(m=>{
-    html += '<div class="legendRow"><div class="ic">' + m.icon + '</div><div class="txt"><b>' + m.name + '</b> · +' + m.points + '<small>' + m.rname + ' · ×' + (m.fishMult||1) + ' к рыбам</small></div></div>';
+    html += '<div class="legendRow"><div class="ic">' + m.icon + '</div><div class="txt"><b>' + m.name + '</b> · +' + m.percent + '%<small>' + m.rname + ' · ×' + (m.fishMult||1) + ' к рыбам</small></div></div>';
   });
 
   html += '<div class="sectionTitle">⚡ Комбо</div>';
   COMBOS.forEach(c=>{
-    html += '<div class="legendRow"><div class="ic">' + c.icon + '</div><div class="txt"><b>' + c.name + '</b> · +' + c.pts + '<small>' + c.pair.map(id=>MUT_BY_ID[id]?.icon).join('+') + ' · ×' + c.fishMult + ' к рыбам</small></div></div>';
+    html += '<div class="legendRow"><div class="ic">' + c.icon + '</div><div class="txt"><b>' + c.name + '</b> · +' + c.percent + '%<small>' + c.pair.map(id=>MUT_BY_ID[id]?.icon).join('+') + ' · ×' + c.fishMult + ' к рыбам</small></div></div>';
   });
 
   html += '<div class="sectionTitle">⭐ Звёзды карт</div>';
@@ -6433,6 +7090,28 @@ function openHelp(){
     html += '<div style="background:var(--bg2);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid var(--purple)"><div style="font-size:13px;font-weight:700;color:var(--purple)">'+r.icon+' '+r.name+'</div><div style="font-size:10px;opacity:.7;margin-top:4px;line-height:1.5"><b>Обязательные:</b><br>'+mandatory+'</div><div style="font-size:10px;opacity:.7;margin-top:6px"><b>Жертва:</b> '+sac+'</div><div style="font-size:11px;opacity:.9;margin-top:6px">🪙 '+r.baseCoins+' · ⏱ '+r.timeMinH+'–'+r.timeMaxH+' ч · ×1.5 цена за каждый следующий</div></div>';
   });
 
+  html += '<div class="sectionTitle">🤖 Боты-автокликеры</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">В магазине → 🤖 Боты. 10 уровней: Сонный (клик раз в 10 сек) → Божественный (раз в 2 сек). Бот кликает <b>только при открытой вкладке «Клик»</b>. Даёт монеты, золото, ману, XP — как обычный клик.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Уровни покупаются по очереди, цены ×10: 10К, 100К, 1М, 10М, 100М, 1Б, 10Б, 100Б, 1Т, 10Т 🪙.</div>';
+
+  html += '<div class="sectionTitle">🎉 События дня</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">С 06:00 до 00:00 МСК. ~60-75 событий в день, пауза 3-10 мин, длительность 6-12 мин. Плашка в шапке показывает активное событие. Тап по плашке — расписание на день.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0"><b>30 типов:</b> бафы (монеты, мана, КД, шансы), моно-мутации, комбо, рандом, мега, аукцион.</div>';
+
+  html += '<div class="legendRow"><div class="ic">💰</div><div class="txt"><b>Монетопад</b><small>×2 монеты со кликов · 6-12 мин</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">✨</div><div class="txt"><b>Мана-шторм</b><small>×3 мана с кликов и рыбы</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">⚡</div><div class="txt"><b>Кошачий рефлекс</b><small>−50% КД · ульта ×15</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🧪</div><div class="txt"><b>Алхимия</b><small>×2 эссенция + рыба даёт эссенцию</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🎣</div><div class="txt"><b>Бешеный клёв</b><small>Спавн ×1.5 · скорость ×1.5 · до 15 рыб</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🍀</div><div class="txt"><b>Кот-везунчик</b><small>×2 шансы + 25% апгрейд редкости</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">📈</div><div class="txt"><b>Подъём/спад биржи</b><small>Курс ×2 или ÷2 мгновенно</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🧬</div><div class="txt"><b>10 моно-мутаций</b><small>Огонь, лёд, гром, радиация, кристалл, тень, око, крыло, корона, радуга</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">⚡</div><div class="txt"><b>4 комбо</b><small>Пар, шторм, чёрная дыра, божественный пир</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🎲</div><div class="txt"><b>Рандом</b><small>1 или 3 случайные мутации</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">☢️</div><div class="txt"><b>5 мега</b><small>Радиация, лёд, апокалипсис, пожар, кристалл · 2 раза в день минимум</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🐟</div><div class="txt"><b>Аукцион</b><small>Рыба продаётся дороже: 5+ = ×1.5, 10+ = ×2, 15+ = ×2.5, 20+ = ×3</small></div></div>';
+
+  html += '<div class="sectionTitle">🐟 Рыбалка</div>';
   html += '<div class="sectionTitle">🎣 Рыбалка</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Раунд 60 сек. Тапаешь по рыбе → цепляешь → тапаешь ещё → вываживаешь. Тратится ⚡.</div>';
   html += '<div style="font-size:12px;opacity:.85;padding:6px 0">🚫 Не хватает энергии → рыба серая с <b>🔒</b>, тап не сработает.</div>';
@@ -6443,10 +7122,8 @@ function openHelp(){
   });
 
   html += '<div class="sectionTitle">🧬 Мутации рыб</div>';
-  html += '<div class="legendRow"><div class="ic">🟢</div><div class="txt"><b>Пруд</b><small>1% шанс, 1 мутация</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🟣</div><div class="txt"><b>Озеро</b><small>8% шанс, до 2</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🔴</div><div class="txt"><b>Глубина</b><small>15% шанс, до 2</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">⚫</div><div class="txt"><b>Бездна</b><small>25% шанс, до 3 (68%/24%/8%)</small></div></div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">⚠️ <b>Мутации рыб появляются ТОЛЬКО во время мутационных событий</b> (моно, комбо, рандом, мега). Вне ивентов рыба всегда чистая.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">🐟 <b>Наложение мутаций с карт:</b> шанс зависит от tier мутации: обычная 50%, редкая 35%, эпическая 20%, легендарная <b>10%</b>. Радугу наложить сложно!</div>';
 
   html += '<div class="sectionTitle">🎁 События на рыбалке</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Раз в 20-35 сек, ловится за 1 тап без энергии:</div>';
@@ -6480,10 +7157,11 @@ function openHelp(){
   html += '<div style="font-size:12px;opacity:.85;padding:6px 0">3 задания (лёгкое/среднее/сложное). Обновление в 12:00 и 00:00 МСК.</div>';
 
   html += '<div class="sectionTitle">🏪 Магазин дня</div>';
-  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">4 карты за золото. Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0"><b>6 карт за золото</b>, от дешёвой к топовой. Все со звёздами и мутациями. Цена = качество: база × звёзды × мутации, кап 8000🥇. Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК.</div>';
 
-  html += '<div style="height:14px"></div>';
-  html += '<button class="profileBtn btnGold" onclick="closeModal(\'helpModal\');restartTut()">🎓 Пройти обучение заново</button>';
+  html += '<div class="sectionTitle">🎵 Звуки событий</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">Тумблер в профиле → 🎵 Звуки событий. Отключи, если хочешь тишину.</div>';
+  html += '<div style="height:14px"></div>';  html += '<button class="profileBtn btnGold" onclick="closeModal(\'helpModal\');restartTut()">🎓 Пройти обучение заново</button>';
   html += '<button class="btnClose" onclick="closeModal(\'helpModal\')">Понятно</button>';
   $('helpContent').innerHTML = html;
   openModal('helpModal');
@@ -6776,6 +7454,7 @@ $$('.shopTabs button').forEach(btn=>{
     if(btn.dataset.shop === 'packs'){ renderShop(); bindPackClicks(); }
     if(btn.dataset.shop === 'daily') renderDailyShop();
     if(btn.dataset.shop === 'fishing') renderUpgrades();
+    if(btn.dataset.shop === 'bots') renderBots();
   };
 });
 
@@ -6847,6 +7526,10 @@ function startGame(){
   renderQuests();
   renderBourse();
   renderCraft();
+  renderBots();
+  renderBotBar();
+  ensureEvents();
+  renderEventBar();
 
   checkUnlocks();
   initCustomMusic();
@@ -6882,7 +7565,7 @@ function startGame(){
   const ultraBtn = $('ultraBtn');
   if(staticBtn) staticBtn.onclick = (e)=>doClick(1, e);
   if(movingBtn) movingBtn.onclick = (e)=>{ doClick(3, e); moveBtn(movingBtn, 1000); };
-  if(ultraBtn) ultraBtn.onclick = (e)=>{ doClick(10, e); moveBtn(ultraBtn, 500); };
+  if(ultraBtn) ultraBtn.onclick = (e)=>{ doClick(isEventActive('reflex') ? 15 : 10, e); moveBtn(ultraBtn, 500); };
   const _isNarrow = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
   const _moveEvery = _isNarrow ? 550 : 1000;
   const _moveDur   = _isNarrow ? 320 : 1000;
@@ -7001,6 +7684,16 @@ setTimeout(startResEmojiReplacer, 100);
 /* ============================================================
    ✅ ФИНАЛЬНАЯ САМОПРОВЕРКА — ищем пропавшие функции
    ============================================================ */
+function ensureSaveCompat(){
+  const critical = ['coins','gold','essence','mana','collection','lvl','xpTotal'];
+  let broken = false;
+  for(const k of critical){
+    if(state[k] === undefined){ console.warn('⚠️ Сейв потерял поле:', k); broken = true; }
+  }
+  if(broken) console.error('❌ Сейв повреждён');
+  else console.log('%c✅ Сейв в порядке', 'color:#10b981;font-weight:700');
+  return !broken;
+}
 (function selfCheck(){
   const required = [
     'generatePromoCode', 'generateRefCode',
@@ -7034,7 +7727,7 @@ setTimeout(startResEmojiReplacer, 100);
     'containsBad', 'censorNick', 'isValidNick', 'normalizeText',
         'getMaxEnergy', 'getUpgradeVal', 'getUpgradeLvl', 'applyEnergyRegen', 'syncInvMax',
     'switchTab', 'renderSlots', 'renderBuffs', 'applyBackground',
-    'genNPCs', 'playerTopValue', 'getActiveTitleObjs'
+    'genNPCs', 'playerTopValue', 'getActiveTitleObjs', 'ensureSaveCompat'
   ];
   const missing = [];
   for(const fn of required){
