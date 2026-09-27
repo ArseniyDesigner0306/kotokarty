@@ -1152,8 +1152,8 @@ const EVENT_TYPES = {
 
   /* ============ 🔱 CLASS 4: РЕЙДЫ (по 1 на глубину) ============ */
   raidPond:  {name:'РЕЙД: Пруд', icon:'⚔️', color:'#dc2626', class:4, desc:'Толстый Сом! Заряди удочку!', isRaid:true, bossId:'boss_pond', duration:30},
-  raidRiver: {name:'РЕЙД: Река', icon:'⚔️', color:'#dc2626', class:4, desc:'Босс со стражами!', isRaid:true, bossId:'boss_river', duration:30, hidden:true},
-  raidLake:  {name:'РЕЙД: Озеро', icon:'⚔️', color:'#dc2626', class:4, desc:'Лягушка-обманщица!', isRaid:true, bossId:'boss_lake', duration:30, hidden:true},
+  raidRiver: {name:'РЕЙД: Река', icon:'⚔️', color:'#dc2626', class:4, desc:'Речная Змея!', isRaid:true, bossId:'boss_river', duration:30},
+  raidLake:  {name:'РЕЙД: Озеро', icon:'⚔️', color:'#dc2626', class:4, desc:'Лягушка-Обманщица!', isRaid:true, bossId:'boss_lake', duration:30},
   raidDeep:  {name:'РЕЙД: Глубина', icon:'⚔️', color:'#dc2626', class:4, desc:'Морской чёрт!', isRaid:true, bossId:'boss_deep', duration:30, hidden:true},
   raidAbyss: {name:'РЕЙД: Бездна', icon:'⚔️', color:'#dc2626', class:4, desc:'Существо Бездны!', isRaid:true, bossId:'boss_abyss', duration:30, hidden:true}
 };
@@ -1904,10 +1904,55 @@ const BOSSES = [
     stages: 4,
     desc: 'Жирный и тупой. Просто тапай и не отвлекайся.',
     flavor: 'Плюётся водой, но сам себя бьёт.'
+  },
+  {
+    id: 'boss_river',
+    depthId: 1,
+    name: 'Речная Змея',
+    icon: '🐍',
+    color: '#3b82c9',
+    minWeight: 15000,
+    maxWeight: 30000,
+    minPrice: 1500000,
+    maxPrice: 3000000,
+    rodRequired: 'bamboo',
+    stages: 4,
+    hasGuards: true,
+    desc: 'Окружена стражами. Сначала убей охрану!',
+    flavor: 'Шипит и скользит по воде.'
+  },
+  {
+    id: 'boss_lake',
+    depthId: 2,
+    name: 'Лягушка-Обманщица',
+    icon: '🐸',
+    color: '#7c3aed',
+    minWeight: 30000,
+    maxWeight: 60000,
+    minPrice: 4000000,
+    maxPrice: 8000000,
+    rodRequired: 'spinning',
+    stages: 4,
+    hasClones: true,
+    desc: 'Создаёт клонов! Не знаешь кто настоящий пока не поймаешь.',
+    flavor: 'Квакает, но звук идёт со всех сторон.'
   }
-];
-const BOSS_BY_ID = {};
+];const BOSS_BY_ID = {};
 BOSSES.forEach(b => BOSS_BY_ID[b.id] = b);
+
+/* 🛡 ТИПЫ СТРАЖЕЙ */
+const GUARD_TYPES = {
+  common: { name:'Заколдованный', icon:'🐟', progressBase: 5,   tugInterval: 1300, tugPower: 1.6, canBite: false, color: '#3b82c9', speed: 130 },
+  normal: { name:'Заколдованный', icon:'🐠', progressBase: 4,   tugInterval: 1100, tugPower: 1.8, canBite: false, color: '#10b981', speed: 145 },
+  hard:   { name:'Заколдованный', icon:'🐡', progressBase: 3,   tugInterval: 1000, tugPower: 2.0, canBite: false, color: '#a855f7', speed: 160 },
+  mad:    { name:'Заколдованный', icon:'🦈', progressBase: 2.5, tugInterval: 1200, tugPower: 2.2, canBite: true,  color: '#dc2626', speed: 175 }
+};
+const GUARD_STAGES = [
+  ['common'],
+  ['common', 'normal'],
+  ['common', 'normal', 'hard'],
+  ['common', 'normal', 'hard', 'mad']
+];
 
 /* Глубины */
 const DEPTHS = [
@@ -2318,6 +2363,424 @@ function tryStartRaid(depthId){
   startRaid(boss);
   return true;
 }
+/* ============================================================
+   🛡 СТРАЖИ
+   ============================================================ */
+/* 🎲 Редкость стража зависит от типа */
+function rollGuardRarity(type){
+  const tables = {
+    /* Все стражи — от Редкой и выше */
+    common: [['r',40],['sr',25],['e',20],['l',10],['d',4],['m',0.8],['s',0.2]],
+    normal: [['sr',30],['e',30],['l',25],['d',10],['m',4],['s',1]],
+    hard:   [['e',30],['l',35],['d',20],['m',12],['s',3]],
+    mad:    [['l',40],['d',30],['m',22],['s',8]]
+  };
+  const table = tables[type] || tables.common;
+  const total = table.reduce((s, x) => s + x[1], 0);
+  let r = Math.random() * total;
+  for(const [rar, w] of table){
+    r -= w;
+    if(r < 0) return rar;
+  }
+  return 'c';
+}
+/* ============================================================
+   🐸 ЛЯГУШКИ (клон-механика)
+   ============================================================ */
+function reshuffleFrogs(){
+  const raid = state.raid;
+  if(!raid) return;
+  const canvas = $('fishingCanvas');
+  const w = (canvas && canvas.width) || 300;
+  const h = (canvas && canvas.height) || 300;
+  const total = raid.stage + 1;
+  const realIdx = Math.floor(Math.random() * total);
+  const frogs = [];
+  for(let i = 0; i < total; i++){
+    const ang = (i / total) * Math.PI * 2 + Math.random() * 0.4;
+    const spd = 110 + raid.stage * 15;
+    frogs.push({
+      id: uid(),
+      isReal: i === realIdx,
+      isFighting: false,
+      isCaught: false,
+      isRevealed: false,
+      x: w/2 + Math.cos(ang) * 100,
+      y: h/2 + Math.sin(ang) * 100,
+      vx: Math.cos(ang) * spd * (0.8 + Math.random() * 0.4),
+      vy: Math.sin(ang) * spd * (0.8 + Math.random() * 0.4),
+      tugTimer: 1500,
+      progress: 0,
+      fightX: 0,
+      fightY: 0,
+      fightVx: 0,
+      fightVy: 0,
+      lastTapTime: 0,
+      jumpTimer: 7000 + Math.random() * 3000
+    });
+  }
+  raid.frogs = frogs;
+  raid.frogFight = null;
+  raid.frogCloneTimer = 15000;
+}
+function endFrogFightReveal(){
+  const raid = state.raid;
+  if(!raid || !raid.frogFight) return;
+  const f = raid.frogFight;
+  f.isFighting = false;
+  f.isRevealed = true;
+  const canvas = $('fishingCanvas');
+  const _r = canvas ? canvas.getBoundingClientRect() : {left:0, top:0};
+  if(f.isReal){
+    /* ✅ НАСТОЯЩАЯ — +25% к стадии */
+    raid.progress = Math.min(100, raid.progress + 25);
+    playFishWin();
+    flashRare();
+    floatTextAt('✅ НАСТОЯЩАЯ! +25%', _r.left + f.fightX, _r.top + f.fightY - 40, '#10b981');
+    notify('✅', 'Настоящая!', '+25% к стадии', '#10b981');
+    raid.frogFight = null;
+    /* Победа на стадии */
+    if(raid.progress >= 100){
+      if(raid.stage >= 4){ endRaidWin(); return; }
+      raid.stage++;
+      raid.progress = 0;
+      spawnFrogs(raid.stage);
+      playFishBreak();
+      flashRare();
+      notify('💢', 'Стадия ' + raid.stage + '!', 'Клонов больше!', '#7c3aed');
+      renderRaidHUD();
+      return;
+    }
+    /* 🔀 ПЕРЕМЕШКА — роли и позиции заново */
+    reshuffleFrogs();
+    notify('🔀', 'Роли перемешаны!', 'Кто теперь настоящая?', '#a855f7');
+    renderRaidHUD();
+    return;
+  } else {
+    /* ❌ КЛОН — -3% и исчезает, но тоже перемешиваем */
+    raid.progress = Math.max(0, raid.progress - 3);
+    playFishMiss();
+    floatTextAt('❌ КЛОН!', _r.left + f.fightX, _r.top + f.fightY - 40, '#dc2626');
+    notify('❌', 'Клон!', '-3% прогресса', '#dc2626');
+    raid.frogFight = null;
+    /* 🔀 Тоже перемешиваем — клоны восстанавливаются */
+    reshuffleFrogs();
+    renderRaidHUD();
+    return;
+  }
+}
+function endFrogFightLose(){
+  const raid = state.raid;
+  if(!raid || !raid.frogFight) return;
+  const f = raid.frogFight;
+  f.isFighting = false;
+  f.progress = 0;
+  raid.frogFight = null;
+  playFishBreak();
+  notify('💢', 'Сорвалась!', 'Попробуй снова', '#dc2626');
+  renderRaidHUD();
+}
+function spawnFrogs(stage){
+  if(!state.raid) return;
+  const boss = BOSS_BY_ID[state.raid.bossId];
+  if(!boss || !boss.hasClones) return;
+  const canvas = $('fishingCanvas');
+  const w = (canvas && canvas.width) || 300;
+  const h = (canvas && canvas.height) || 300;
+  const total = stage + 1;
+  const realIdx = Math.floor(Math.random() * total);
+  const frogs = [];
+  for(let i = 0; i < total; i++){
+    const ang = (i / total) * Math.PI * 2;
+    const spd = 110 + stage * 15;
+    frogs.push({
+      id: uid(),
+      isReal: i === realIdx,
+      isFighting: false,
+      isCaught: false,
+      isRevealed: false,
+      x: w/2 + Math.cos(ang) * 100,
+      y: h/2 + Math.sin(ang) * 100,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
+      tugTimer: 1500,
+      progress: 0,
+      fightX: 0,
+      fightY: 0,
+      fightVx: 0,
+      fightVy: 0,
+      lastTapTime: 0,
+      jumpTimer: 7000 + Math.random() * 3000
+    });
+  }
+  state.raid.frogs = frogs;
+  state.raid.frogFight = null;
+  state.raid.stagePhase = 'frogs';
+  state.raid.frogCloneTimer = 15000;
+}
+function reshuffleFrogs(){
+  const raid = state.raid;
+  if(!raid) return;
+  const canvas = $('fishingCanvas');
+  const w = (canvas && canvas.width) || 300;
+  const h = (canvas && canvas.height) || 300;
+  const total = raid.stage + 1;
+  const realIdx = Math.floor(Math.random() * total);
+  const frogs = [];
+  for(let i = 0; i < total; i++){
+    const ang = (i / total) * Math.PI * 2 + Math.random() * 0.4;
+    const spd = 110 + raid.stage * 15;
+    frogs.push({
+      id: uid(),
+      isReal: i === realIdx,
+      isFighting: false,
+      isCaught: false,
+      isRevealed: false,
+      x: w/2 + Math.cos(ang) * 100,
+      y: h/2 + Math.sin(ang) * 100,
+      vx: Math.cos(ang) * spd * (0.8 + Math.random() * 0.4),
+      vy: Math.sin(ang) * spd * (0.8 + Math.random() * 0.4),
+      tugTimer: 1500,
+      progress: 0,
+      fightX: 0,
+      fightY: 0,
+      fightVx: 0,
+      fightVy: 0,
+      lastTapTime: 0,
+      jumpTimer: 7000 + Math.random() * 3000
+    });
+  }
+  raid.frogs = frogs;
+  raid.frogFight = null;
+  raid.frogCloneTimer = 15000;
+}
+function reshuffleRemainingFrogs(){
+  const raid = state.raid;
+  if(!raid) return;
+  const alive = raid.frogs.filter(f => !f.isCaught);
+  if(alive.length === 0) return;
+  /* Сброс ролей */
+  alive.forEach(f => {
+    f.isReal = false;
+    f.isFighting = false;
+    f.progress = 0;
+    f.isRevealed = false;
+  });
+  /* Новая настоящая */
+  const newRealIdx = Math.floor(Math.random() * alive.length);
+  alive[newRealIdx].isReal = true;
+  /* Перемещение по новым позициям */
+  const canvas = $('fishingCanvas');
+  const w = (canvas && canvas.width) || 300;
+  const h = (canvas && canvas.height) || 300;
+  alive.forEach((f, i) => {
+    const ang = (i / alive.length) * Math.PI * 2 + Math.random() * 0.4;
+    const spd = 110 + raid.stage * 15;
+    f.x = w/2 + Math.cos(ang) * 100;
+    f.y = h/2 + Math.sin(ang) * 100;
+    f.vx = Math.cos(ang) * spd * (0.8 + Math.random() * 0.4);
+    f.vy = Math.sin(ang) * spd * (0.8 + Math.random() * 0.4);
+    f.jumpTimer = 7000 + Math.random() * 3000;
+  });
+}
+function startFrogFight(frog){
+  if(!state.raid || !frog || frog.isCaught || frog.isFighting) return;
+  frog.isFighting = true;
+  const _startP = [30, 28, 26, 24][state.raid.stage - 1] || 24;
+  frog.progress = _startP;
+  frog.lastTapTime = Date.now();
+  frog.tugTimer = 1500;
+  const canvas = $('fishingCanvas');
+  if(canvas){
+    frog.fightX = canvas.width / 2;
+    frog.fightY = canvas.height / 2;
+    const diff = state.raid.frogDifficulty || 1;
+    const stageSpeed = [1, 1.1, 1.2, 1.3][state.raid.stage - 1] || 1.3;
+    const spd = 160 * diff * stageSpeed;
+    const ang = Math.random() * Math.PI * 2;
+    frog.fightVx = Math.cos(ang) * spd;
+    frog.fightVy = Math.sin(ang) * spd;
+  }
+  state.raid.frogFight = frog;
+  playFishBite();
+  notify('🪝', 'Лягушка на крючке!', 'Вываживай — но кто это?', '#7c3aed');
+  renderRaidHUD();
+}
+function endFrogFightReveal(){
+  const raid = state.raid;
+  if(!raid || !raid.frogFight) return;
+  const f = raid.frogFight;
+  f.isFighting = false;
+  const canvas = $('fishingCanvas');
+  const _r = canvas ? canvas.getBoundingClientRect() : {left:0, top:0};
+
+  /* 📈 Сложность растёт после catch */
+  raid.frogDifficulty = Math.min(1.8, (raid.frogDifficulty || 1) + 0.08);
+
+  if(f.isReal){
+    /* ✅ НАСТОЯЩАЯ */
+    raid.progress = Math.min(100, raid.progress + 25);
+    playFishWin();
+    flashRare();
+    floatTextAt('✅ НАСТОЯЩАЯ! +25%', _r.left + f.fightX, _r.top + f.fightY - 40, '#10b981');
+    notify('✅', 'Настоящая!', '+25% · роли перемешаны', '#10b981');
+    raid.frogFight = null;
+    /* Победа на стадии? */
+    if(raid.progress >= 100){
+      if(raid.stage >= 4){ endRaidWin(); return; }
+      raid.stage++;
+      raid.progress = 0;
+      raid.frogDifficulty = 1 + (raid.stage - 1) * 0.2;
+      spawnFrogs(raid.stage);
+      playFishBreak();
+      flashRare();
+      notify('💢', 'Стадия ' + raid.stage + '!', 'Клонов больше!', '#7c3aed');
+      renderRaidHUD();
+      return;
+    }
+    /* 🔀 ПОЛНЫЙ РЕСПАВН + ПЕРЕМЕШКА — все лягушки заново */
+    spawnFrogs(raid.stage);
+    notify('🔀', 'Все перемешаны!', 'Кто теперь настоящая?', '#a855f7');
+    renderRaidHUD();
+    return;
+  } else {
+    /* ❌ КЛОН — исчезает, выживших перемешиваем */
+    raid.progress = Math.max(0, raid.progress - 3);
+    f.isCaught = true;
+    playFishMiss();
+    floatTextAt('❌ КЛОН!', _r.left + f.fightX, _r.top + f.fightY - 40, '#dc2626');
+    notify('❌', 'Клон!', '−3% · роли перемешаны', '#dc2626');
+    raid.frogFight = null;
+    reshuffleRemainingFrogs();
+    renderRaidHUD();
+    return;
+  }
+}function endFrogFightLose(){
+  const raid = state.raid;
+  if(!raid || !raid.frogFight) return;
+  const f = raid.frogFight;
+  f.isFighting = false;
+  f.progress = 0;
+  raid.frogFight = null;
+  playFishBreak();
+  notify('💢', 'Сорвалась!', 'Попробуй снова', '#dc2626');
+  renderRaidHUD();
+}
+function spawnStageGuards(stage){
+  if(!state.raid) return;
+  const boss = BOSS_BY_ID[state.raid.bossId];
+  if(!boss || !boss.hasGuards) return;
+  const types = GUARD_STAGES[stage - 1] || ['common'];
+  const count = types.length;
+  const guards = [];
+  for(let i = 0; i < count; i++){
+    const t = GUARD_TYPES[types[i]];
+    guards.push({
+      id: uid(),
+      type: types[i],
+      name: t.name,
+      emoji: t.icon,
+      color: t.color,
+      angle: (i / count) * Math.PI * 2,
+      orbitRadius: 95,
+      orbitSpeed: 0.0003 + stage * 0.00015,
+      progress: 0,
+      maxProgress: 100,
+      tugInterval: t.tugInterval,
+      tugPower: t.tugPower,
+      canBite: t.canBite,
+      lastTapTime: 0,
+      lastBiteTime: 0,
+      tugTimer: 1500,
+      x: 0, y: 0,
+      isCaught: false,
+      isFighting: false,
+      fightX: 0, fightY: 0,
+      vx: 0, vy: 0
+    });
+  }
+  state.raid.guards = guards;
+  state.raid.guardsAlive = count;
+  state.raid.stagePhase = 'guards';
+  state.raid.guardFight = null;
+}
+function startGuardFight(guard){
+  if(!state.raid || !guard || guard.isCaught || guard.isFighting) return;
+  guard.isFighting = true;
+  guard.progress = 15;
+  guard.lastTapTime = Date.now();
+  guard.tugTimer = 1500;
+  const canvas = $('fishingCanvas');
+  if(canvas){
+    /* Стартовая позиция — там где он был на орбите */
+    guard.fightX = guard.x || canvas.width / 2;
+    guard.fightY = guard.y || canvas.height / 2;
+    const spd = GUARD_TYPES[guard.type].speed || 190;
+    const angle = Math.random() * Math.PI * 2;
+    guard.vx = Math.cos(angle) * spd;
+    guard.vy = Math.sin(angle) * spd;
+    /* 🌀 Телепорт только для «сложного», реже */
+    guard.teleportCooldown = (guard.type === 'hard') ? 6500 : 999999;
+    guard.teleportTimer = guard.teleportCooldown;
+  }
+  state.raid.guardFight = guard;
+  playFishBite();
+  notify('🪝', guard.name + ' на крючке!', 'Тапай по нему!', guard.color);
+  renderRaidHUD();
+}
+function endGuardFightWin(){
+  const raid = state.raid;
+  if(!raid || !raid.guardFight) return;
+  const g = raid.guardFight;
+  g.isCaught = true;
+  g.isFighting = false;
+  raid.guardsAlive--;
+  /* Генерим заколдованную рыбу — редкость по типу стража */
+  const rarity = rollGuardRarity(g.type);
+  const rTier = FISH_RARITY_TIER[rarity] || 0;
+  const rRange = FISH_WEIGHT_RANGE[rarity] || FISH_WEIGHT_RANGE.c;
+  const weight = +(rRange[0] + Math.random() * (rRange[1] - rRange[0])).toFixed(2);
+  const baseFish = FISH_DATA.filter(f => f.r === rarity);
+  const sample = baseFish.length ? pick(baseFish) : FISH_DATA[0];
+  /* 💰 Множитель цены по типу стража */
+  const priceMult = { common: 2, normal: 3, hard: 5, mad: 8 }[g.type] || 2;
+  const guardFish = {
+    id: uid(),
+    fishId: 'guard_' + g.id,
+    name: g.emoji + ' Заколдованный ' + sample.name,
+    emoji: g.emoji,
+    rarity: rarity,
+    weight: weight,
+    size: 1,
+    spd: 1,
+    mutations: [],
+    caughtAt: Date.now(),
+    isGuard: true,
+    basePrice: Math.round(sample.price * priceMult)
+  };
+  if(!raid.caughtGuards) raid.caughtGuards = [];
+  raid.caughtGuards.push(guardFish);
+  raid.guardFight = null;
+  playFishWin();
+  flashRare();
+  notify('✅', 'Страж пойман!', guardFish.emoji + ' ' + guardFish.name + ' (' + FISH_RARITY_NAME[rarity] + ')', '#10b981');
+  /* Все убиты — переход к боссу */
+  if(raid.guardsAlive <= 0){
+    setTimeout(() => enterBossPhase(), 400);
+  }
+  renderRaidHUD();
+}
+function endGuardFightLose(){
+  const raid = state.raid;
+  if(!raid || !raid.guardFight) return;
+  const g = raid.guardFight;
+  g.isFighting = false;
+  g.progress = 0;
+  raid.guardFight = null;
+  playFishBreak();
+  notify('💢', 'Страж сорвался!', 'Попробуй снова', '#dc2626');
+  renderRaidHUD();
+}
 function startRaid(boss){
   if(state.raid && state.raid.active) return;
   const lobby = $('fishingLobby'), play = $('fishingPlay');
@@ -2336,8 +2799,27 @@ function startRaid(boss){
     progress: 0,
     bossX: w/2, bossY: h/2, vx: 1.2, vy: 1.2,
     lastTapTime: Date.now(), taps: 0, radius: 65,
-    tugTimer: 1500
+    tugTimer: 1500,
+    /* 🛡 Стражи (для боссов с hasGuards) */
+    guards: [],
+    guardsAlive: 0,
+    stagePhase: boss.hasGuards ? 'guards' : 'boss',
+    guardFight: null,
+    caughtGuards: [],
+    snakeAbilities: (boss.id === 'boss_river') ? {
+      poisonActive: false,
+      poisonUntil: 0,
+      poisonTimer: 7000 + Math.random() * 2000,
+      slideMult: 1,
+      waveTimer: 8000 + Math.random() * 2000
+    } : null,
+    frogs: [],
+    frogFight: null,
+    frogCloneTimer: 15000,
+    frogDifficulty: 1
   };
+  /* 🐸 Спавним лягушек если у босса есть клоны */
+  if(boss.hasClones) spawnFrogs(state.raid.stage);
   if(!state.raidStats) state.raidStats = {caught:{}, attempts:0, totalTime:0};
   state.raidStats.attempts = (state.raidStats.attempts || 0) + 1;
   const bottleBtn = $('fishBottleBtn');
@@ -2370,6 +2852,7 @@ function renderRaidHUD(){
   if(!state.raid) return;
   const boss = BOSS_BY_ID[state.raid.bossId];
   if(!boss) return;
+  const bossTitle = boss.icon + ' ' + boss.name;
   let hud = $('raidHud');
   if(!hud){
     hud = document.createElement('div');
@@ -2379,16 +2862,37 @@ function renderRaidHUD(){
     if(area) area.appendChild(hud);
   }
   const raid = state.raid;
-  const stageProgress = raid.phase === 'fight' ? Math.min(100, Math.max(0, raid.progress)) : 0;
+  const isGuardFight = !!raid.guardFight;
+  const isGuardPhase = raid.stagePhase === 'guards';
+  const isFrogPhase = raid.stagePhase === 'frogs';
+  const isFrogFight = !!raid.frogFight;
+  let stageProgress;
+  if(raid.stagePhase === 'frogs'){
+    stageProgress = isFrogFight
+      ? Math.min(100, Math.max(0, raid.frogFight.progress))
+      : Math.min(100, Math.max(0, raid.progress || 0));
+  } else if(isGuardFight){
+    stageProgress = Math.min(100, Math.max(0, raid.guardFight.progress));
+  } else if(raid.phase === 'fight'){
+    stageProgress = Math.min(100, Math.max(0, raid.progress));
+  } else {
+    stageProgress = 0;
+  }
   const timeLeft = Math.max(0, raid.endTime - Date.now());
   const m = Math.floor(timeLeft/60000), s = Math.floor((timeLeft%60000)/1000);
-  const phaseText = raid.phase === 'swim' ? '🎣 ЗАЦЕПИ' : '💪 ВЫВАЖИВАЙ';
-  const pauseRatio = raid.phase === 'fight' ? Math.max(0, 1 - (Date.now() - raid.lastTapTime) / 3000) : 0;
+  const phaseText = isFrogFight
+    ? '🐸 НЕИЗВЕСТНО! ТАПАЙ ПО НЕЙ!'
+    : (isFrogPhase
+        ? '🐸 ЗАЦЕПИ ЛЮБУЮ'
+        : (isGuardFight
+            ? '🪝 ВЫВАЖИВАЙ СТРАЖА'
+            : (isGuardPhase ? '🛡 ЗАЦЕПИ СТРАЖА' : (raid.phase === 'swim' ? '🎣 ЗАЦЕПИ' : '💪 ВЫВАЖИВАЙ'))));
+  const pauseRatio = (!isGuardPhase && raid.phase === 'fight') ? Math.max(0, 1 - (Date.now() - raid.lastTapTime) / 3000) : 0;
   const pauseColor = pauseRatio > 0.6 ? '#10b981' : pauseRatio > 0.3 ? '#f59e0b' : '#dc2626';
   hud.innerHTML =
     '<div style="background:#000000dd;border-radius:10px;padding:8px 10px;border:2px solid ' + boss.color + '">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:5px">' +
-        '<div style="font-size:12px;font-weight:700;color:' + boss.color + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + boss.icon + ' ' + boss.name + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:' + boss.color + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + bossTitle + '</div>' +
         '<div style="font-size:12px;font-weight:700;color:#ffd93d;flex-shrink:0">⏱ ' + m + ':' + String(s).padStart(2,'0') + '</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
@@ -2398,10 +2902,16 @@ function renderRaidHUD(){
         '</div>' +
         '<span style="font-size:10px;font-weight:700;color:#fff;min-width:32px;text-align:right;flex-shrink:0">' + Math.floor(stageProgress) + '%</span>' +
       '</div>' +
-      (raid.phase === 'fight'
-        ? '<div style="font-size:10px;font-weight:700;text-align:center;color:' + pauseColor + '">' + phaseText + ' · тапай! (' + Math.ceil((3000 - (Date.now() - raid.lastTapTime))/1000) + 'с)</div>'
-        : '<div style="font-size:10px;font-weight:700;text-align:center;color:#fff">' + phaseText + ' · тапни по боссу</div>'
-      ) +
+      (raid.snakeAbilities && raid.snakeAbilities.poisonActive ? '<div style="font-size:10px;font-weight:900;text-align:center;color:#10b981;margin-bottom:3px;animation:raidPoisonPulse 0.6s infinite">☠️ ЯД! Прогресс ×2 вниз</div>' : '') +
+      (isFrogPhase
+        ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#7c3aed">' + phaseText + ' (' + raid.frogs.filter(f => !f.isCaught).length + ' шт · ×' + (raid.frogDifficulty||1).toFixed(2) + ' слож.)</div>'
+        : (isGuardPhase
+        ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#3b82c9">' + phaseText + ' (' + raid.guardsAlive + '/' + raid.guards.length + ')</div>'
+        : (raid.phase === 'fight'
+          ? '<div style="font-size:10px;font-weight:700;text-align:center;color:' + pauseColor + '">' + phaseText + ' · тапай! (' + Math.ceil((3000 - (Date.now() - raid.lastTapTime))/1000) + 'с)</div>'
+          : '<div style="font-size:10px;font-weight:700;text-align:center;color:#fff">' + phaseText + ' · тапни по боссу</div>'
+        )
+      )) +
     '</div>';
 }
 function startRaidLoop(){
@@ -2422,8 +2932,176 @@ function startRaidLoop(){
 
     const speed = 0.6 + raid.stage * 0.25;
 
-    if(raid.phase === 'swim'){
-      raid.bossX += raid.vx * speed;
+    /* 🐸 ФАЗА ЛЯГУШЕК */
+    if(raid.stagePhase === 'frogs'){
+      const canvas2 = canvas;
+      /* Регенерация клонов */
+      raid.frogCloneTimer -= dt;
+      if(raid.frogCloneTimer <= 0){
+        raid.frogCloneTimer = 15000;
+        const aliveCount = raid.frogs.filter(f => !f.isCaught).length;
+        const needed = raid.stage + 1;
+        if(aliveCount < needed){
+          /* Добавляем нового клона */
+          const ang = Math.random() * Math.PI * 2;
+          const spd = 110 + raid.stage * 15;
+          raid.frogs.push({
+            id: uid(), isReal: false, isFighting: false, isCaught: false, isRevealed: false,
+            x: canvas2.width/2 + Math.cos(ang) * 100,
+            y: canvas2.height/2 + Math.sin(ang) * 100,
+            vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+            tugTimer: 1500, progress: 0, fightX: 0, fightY: 0, fightVx: 0, fightVy: 0, lastTapTime: 0
+          });
+          playFishBite();
+        }
+      }
+      /* Движение лягушек */
+      raid.frogs.forEach(f => {
+        if(f.isCaught) return;
+        if(f.isFighting){
+          const _fd = raid.frogDifficulty || 1;
+          /* Вываживание */
+          if(now - f.lastTapTime > 3000){ endFrogFightLose(); return; }
+          /* Регресс — растёт со стадией и сложностью */
+          if(now - f.lastTapTime > 600){
+            const frogDecay = (4 + raid.stage * 1.0) * _fd;
+            f.progress = Math.max(0, f.progress - frogDecay * (dt/1000));
+            if(f.progress <= 0){ endFrogFightLose(); return; }
+          }
+          f.fightX += f.fightVx * (dt/1000);
+          f.fightY += f.fightVy * (dt/1000);
+          if(f.fightX < 40){ f.fightX = 40; f.fightVx = Math.abs(f.fightVx); }
+          if(f.fightX > canvas2.width - 40){ f.fightX = canvas2.width - 40; f.fightVx = -Math.abs(f.fightVx); }
+          if(f.fightY < 40){ f.fightY = 40; f.fightVy = Math.abs(f.fightVy); }
+          if(f.fightY > canvas2.height - 40){ f.fightY = canvas2.height - 40; f.fightVy = -Math.abs(f.fightVy); }
+          f.tugTimer -= dt;
+          if(f.tugTimer <= 0){
+            f.tugTimer = (1100 + Math.random() * 600) / _fd;
+            const a = Math.random() * Math.PI * 2;
+            const spd2 = 180 * _fd * (0.9 + Math.random() * 0.4);
+            f.fightVx = Math.cos(a) * spd2;
+            f.fightVy = Math.sin(a) * spd2;
+            f.progress = Math.max(0, f.progress - 3 * _fd);
+            playFishStruggle();
+          }
+          /* 🐸 ПРЫЖОК — чаще со сложностью */
+          if(!f.jumpTimer) f.jumpTimer = 7000 + Math.random() * 3000;
+          f.jumpTimer -= dt;
+          if(f.jumpTimer <= 0){
+            f.jumpTimer = (7000 + Math.random() * 3000) / _fd;
+            f.fightX = 60 + Math.random() * (canvas.width - 120);
+            f.fightY = 60 + Math.random() * (canvas.height - 120);
+            const a2 = Math.random() * Math.PI * 2;
+            f.fightVx = Math.cos(a2) * 220 * _fd;
+            f.fightVy = Math.sin(a2) * 220 * _fd;
+            f.progress = Math.max(0, f.progress - 2 * _fd);
+            playFishBite();
+            const _rj = canvas.getBoundingClientRect();
+            floatTextAt('🐸 ПРЫЖОК!', _rj.left + f.fightX, _rj.top + f.fightY - 40, '#a855f7');
+          }
+        } else {
+          /* Плавание */
+          f.x += f.vx * (dt/1000);
+          f.y += f.vy * (dt/1000);
+          if(f.x < 40){ f.x = 40; f.vx = Math.abs(f.vx); }
+          if(f.x > canvas2.width - 40){ f.x = canvas2.width - 40; f.vx = -Math.abs(f.vx); }
+          if(f.y < 40){ f.y = 40; f.vy = Math.abs(f.vy); }
+          if(f.y > canvas2.height - 40){ f.y = canvas2.height - 40; f.vy = -Math.abs(f.vy); }
+        }
+      });
+    } else if(raid.stagePhase === 'guards'){
+      /* Босс медленно плавает */
+      raid.bossX += raid.vx * 0.4;
+      raid.bossY += raid.vy * 0.4;
+      const r = raid.radius;
+      if(raid.bossX < r + 10){ raid.bossX = r + 10; raid.vx = Math.abs(raid.vx); }
+      if(raid.bossX > canvas.width - r - 10){ raid.bossX = canvas.width - r - 10; raid.vx = -Math.abs(raid.vx); }
+      if(raid.bossY < r + 10){ raid.bossY = r + 10; raid.vy = Math.abs(raid.vy); }
+      if(raid.bossY > canvas.height - r - 10){ raid.bossY = canvas.height - r - 10; raid.vy = -Math.abs(raid.vy); }
+      if(Math.random() < 0.01){
+        raid.vx = (Math.random() - 0.5) * 2;
+        raid.vy = (Math.random() - 0.5) * 2;
+        if(Math.abs(raid.vx) < 0.4) raid.vx = raid.vx > 0 ? 0.6 : -0.6;
+        if(Math.abs(raid.vy) < 0.4) raid.vy = raid.vy > 0 ? 0.6 : -0.6;
+      }
+      /* Стражи крутятся вокруг босса */
+      if(raid.guards){
+        raid.guards.forEach(g => {
+          if(g.isCaught) return;
+          if(g.isFighting){
+            /* 🪝 Зацепленный страж — активно плавает по всему полю */
+            if(now - g.lastTapTime > 3000){
+              endGuardFightLose();
+              return;
+            }
+            /* Регресс прогресса — растёт со стадией */
+            const guardDecay = 4 + raid.stage * 1.2;
+            g.progress = Math.max(0, g.progress - guardDecay * (dt/1000));
+            if(g.progress <= 0){
+              endGuardFightLose();
+              return;
+            }
+            /* ➡️ Реальное движение */
+            g.fightX += g.vx * (dt/1000);
+            g.fightY += g.vy * (dt/1000);
+            if(g.fightX < 40){ g.fightX = 40; g.vx = Math.abs(g.vx); }
+            if(g.fightX > canvas.width - 40){ g.fightX = canvas.width - 40; g.vx = -Math.abs(g.vx); }
+            if(g.fightY < 40){ g.fightY = 40; g.vy = Math.abs(g.vy); }
+            if(g.fightY > canvas.height - 40){ g.fightY = canvas.height - 40; g.vy = -Math.abs(g.vy); }
+            /* Рывки — мягче */
+            g.tugTimer -= dt;
+            if(g.tugTimer <= 0){
+              g.tugTimer = GUARD_TYPES[g.type].tugInterval * (0.8 + Math.random() * 0.6);
+              const ang = Math.random() * Math.PI * 2;
+              const baseSpd = GUARD_TYPES[g.type].speed || 130;
+              const spd = baseSpd * (0.9 + Math.random() * 0.4);
+              g.vx = Math.cos(ang) * spd;
+              g.vy = Math.sin(ang) * spd;
+              g.progress = Math.max(0, g.progress - GUARD_TYPES[g.type].tugPower * 2.5);
+              playFishStruggle();
+            }
+            /* 🌀 ТЕЛЕПОРТ (только hard) */
+            if(g.teleportTimer !== undefined && g.teleportCooldown < 999999){
+              g.teleportTimer -= dt;
+              if(g.teleportTimer <= 0){
+                g.teleportTimer = g.teleportCooldown;
+                g.fightX = 60 + Math.random() * (canvas.width - 120);
+                g.fightY = 60 + Math.random() * (canvas.height - 120);
+                const ang2 = Math.random() * Math.PI * 2;
+                const spd2 = (GUARD_TYPES[g.type].speed || 195) * 0.5;
+                g.vx = Math.cos(ang2) * spd2;
+                g.vy = Math.sin(ang2) * spd2;
+                g.tugTimer = 500;
+                g.progress = Math.max(0, g.progress - 1);
+                const _r4 = canvas.getBoundingClientRect();
+                floatTextAt('🌀 ТЕЛЕПОРТ!', _r4.left + g.fightX, _r4.top + g.fightY - 40, '#a855f7');
+                playFishBite();
+              }
+            }
+            /* Укус (бешеный) — не анскилл */
+            if(g.canBite){
+              if(!g.lastBiteTime) g.lastBiteTime = now;
+              if(now - g.lastBiteTime > 5000){
+                g.lastBiteTime = now;
+                g.progress = Math.max(0, g.progress - 3);
+                notify('🦈', 'СТРАЖ УКУСИЛ!', '-3% прогресса', '#dc2626');
+                const _r3 = canvas.getBoundingClientRect();
+                floatTextAt('🦈 УКУС! -3%', _r3.left + g.fightX, _r3.top + g.fightY - 40, '#dc2626');
+              }
+            }
+          } else {
+            /* Обычное кружение по орбите */
+            g.angle += g.orbitSpeed * dt;
+            g.x = raid.bossX + Math.cos(g.angle) * g.orbitRadius;
+            g.y = raid.bossY + Math.sin(g.angle) * g.orbitRadius;
+            if(raid.stage >= 2){
+              g.x += Math.sin(now / 300 + g.angle * 3) * 2;
+              g.y += Math.cos(now / 300 + g.angle * 3) * 2;
+            }
+          }
+        });
+      }
+    } else if(raid.phase === 'swim'){
       raid.bossY += raid.vy * speed;
       const r = raid.radius;
       if(raid.bossX < r + 10){ raid.bossX = r + 10; raid.vx = Math.abs(raid.vx); }
@@ -2438,14 +3116,20 @@ function startRaidLoop(){
       }
     } else if(raid.phase === 'fight'){
       const s = raid.stage;
-      /* 💀 Пассивный регресс — средний */
-      const decayRate = 0.3 + s * 0.12;
+      /* 💀 Пассивный регресс — растёт со стадией */
+      let decayRate = 1.0 + s * 0.4;
+      /* ☠️ ЯД — прогресс падает ×2 */
+      if(raid.snakeAbilities && raid.snakeAbilities.poisonActive){
+        decayRate *= 2;
+      }
       raid.progress = Math.max(0, raid.progress - decayRate * (dt/1000));
       /* 💢 Рывки */
       raid.tugTimer -= dt;
       if(raid.tugTimer <= 0){
-        const tugIntervalMin = 2000 - s * 150;
-        const tugIntervalMax = 2600 - s * 200;
+        /* 🌀 СКОЛЬЖЕНИЕ — ускоряет рывки */
+        const slideMult = (raid.snakeAbilities && raid.snakeAbilities.slideMult) || 1;
+        const tugIntervalMin = (2000 - s * 150) / slideMult;
+        const tugIntervalMax = (2600 - s * 200) / slideMult;
         raid.tugTimer = tugIntervalMin + Math.random() * (tugIntervalMax - tugIntervalMin);
         const tugAngle = Math.random() * Math.PI * 2;
         const tugDistMin = 120 + s * 25;
@@ -2457,6 +3141,10 @@ function startRaidLoop(){
         playFishStruggle();
         const _r = canvas.getBoundingClientRect();
         floatTextAt('РЫВОК! -' + (0.8 + s * 0.25).toFixed(1) + '%', _r.left + raid.bossX, _r.top + raid.bossY - 40, '#dc2626');
+        /* 🌀 СКОЛЬЖЕНИЕ — каждый рывок +8% скорости */
+        if(raid.snakeAbilities){
+          raid.snakeAbilities.slideMult = Math.min(1.5, raid.snakeAbilities.slideMult + 0.08);
+        }
       }
       /* 🐟 Микро-дрожание */
       if(Math.random() < 0.4){
@@ -2500,6 +3188,37 @@ function startRaidLoop(){
         raid.bossX = Math.max(40, Math.min(canvas.width - 40, raid.bossX));
         raid.bossY = Math.max(40, Math.min(canvas.height - 40, raid.bossY));
       }
+      /* 🐍 СПОСОБНОСТИ ЗМЕИ */
+      if(raid.snakeAbilities){
+        const sa = raid.snakeAbilities;
+
+        /* ☠️ ЯД — каждые 6-8 сек отравляет, прогресс ×2 на 3 сек */
+        if(sa.poisonActive && now >= sa.poisonUntil){
+          sa.poisonActive = false;
+          notify('💚', 'Яд прошёл', 'Продолжай тапать', '#10b981');
+        }
+        sa.poisonTimer -= dt;
+        if(sa.poisonTimer <= 0 && !sa.poisonActive){
+          sa.poisonTimer = 6000 + Math.random() * 2000;
+          sa.poisonActive = true;
+          sa.poisonUntil = now + 3000;
+          playFishMiss();
+          notify('☠️', 'ЗМЕЯ ОТРАВИЛА!', 'Прогресс ×2 вниз 3 сек!', '#10b981');
+        }
+
+        /* 🌊 ВОЛНА — раз в 7-10 сек отбрасывает босса */
+        sa.waveTimer -= dt;
+        if(sa.waveTimer <= 0){
+          sa.waveTimer = 7000 + Math.random() * 3000;
+          const wAng = Math.random() * Math.PI * 2;
+          raid.bossX = Math.max(60, Math.min(canvas.width - 60, raid.bossX + Math.cos(wAng) * 150));
+          raid.bossY = Math.max(60, Math.min(canvas.height - 60, raid.bossY + Math.sin(wAng) * 150));
+          const _r5 = canvas.getBoundingClientRect();
+          floatTextAt('🌊 ВОЛНА!', _r5.left + raid.bossX, _r5.top + raid.bossY - 50, '#3b82c9');
+          playFishBreak();
+        }
+      }
+
       const pauseLimit = 3000;
       if(now - raid.lastTapTime > pauseLimit){
         forceRaidBiteoff('Пауза! Сорвался');
@@ -2514,22 +3233,117 @@ function startRaidLoop(){
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const cx = raid.bossX, cy = raid.bossY;
-    const pulse = 1 + Math.sin(now / 200) * 0.08;
-    const rr = raid.radius * pulse;
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr * 2);
-    glow.addColorStop(0, boss.color + 'cc');
-    glow.addColorStop(1, 'transparent');
-    ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(cx, cy, rr * 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = boss.color;
-    ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = Math.round(rr * 1.4) + 'px system-ui';
-    ctx.fillText(boss.icon, cx, cy);
+    const _isFrogPhase = (raid.stagePhase === 'frogs');
+    if(!_isFrogPhase){
+      const pulse = 1 + Math.sin(now / 200) * 0.08;
+      const rr = raid.radius * pulse;
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr * 2);
+      glow.addColorStop(0, boss.color + 'cc');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(cx, cy, rr * 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = boss.color;
+      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = Math.round(rr * 1.4) + 'px system-ui';
+      ctx.fillText(boss.icon, cx, cy);
+    }
+
+    /* 🐸 Рендер лягушек */
+    if(raid.stagePhase === 'frogs' && raid.frogs){
+      raid.frogs.forEach(f => {
+        if(f.isCaught) return;
+        const fx = f.isFighting ? f.fightX : f.x;
+        const fy = f.isFighting ? f.fightY : f.y;
+        const fColor = '#7c3aed';
+        const fRadius = 24;
+        const glow = ctx.createRadialGradient(fx, fy, 0, fx, fy, fRadius * 1.6);
+        glow.addColorStop(0, fColor + 'cc');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(fx, fy, fRadius * 1.6, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = fColor;
+        ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '28px system-ui';
+        ctx.fillText('🐸', fx, fy);
+        /* Крест над мёртвым клоном — не нужен, они удаляются */
+        if(f.isFighting){
+          const pPct = Math.max(0, f.progress / 100);
+          ctx.fillStyle = '#000000cc';
+          ctx.fillRect(fx - 45, fy - 52, 90, 12);
+          ctx.fillStyle = pPct > 0.5 ? '#10b981' : pPct > 0.25 ? '#f59e0b' : '#dc2626';
+          ctx.fillRect(fx - 45, fy - 52, 90 * pPct, 12);
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 11px system-ui';
+          ctx.fillText(Math.floor(f.progress) + '% ?', fx, fy - 62);
+          /* 🐸 Метка "КТО ЭТО?" */
+          ctx.font = 'bold 12px system-ui';
+          ctx.fillStyle = '#a855f7';
+          ctx.fillText('КТО ЭТО?', fx, fy - 78);
+          ctx.strokeStyle = '#ffd93d';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(canvas.width/2, canvas.height);
+          ctx.lineTo(fx, fy);
+          ctx.stroke();
+        }
+      });
+    }
+    /* 🛡 Рендер стражей */
+    if(raid.stagePhase === 'guards' && raid.guards){
+      raid.guards.forEach(g => {
+        if(g.isCaught) return;
+        const gx = g.isFighting ? g.fightX : g.x;
+        const gy = g.isFighting ? g.fightY : g.y;
+        const gColor = g.color || '#3b82c9';
+        /* Свечение */
+        const gGlow = ctx.createRadialGradient(gx, gy, 0, gx, gy, g.isFighting ? 30 : 22);
+        gGlow.addColorStop(0, gColor + 'cc');
+        gGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = gGlow;
+        ctx.beginPath(); ctx.arc(gx, gy, g.isFighting ? 30 : 22, 0, Math.PI*2); ctx.fill();
+        /* Тело */
+        ctx.fillStyle = gColor;
+        ctx.beginPath(); ctx.arc(gx, gy, g.isFighting ? 22 : 14, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(gx, gy, g.isFighting ? 22 : 14, 0, Math.PI*2); ctx.stroke();
+        /* Эмодзи */
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = (g.isFighting ? '28' : '18') + 'px system-ui';
+        ctx.fillText(g.emoji, gx, gy);
+        /* Прогресс-полоска (если ловим) */
+        if(g.isFighting){
+          const pPct = Math.max(0, g.progress / 100);
+          ctx.fillStyle = '#000000cc';
+          ctx.fillRect(gx - 40, gy - 42, 80, 10);
+          ctx.fillStyle = pPct > 0.5 ? '#10b981' : pPct > 0.25 ? '#f59e0b' : '#dc2626';
+          ctx.fillRect(gx - 40, gy - 42, 80 * pPct, 10);
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 10px system-ui';
+          ctx.fillText(Math.floor(g.progress) + '%', gx, gy - 51);
+        }
+        /* Леска от низа экрана (если ловим) */
+        if(g.isFighting){
+          ctx.strokeStyle = '#ffd93d';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(canvas.width/2, canvas.height);
+          ctx.lineTo(gx, gy);
+          ctx.stroke();
+        }
+      });
+    }
 
     if(raid.phase === 'fight'){
       ctx.strokeStyle = '#ffd93d';
@@ -2554,6 +3368,109 @@ function handleRaidClick(e){
   const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
   const x = (clientX - rect.left) * (canvas.width / rect.width);
   const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+  /* 🐸 ФАЗА ЛЯГУШЕК — ПРИОРИТЕТ, проверяем ПЕРВЫМ делом */
+  if(raid.stagePhase === 'frogs' && raid.frogs){
+    if(raid.frogFight){
+      const f = raid.frogFight;
+      const dx2 = f.fightX - x, dy2 = f.fightY - y;
+      const d2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+      if(d2 < 55){
+        const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
+        if(rodIdx < 2){
+          floatTextAt('🔒 Нужен спиннинг!', clientX, clientY, '#dc2626');
+          playFishMiss();
+          return;
+        }
+        const rodMult = [0, 0, 1.0, 1.3, 1.6][rodIdx] || 1;
+        const stagePenalty = [1, 0.93, 0.86, 0.79][raid.stage - 1] || 0.79;
+        const gain = 5.5 * rodMult * stagePenalty;
+        f.progress = Math.min(100, f.progress + gain);
+        f.lastTapTime = Date.now();
+        raid.taps++;
+        playFishReel();
+        floatTextAt('+' + gain.toFixed(1) + '%', clientX, clientY, '#10b981');
+        if(f.progress >= 100){ endFrogFightReveal(); }
+      } else {
+        /* Промах — без штрафа, просто не растёт */
+        floatTextAt('МИМО!', clientX, clientY, '#dc2626');
+        playFishMiss();
+      }
+      return;
+    }
+    let hit = null, hitDist = Infinity;
+    raid.frogs.forEach(f => {
+      if(f.isCaught || f.isFighting) return;
+      const ddx = f.x - x, ddy = f.y - y;
+      const d = Math.sqrt(ddx*ddx + ddy*ddy);
+      if(d < 48 && d < hitDist){ hit = f; hitDist = d; }
+    });
+    if(hit){
+      const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
+      if(rodIdx < 2){
+        floatTextAt('🔒 Нужен спиннинг!', clientX, clientY, '#dc2626');
+        playFishMiss();
+        return;
+      }
+      startFrogFight(hit);
+      return;
+    }
+    playFishMiss();
+    return;
+  }
+
+  /* 🛡 ФАЗА СТРАЖЕЙ */
+  if(raid.stagePhase === 'guards' && raid.guards){
+    /* Если ловим стража — тапаем по нему (он в центре) */
+    if(raid.guardFight){
+      const g = raid.guardFight;
+      const gdx = g.fightX - x, gdy = g.fightY - y;
+      const gdist = Math.sqrt(gdx*gdx + gdy*gdy);
+      /* Тап работает если попал в радиус 50px (легче попасть) */
+      if(gdist < 50){
+        const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
+        const rodMult = [0, 1, 1.25, 1.5, 1.75][rodIdx] || 0;
+        const baseGain = GUARD_TYPES[g.type].progressBase;
+        const gain = baseGain * rodMult;
+        g.progress = Math.min(100, g.progress + gain);
+        g.lastTapTime = Date.now();
+        raid.taps++;
+        playFishReel();
+        floatTextAt('+' + gain.toFixed(0) + '%', clientX, clientY, '#10b981');
+        if(g.progress >= 100){
+          endGuardFightWin();
+        }
+      } else {
+        /* 🎯 Промах — прогресс не растёт, лёгкий штраф */
+        const missPenalty = 1;
+        g.progress = Math.max(0, g.progress - missPenalty);
+        floatTextAt('МИМО!', clientX, clientY, '#dc2626');
+        playFishMiss();
+      }
+      return;
+    }
+    /* Иначе — ищем стража для зацепа */
+    let hit = null, hitDist = Infinity;
+    raid.guards.forEach(g => {
+      if(g.isCaught || g.isFighting) return;
+      const ddx = g.x - x, ddy = g.y - y;
+      const d = Math.sqrt(ddx*ddx + ddy*ddy);
+      if(d < 24 && d < hitDist){ hit = g; hitDist = d; }
+    });
+    if(hit){
+      const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
+      if(rodIdx === 0){
+        floatTextAt('🔒 Нужна удочка!', clientX, clientY, '#dc2626');
+        playFishMiss();
+        return;
+      }
+      startGuardFight(hit);
+      return;
+    }
+    playFishMiss();
+    return;
+  }
+
   const dx = raid.bossX - x, dy = raid.bossY - y;
   const dist = Math.sqrt(dx*dx + dy*dy);
   if(dist > raid.radius + 25) return;
@@ -2571,7 +3488,7 @@ function handleRaidClick(e){
 
   if(raid.phase === 'fight'){
     const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
-    const dmgPerTap = [1.5, 2.0, 2.8, 3.8, 5.0][rodIdx] || 1.5;
+    const dmgPerTap = [1.0, 1.3, 1.8, 2.4, 3.2][rodIdx] || 1.0;
     raid.progress = Math.min(100, raid.progress + dmgPerTap);
     raid.lastTapTime = Date.now();
     raid.taps++;
@@ -2584,6 +3501,20 @@ function handleRaidClick(e){
       raid.phase = 'swim';
       raid.lastTapTime = Date.now();
       raid.radius = [65, 52, 42, 35][raid.stage - 1] || 35;
+      const _boss2 = BOSS_BY_ID[raid.bossId];
+      /* 🛡 Если у босса есть охрана — новая фаза стражей */
+      if(_boss2 && _boss2.hasGuards){
+        spawnStageGuards(raid.stage);
+        raid.bossX = canvas.width / 2;
+        raid.bossY = canvas.height / 2;
+        raid.vx = 0.8; raid.vy = 0.8;
+        playFishBreak();
+        flashRare();
+        notify('🛡', 'Стадия ' + raid.stage + '!', 'Стражи: ' + raid.stage + ' · змея неуязвима!', '#3b82c9');
+        floatTextAt('СТАДИЯ ' + raid.stage + ' · СТРАЖИ!', clientX, clientY - 50, '#3b82c9');
+        renderRaidHUD();
+        return;
+      }
       const angle = Math.random() * Math.PI * 2;
       raid.bossX = Math.max(60, Math.min(canvas.width - 60, canvas.width/2 + Math.cos(angle) * 120));
       raid.bossY = Math.max(60, Math.min(canvas.height - 60, canvas.height/2 + Math.sin(angle) * 120));
@@ -2597,6 +3528,36 @@ function handleRaidClick(e){
       floatTextAt('СТАДИЯ ' + raid.stage + '!', clientX, clientY - 50, '#f59e0b');
     }
   }
+}
+function enterBossPhase(){
+  const raid = state.raid;
+  if(!raid || !raid.active) return;
+  const boss = BOSS_BY_ID[raid.bossId];
+  raid.stagePhase = 'boss';
+  raid.phase = 'swim';
+  raid.progress = 0;
+  raid.lastTapTime = Date.now();
+  /* 🐍 Сброс способностей Змеи при новой стадии */
+  if(raid.snakeAbilities){
+    raid.snakeAbilities.slideMult = 1;
+    raid.snakeAbilities.poisonActive = false;
+    raid.snakeAbilities.poisonTimer = 5000 + Math.random() * 2000;
+    raid.snakeAbilities.waveTimer = 7000 + Math.random() * 3000;
+  }
+  const canvas = $('fishingCanvas');
+  if(canvas){
+    frog.fightX = canvas.width / 2;
+    frog.fightY = canvas.height / 2;
+    const spd = 200;
+    const ang = Math.random() * Math.PI * 2;
+    frog.fightVx = Math.cos(ang) * spd;
+    frog.fightVy = Math.sin(ang) * spd;
+  }
+  playAchievement();
+  flashRare();
+  notify('🐍', 'ЗМЕЯ УЯЗВИМА!', 'Тапай по ней!', '#3b82c9');
+  floatTextAt('🐍 ЗМЕЯ УЯЗВИМА!', (canvas ? canvas.width/2 : 200), (canvas ? canvas.height/2 : 200), '#3b82c9');
+  renderRaidHUD();
 }
 function forceRaidBiteoff(reason){
   const raid = state.raid;
@@ -2686,9 +3647,14 @@ function endRaidWin(){
   setTimeout(() => {
     const winAnim = $('raidWinAnim');
     if(winAnim) winAnim.remove();
-    /* 🎣 Сохраняем в state.pendingCatch чтобы переиспользовать панель улова */
+    /* 🎣 Собираем стражей + босса в одну панель улова */
+    const allCaught = [];
+    if(raid.caughtGuards && raid.caughtGuards.length){
+      raid.caughtGuards.forEach(cg => allCaught.push(cg));
+    }
+    allCaught.push(Object.assign({}, bossFish, { rarity: 'boss', isBoss: true, spd: 1, size: 1 }));
     state.pendingCatch = {
-      caught: [Object.assign({}, bossFish, { rarity: 'boss', isBoss: true, spd: 1, size: 1 })],
+      caught: allCaught,
       depthId: -1,
       mutAttempts: 5,
       fromRaid: true
@@ -6354,9 +7320,21 @@ function endFishing(){
 
 /* ============================================================
    УЛОВ
-   ============================================================ */
-function calcFishPrice(f){
+   ============================================================ */function calcFishPrice(f){
   if(f.isBoss){ return f.price || 0; }
+  if(f.isGuard && f.basePrice){
+    let price = f.basePrice;
+    const range = FISH_WEIGHT_RANGE[f.rarity] || FISH_WEIGHT_RANGE.c;
+    const avgW = (range[0] + range[1]) / 2;
+    const weightMult = Math.max(0.9, Math.min(1.15, f.weight / avgW));
+    price *= weightMult;
+    (f.mutations||[]).forEach(mid => {
+      const m = MUT_BY_ID[mid];
+      if(m && m.fishMult) price *= m.fishMult;
+    });
+    getActiveCombos(f.mutations||[]).forEach(c => { if(c.fishMult) price *= c.fishMult; });
+    return Math.round(price);
+  }
   const fish = FISH_BY_ID[f.fishId];
   if(!fish) return 0;
   let price = fish.price;
@@ -6385,38 +7363,72 @@ function openCatchModal(){  const pc = state.pendingCatch;
     return;
   }
 
-  /* Босс — особый случай, старая логика */
-  if(pc.fromRaid && caught.length === 1 && caught[0].isBoss){
-    const f = caught[0];
-    const muts = (f.mutations||[]).map(id => MUT_BY_ID[id]?.icon||'').join(' ');
-    const price = getFishCurrentPrice(f);
-    const mutsHtml = (f.mutations||[]).length ? '<div style="margin-top:6px;font-size:20px">' + muts + '</div>' : '';
-    $('catchContent').innerHTML =
-      '<h2>🏆 ПОБЕДА!</h2>' +
-      '<div class="fishCard" style="border:2px solid ' + (f.color||'#dc2626') + '"><div class="fPhoto" style="background:' + (f.color||'#dc2626') + '33">' + f.emoji + '</div><div class="fInfo"><div class="fName">' + f.name + ' <span style="color:#dc2626">· Боссовая</span></div><div class="fMeta">📏 ' + fmtWeight(f.weight) + ' · 🔱 БОСС</div>' + mutsHtml + '</div><div class="fPrice">🪙 ' + fmtBig(price) + '</div></div>' +
-      '<div style="font-size:11px;opacity:.7;text-align:center;margin:10px 0">Тапни карточку — наложить мутацию</div>' +
-      '<button class="btnGreen" id="raidSellBtn">💸 Продать за 🪙 ' + fmtBig(price) + '</button>' +
-      '<button class="btnClose" id="raidKeepBtn">📦 Оставить (в инвентарь)</button>';
+  /* Босс — панель со чекбоксами (как обычный улов) */
+  if(pc.fromRaid){
+    const freeSlots = state.fishInvMax - (state.fishInventory||[]).length;
+    let html = '<h2>🏆 ПОБЕДА!</h2>';
+    html += '<div style="font-size:11px;opacity:.7;text-align:center;margin-bottom:10px">✅ Отметь что в <b>инвентарь</b>, остальное <b>продастся</b><br>Свободно слотов: ' + freeSlots + '</div>';
+    html += '<div style="display:flex;gap:6px;margin-bottom:8px">';
+    html += '<button id="raidSelAll" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">✅ Все в инвентарь</button>';
+    html += '<button id="raidSelNone" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">💸 Все продать</button>';
+    html += '</div>';
+    html += '<div style="max-height:48vh;overflow-y:auto;margin-bottom:10px">';
+    caught.forEach((f, i) => {
+      const price = getFishCurrentPrice(f);
+      const muts = (f.mutations||[]).map(id => MUT_BY_ID[id]?.icon||'').join(' ');
+      const mutsHtml = muts ? '<div class="fishMuts">' + f.mutations.map(id => '<span>' + (MUT_BY_ID[id]?.icon||'?') + ' ' + (MUT_BY_ID[id]?.fishName||'') + '</span>').join('') + '</div>' : '';
+      const rarName = f.isBoss ? 'Боссовая' : (FISH_RARITY_NAME[f.rarity] || '');
+      const rarColor = f.isBoss ? '#dc2626' : ({c:'#9ca3af',u:'#10b981',r:'#3b82f6',sr:'#8b5cf6',e:'#a855f7',l:'#f59e0b',d:'#06b6d4',m:'#dc2626',s:'#ec4899'}[f.rarity] || '#fff');
+      const checked = f._toInv ? 'checked' : '';
+      html += '<div class="fishCard raidCatchCard" data-i="' + i + '" style="cursor:pointer;' + (checked?'border-color:var(--green);box-shadow:0 0 8px #10b98144':'border:2px solid ' + (f.isBoss ? (f.color||'#dc2626') : rarColor) + '44') + '">' +
+        '<input type="checkbox" class="raidCatchCb" data-i="' + i + '" ' + checked + ' style="width:22px;height:22px;accent-color:var(--green);flex-shrink:0;cursor:pointer">' +
+        '<div class="fPhoto" style="background:' + (f.isBoss ? (f.color||'#dc2626') : rarColor) + '33">' + f.emoji + '</div>' +
+        '<div class="fInfo"><div class="fName">' + f.name + ' <span style="color:' + rarColor + '">· ' + rarName + '</span></div>' +
+        '<div class="fMeta">📏 ' + fmtWeight(f.weight) + ' · ' + (f.isBoss ? '🔱 БОСС' : '🛡 Страж') + '</div>' + mutsHtml + '</div>' +
+        '<div class="fPrice">🪙 ' + fmtBig(price) + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<div id="raidSummary" style="background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px;display:flex;justify-content:space-between"></div>';
+    html += '<button class="btnGreen" id="raidConfirmBtn">✅ Подтвердить</button>';
+    html += '<button class="btnClose" id="raidSellAllBtn">💸 Продать всё</button>';
+
+    $('catchContent').innerHTML = html;
     openModal('catchModal');
-    const cardEl = $('catchContent').querySelector('.fishCard');
-    if(cardEl) cardEl.onclick = () => { mutPickTargetIdx = 0; openMutPickModal(0); };
-    $('raidSellBtn').onclick = () => {
-      state.coins += price; state.coinsEarned += price;
-      playResource(); save(); renderHeader(); checkAchievements();
-      closeCatchModal();
-      notify('💰', 'Продано!', '+' + fmtBig(price) + ' 🪙', '#10b981');
+
+    const updateSummary = () => {
+      const toInv = caught.filter(f => f._toInv).length;
+      const toSell = caught.filter(f => !f._toInv).reduce((s,f) => s + getFishCurrentPrice(f), 0);
+      const el = $('raidSummary');
+      if(el) el.innerHTML = '<span>В инвентарь: <b style="color:var(--green)">' + toInv + '</b></span><span>Продажа: <b style="color:var(--gold)">🪙 ' + fmtBig(toSell) + '</b></span>';
     };
-    $('raidKeepBtn').onclick = () => {
-      if(!addFishToInventory(f)){
-        const refund = Math.round(price * 0.5);
-        state.coins += refund; state.coinsEarned += refund;
-        notify('⚠️', 'Инвентарь полон', 'Продано за ' + fmtBig(refund), '#f59e0b');
-      } else {
-        notify('📦', 'Босс сохранён', f.name, '#a855f7');
-      }
-      save(); updateFishInvCount();
-      closeCatchModal();
-    };
+    updateSummary();
+
+    $('catchContent').querySelectorAll('.raidCatchCb').forEach(cb => {
+      cb.onclick = (e) => {
+        e.stopPropagation();
+        const i = +cb.dataset.i;
+        caught[i]._toInv = cb.checked;
+        const card = cb.closest('.fishCard');
+        if(card){
+          card.style.borderColor = cb.checked ? 'var(--green)' : '';
+          card.style.boxShadow = cb.checked ? '0 0 8px #10b98144' : '';
+        }
+        updateSummary();
+      };
+    });
+    $('catchContent').querySelectorAll('.fishCard').forEach(el => {
+      el.onclick = (e) => {
+        if(e.target.classList.contains('raidCatchCb')) return;
+        const i = +el.dataset.i;
+        mutPickTargetIdx = i;
+        openMutPickModal(i);
+      };
+    });
+    $('raidSelAll').onclick = () => { caught.forEach(f => f._toInv = true); openCatchModal(); };
+    $('raidSelNone').onclick = () => { caught.forEach(f => f._toInv = false); openCatchModal(); };
+    $('raidConfirmBtn').onclick = () => raidConfirmCatch();
+    $('raidSellAllBtn').onclick = () => { caught.forEach(f => f._toInv = false); raidConfirmCatch(); };
     return;
   }
 
@@ -6506,6 +7518,43 @@ function openCatchModal(){  const pc = state.pendingCatch;
   $('catchAllSellBtn').onclick = () => { caught.forEach(f => f._toInv = false); confirmCatch(); };
 }
 
+function raidConfirmCatch(){
+  const pc = state.pendingCatch;
+  if(!pc) return;
+  const caught = pc.caught;
+  let added = 0, sold = 0, soldCoins = 0, blocked = 0;
+  caught.forEach(f => {
+    if(f._toInv){
+      if(addFishToInventory(f)) added++;
+      else {
+        const refund = Math.round(getFishCurrentPrice(f) * 0.5);
+        sold++; soldCoins += refund;
+        state.coins += refund; state.coinsEarned += refund;
+        blocked++;
+      }
+    } else {
+      const price = getFishCurrentPrice(f);
+      sold++; soldCoins += price;
+      state.coins += price; state.coinsEarned += price;
+    }
+  });
+  if(soldCoins > 0){
+    state.fishStats.earned = (state.fishStats.earned||0) + soldCoins;
+    state.dailyStats.coins = (state.dailyStats.coins||0) + soldCoins;
+  }
+  addXP(10);
+  playResource(); save(); renderHeader(); updateFishInvCount(); checkAchievements();
+  /* 🛡 Очищаем pendingCatch ДО closeModal чтобы избежать дюпа */
+  state.pendingCatch = null;
+  save();
+  closeModal('catchModal');
+  restoreFishingAfterRaid();
+  let msg = '';
+  if(added > 0) msg += '📦 +' + added + ' в инвентарь';
+  if(soldCoins > 0) msg += (msg?' · ':'') + '💰 +' + fmtBig(soldCoins) + ' 🪙';
+  if(blocked > 0) msg += ' · ⚠️ ' + blocked + ' не влезло';
+  if(msg) notify('✅', 'Готово!', msg, '#10b981');
+}
 function confirmCatch(){
   const pc = state.pendingCatch;
   if(!pc) return;
@@ -6576,14 +7625,19 @@ function getAuctionMult(count){
 function closeCatchModal(){
   const pc = state.pendingCatch;
   const wasRaid = pc && pc.fromRaid;
-  /* 🔱 Защита: если это босс — автосохраняем в коллекцию, даже если игрок случайно закрыл */
-  if(wasRaid && pc.caught && pc.caught[0] && pc.caught[0].isBoss){
-    if(!state.fishStats.bossCaught) state.fishStats.bossCaught = [];
-    const bossFish = pc.caught[0];
-    const alreadyKept = state.fishStats.bossCaught.some(b => b.id === bossFish.id);
-    if(!alreadyKept){
-      state.fishStats.bossCaught.push(bossFish);
-      notify('📦', 'Босс сохранён', 'Защита от случайного закрытия', '#a855f7');
+  /* 🔱 Автосейв — только для босс-панели если игрок как-то закрыл вручную */
+  if(wasRaid && pc.caught && pc.caught.length){
+    let added = 0;
+    pc.caught.forEach(f => {
+      if(addFishToInventory(f)) added++;
+      else {
+        const refund = Math.round(getFishCurrentPrice(f) * 0.5);
+        state.coins += refund; state.coinsEarned += refund;
+      }
+    });
+    if(added > 0){
+      notify('📦', 'Сохранено', added + ' в инвентарь (защита)', '#a855f7');
+      updateFishInvCount();
     }
   }
   state.pendingCatch = null;
@@ -6656,17 +7710,11 @@ function applyMutationToFish(mid){
     fish.mutations = fish.mutations || [];
     fish.mutations.push(mid);
     playRare(); flashRare();
-    /* 🔱 Пересчёт цены босса с мутацией */
-    if(fish.isBoss){
-      let priceMult = 1;
-      (fish.mutations||[]).forEach(mid2 => {
-        const mm = MUT_BY_ID[mid2];
-        if(mm && mm.fishMult) priceMult *= mm.fishMult;
-      });
-      fish.basePrice = fish.basePrice || fish.price;
-      fish.price = Math.round(fish.basePrice * priceMult);
+    /* 🔱 Пересчёт цены босса И стража с мутацией */
+    if(fish.isBoss && !fish.basePrice){
+      fish.basePrice = fish.price;
     }
-    const newPrice = fish.isBoss ? fish.price : calcFishPrice(fish);
+    const newPrice = getFishCurrentPrice(fish);
     alert('✅ УСПЕХ!\n' + m.icon + ' ' + (m.fishName || m.name) + ' → 🪙 ' + fmtBig(newPrice) + '\n\nКарта «' + cardWithMut.name + '» в КД на ' + cdMin + ' мин.');
   } else {
     playFishMiss();
@@ -6753,6 +7801,12 @@ function openCardsIndexModal(){
    БИРЖА
    ============================================================ */
 let boursePeriod = '1d';
+/* 🐍 Анимация пульса яда */
+(function(){
+  const st = document.createElement('style');
+  st.textContent = '@keyframes raidPoisonPulse{0%,100%{opacity:1}50%{opacity:0.5}}';
+  document.head.appendChild(st);
+})();
 
 function ensureBourse(){
   if(!state.bourse || typeof state.bourse !== 'object') state.bourse = {rate:BOURSE_BASE, lastChange:0, history:[]};
