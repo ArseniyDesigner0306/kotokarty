@@ -1945,10 +1945,10 @@ BOSSES.forEach(b => BOSS_BY_ID[b.id] = b);
 
 /* 🛡 ТИПЫ СТРАЖЕЙ */
 const GUARD_TYPES = {
-  common: { name:'Заколдованный', icon:'🐟', progressBase: 5,   tugInterval: 1300, tugPower: 1.6, canBite: false, color: '#3b82c9', speed: 130 },
-  normal: { name:'Заколдованный', icon:'🐠', progressBase: 4,   tugInterval: 1100, tugPower: 1.8, canBite: false, color: '#10b981', speed: 145 },
-  hard:   { name:'Заколдованный', icon:'🐡', progressBase: 3,   tugInterval: 1000, tugPower: 2.0, canBite: false, color: '#a855f7', speed: 160 },
-  mad:    { name:'Заколдованный', icon:'🦈', progressBase: 2.5, tugInterval: 1200, tugPower: 2.2, canBite: true,  color: '#dc2626', speed: 175 }
+  common: { name:'Заколдованный', icon:'🐟', progressBase: 6,   tugInterval: 1400, tugPower: 1.4, canBite: false, color: '#3b82c9', speed: 105 },
+  normal: { name:'Заколдованный', icon:'🐠', progressBase: 5,   tugInterval: 1200, tugPower: 1.6, canBite: false, color: '#10b981', speed: 120 },
+  hard:   { name:'Заколдованный', icon:'🐡', progressBase: 4,   tugInterval: 1100, tugPower: 1.8, canBite: false, color: '#a855f7', speed: 135 },
+  mad:    { name:'Заколдованный', icon:'🦈', progressBase: 3,   tugInterval: 1200, tugPower: 2.0, canBite: true,  color: '#dc2626', speed: 150 }
 };
 const GUARD_STAGES = [
   ['common'],
@@ -2822,6 +2822,7 @@ function startRaid(boss){
     frogDifficulty: 1
   };
   /* 🐸 Спавним лягушек если у босса есть клоны */
+if(boss.hasGuards) spawnStageGuards(state.raid.stage);
   if(boss.hasClones) spawnFrogs(state.raid.stage);
   if(!state.raidStats) state.raidStats = {caught:{}, attempts:0, totalTime:0};
   state.raidStats.attempts = (state.raidStats.attempts || 0) + 1;
@@ -3137,8 +3138,8 @@ function startRaidLoop(){
         const tugIntervalMax = (2600 - s * 200) / slideMult;
         raid.tugTimer = tugIntervalMin + Math.random() * (tugIntervalMax - tugIntervalMin);
         const tugAngle = Math.random() * Math.PI * 2;
-        const tugDistMin = 120 + s * 25;
-        const tugDistMax = 200 + s * 35;
+        const tugDistMin = 90 + s * 20;
+        const tugDistMax = 150 + s * 25;
         const tugDist = tugDistMin + Math.random() * (tugDistMax - tugDistMin);
         raid.bossX = Math.max(40, Math.min(canvas.width - 40, raid.bossX + Math.cos(tugAngle) * tugDist));
         raid.bossY = Math.max(40, Math.min(canvas.height - 40, raid.bossY + Math.sin(tugAngle) * tugDist));
@@ -3204,9 +3205,7 @@ function startRaidLoop(){
         }
         sa.poisonTimer -= dt;
         if(sa.poisonTimer <= 0 && !sa.poisonActive){
-          sa.poisonTimer = 6000 + Math.random() * 2000;
-          sa.poisonActive = true;
-          sa.poisonUntil = now + 3000;
+          sa.poisonTimer = 9000 + Math.random() * 3000;
           playFishMiss();
           notify('☠️', 'ЗМЕЯ ОТРАВИЛА!', 'Прогресс ×2 вниз 3 сек!', '#10b981');
         }
@@ -3214,7 +3213,7 @@ function startRaidLoop(){
         /* 🌊 ВОЛНА — раз в 7-10 сек отбрасывает босса */
         sa.waveTimer -= dt;
         if(sa.waveTimer <= 0){
-          sa.waveTimer = 7000 + Math.random() * 3000;
+          sa.waveTimer = 10000 + Math.random() * 4000;
           const wAng = Math.random() * Math.PI * 2;
           raid.bossX = Math.max(60, Math.min(canvas.width - 60, raid.bossX + Math.cos(wAng) * 150));
           raid.bossY = Math.max(60, Math.min(canvas.height - 60, raid.bossY + Math.sin(wAng) * 150));
