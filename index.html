@@ -1151,11 +1151,11 @@ const EVENT_TYPES = {
   auction: {name:'Рыбный аукцион', icon:'🐟', color:'#3b82f6', class:2, desc:'Продай рыбу с уловом ×3 цены (10 мин)', auction:true},
 
   /* ============ 🔱 CLASS 4: РЕЙДЫ (по 1 на глубину) ============ */
-  raidPond:  {name:'РЕЙД: Пруд', icon:'⚔️', color:'#dc2626', class:4, desc:'Толстый Сом! Заряди удочку!', isRaid:true, bossId:'boss_pond', duration:30},
-  raidRiver: {name:'РЕЙД: Река', icon:'⚔️', color:'#dc2626', class:4, desc:'Речная Змея!', isRaid:true, bossId:'boss_river', duration:30},
-  raidLake:  {name:'РЕЙД: Озеро', icon:'⚔️', color:'#dc2626', class:4, desc:'Лягушка-Обманщица!', isRaid:true, bossId:'boss_lake', duration:30},
-  raidDeep:  {name:'РЕЙД: Глубина', icon:'⚔️', color:'#dc2626', class:4, desc:'Морской чёрт!', isRaid:true, bossId:'boss_deep', duration:30, hidden:true},
-  raidAbyss: {name:'РЕЙД: Бездна', icon:'⚔️', color:'#dc2626', class:4, desc:'Существо Бездны!', isRaid:true, bossId:'boss_abyss', duration:30, hidden:true}
+  raidPond:  {name:'РЕЙД: Пруд', icon:'⚔️', color:'#dc2626', class:4, desc:'Толстый Сом! Заряди удочку!', isRaid:true, bossId:'boss_pond', duration:20},
+  raidRiver: {name:'РЕЙД: Река', icon:'⚔️', color:'#dc2626', class:4, desc:'Речная Змея!', isRaid:true, bossId:'boss_river', duration:20},
+  raidLake:  {name:'РЕЙД: Озеро', icon:'⚔️', color:'#dc2626', class:4, desc:'Лягушка-Обманщица!', isRaid:true, bossId:'boss_lake', duration:20},
+  raidDeep:  {name:'РЕЙД: Глубина', icon:'⚔️', color:'#dc2626', class:4, desc:'Морской чёрт!', isRaid:true, bossId:'boss_deep', duration:20, hidden:true},
+  raidAbyss: {name:'РЕЙД: Бездна', icon:'⚔️', color:'#dc2626', class:4, desc:'Существо Бездны!', isRaid:true, bossId:'boss_abyss', duration:20, hidden:true}
 };
 const EVENT_DAY_START = 6;
 const EVENT_DAY_END = 24;
@@ -2436,10 +2436,10 @@ function endFrogFightReveal(){
   const _r = canvas ? canvas.getBoundingClientRect() : {left:0, top:0};
   if(f.isReal){
     /* ✅ НАСТОЯЩАЯ — +25% к стадии */
-    raid.progress = Math.min(100, raid.progress + 25);
+    raid.progress = Math.min(100, raid.progress + 34);
     playFishWin();
     flashRare();
-    floatTextAt('✅ НАСТОЯЩАЯ! +25%', _r.left + f.fightX, _r.top + f.fightY - 40, '#10b981');
+    floatTextAt('✅ НАСТОЯЩАЯ! +34%', _r.left + f.fightX, _r.top + f.fightY - 40, '#10b981');
     notify('✅', 'Настоящая!', '+25% к стадии', '#10b981');
     raid.frogFight = null;
     /* Победа на стадии */
@@ -2796,7 +2796,7 @@ function startRaid(boss){
   const h = (canvas && canvas.height) || 300;
   state.raid = {
     active: true, bossId: boss.id,
-    startedAt: Date.now(), endTime: Date.now() + 10*60*1000,
+    startedAt: Date.now(), endTime: Date.now() + (boss.id === 'boss_lake' ? 15*60*1000 : 10*60*1000),
     phase: 'swim',
     stage: 1,
     progress: 0,
@@ -2819,7 +2819,13 @@ function startRaid(boss){
     frogs: [],
     frogFight: null,
     frogCloneTimer: 15000,
-    frogDifficulty: 1
+    frogDifficulty: 1,
+    frogAbilities: (boss.id === 'boss_lake') ? {
+      slimeTimer: 6000 + Math.random() * 3000,
+      croakTimer: 7000 + Math.random() * 3000,
+      tongueTimer: 5000 + Math.random() * 2000,
+      tongueUntil: 0
+    } : null
   };
   /* 🐸 Спавним лягушек если у босса есть клоны */
 if(boss.hasGuards) spawnStageGuards(state.raid.stage);
@@ -2907,6 +2913,7 @@ function renderRaidHUD(){
         '<span style="font-size:10px;font-weight:700;color:#fff;min-width:32px;text-align:right;flex-shrink:0">' + Math.floor(stageProgress) + '%</span>' +
       '</div>' +
       (raid.snakeAbilities && raid.snakeAbilities.poisonActive ? '<div style="font-size:10px;font-weight:900;text-align:center;color:#10b981;margin-bottom:3px;animation:raidPoisonPulse 0.6s infinite">☠️ ЯД! Прогресс ×2 вниз</div>' : '') +
+      (raid.frogAbilities && raid.frogAbilities.tongueUntil > Date.now() ? '<div style="font-size:10px;font-weight:900;text-align:center;color:#7c3aed;margin-bottom:3px;animation:raidPoisonPulse 0.5s infinite">👅 ЯЗЫК ТЯНЕТ!</div>' : '') +
       (isFrogPhase
         ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#7c3aed">' + phaseText + ' (' + raid.frogs.filter(f => !f.isCaught).length + ' шт · ×' + (raid.frogDifficulty||1).toFixed(2) + ' слож.)</div>'
         : (isGuardPhase
@@ -2939,26 +2946,7 @@ function startRaidLoop(){
     /* 🐸 ФАЗА ЛЯГУШЕК */
     if(raid.stagePhase === 'frogs'){
       const canvas2 = canvas;
-      /* Регенерация клонов */
-      raid.frogCloneTimer -= dt;
-      if(raid.frogCloneTimer <= 0){
-        raid.frogCloneTimer = 15000;
-        const aliveCount = raid.frogs.filter(f => !f.isCaught).length;
-        const needed = raid.stage + 1;
-        if(aliveCount < needed){
-          /* Добавляем нового клона */
-          const ang = Math.random() * Math.PI * 2;
-          const spd = 110 + raid.stage * 15;
-          raid.frogs.push({
-            id: uid(), isReal: false, isFighting: false, isCaught: false, isRevealed: false,
-            x: canvas2.width/2 + Math.cos(ang) * 100,
-            y: canvas2.height/2 + Math.sin(ang) * 100,
-            vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
-            tugTimer: 1500, progress: 0, fightX: 0, fightY: 0, fightVx: 0, fightVy: 0, lastTapTime: 0
-          });
-          playFishBite();
-        }
-      }
+      /* Регенерация клонов отключена */
       /* Движение лягушек */
       raid.frogs.forEach(f => {
         if(f.isCaught) return;
@@ -3002,6 +2990,60 @@ function startRaidLoop(){
             playFishBite();
             const _rj = canvas.getBoundingClientRect();
             floatTextAt('🐸 ПРЫЖОК!', _rj.left + f.fightX, _rj.top + f.fightY - 40, '#a855f7');
+          }
+          /* 🐸 СПОСОБНОСТИ ЛЯГУШКИ */
+          if(raid.frogAbilities){
+            const fa = raid.frogAbilities;
+            const _rfa = canvas.getBoundingClientRect();
+
+            /* ☠️ СЛИЗЬ — пауза >3.5 сек → −40% прогресса */
+            if(now - f.lastTapTime > 3500 && !fa.slimeFired){
+              fa.slimeFired = true;
+              f.progress = Math.max(0, f.progress - 40);
+              playFishMiss();
+              notify('☠️', 'СЛИЗЬ!', '−40% прогресса', '#10b981');
+              floatTextAt('☠️ СЛИЗЬ! -40%', _rfa.left + f.fightX, _rfa.top + f.fightY - 60, '#10b981');
+            }
+            if(now - f.lastTapTime < 3500){ fa.slimeFired = false; }
+
+            /* 🐸 КВАК — раз в 7-10 сек все лягушки прыгают */
+            fa.croakTimer -= dt;
+            if(fa.croakTimer <= 0){
+              fa.croakTimer = 7000 + Math.random() * 3000;
+              raid.frogs.forEach(fr => {
+                if(fr.isCaught) return;
+                if(!fr.isFighting){
+                  const ang = Math.random() * Math.PI * 2;
+                  fr.x = 80 + Math.random() * (canvas.width - 160);
+                  fr.y = 80 + Math.random() * (canvas.height - 160);
+                  fr.vx = Math.cos(ang) * (110 + raid.stage * 15);
+                  fr.vy = Math.sin(ang) * (110 + raid.stage * 15);
+                }
+              });
+              playFishBite();
+              notify('🐸', 'КВАК!', 'Лягушки попрятались', '#a855f7');
+              floatTextAt('🐸 КВАК!', _rfa.left + f.fightX, _rfa.top + f.fightY - 60, '#a855f7');
+            }
+
+            /* 👅 ЯЗЫК — раз в 5-7 сек тянет крючок к себе (ускорение ×2) */
+            fa.tongueTimer -= dt;
+            if(fa.tongueTimer <= 0){
+              fa.tongueTimer = 5000 + Math.random() * 2000;
+              fa.tongueUntil = now + 1500;
+              playFishStruggle();
+              notify('👅', 'ЯЗЫК!', 'Лягушка тянет!', '#7c3aed');
+            }
+            if(fa.tongueUntil > now){
+              /* Ускорение лягушки в 2 раза */
+              f.fightVx *= 1.05;
+              f.fightVy *= 1.05;
+              /* Кап ускорения */
+              const _spd = Math.sqrt(f.fightVx*f.fightVx + f.fightVy*f.fightVy);
+              if(_spd > 500){
+                f.fightVx = (f.fightVx/_spd) * 500;
+                f.fightVy = (f.fightVy/_spd) * 500;
+              }
+            }
           }
         } else {
           /* Плавание */
@@ -3386,7 +3428,7 @@ function handleRaidClick(e){
           playFishMiss();
           return;
         }
-        const rodMult = [0, 0, 1.0, 1.3, 1.6][rodIdx] || 1;
+        const rodMult = [0, 0, 1.3, 1.6, 2.0][rodIdx] || 1;
         const stagePenalty = [1, 0.93, 0.86, 0.79][raid.stage - 1] || 0.79;
         const gain = 5.5 * rodMult * stagePenalty;
         f.progress = Math.min(100, f.progress + gain);
@@ -3549,6 +3591,13 @@ function enterBossPhase(){
     raid.snakeAbilities.poisonActive = false;
     raid.snakeAbilities.poisonTimer = 5000 + Math.random() * 2000;
     raid.snakeAbilities.waveTimer = 7000 + Math.random() * 3000;
+  }
+  /* 🐸 Сброс способностей Лягушки */
+  if(raid.frogAbilities){
+    raid.frogAbilities.slimeTimer = 6000 + Math.random() * 3000;
+    raid.frogAbilities.croakTimer = 7000 + Math.random() * 3000;
+    raid.frogAbilities.tongueTimer = 5000 + Math.random() * 2000;
+    raid.frogAbilities.tongueUntil = 0;
   }
   const canvas = $('fishingCanvas');
   if(canvas){
@@ -4780,8 +4829,8 @@ function generateDaySchedule(){
   addN(coolTypes, 2);
   addN(megaTypes, 2);
 
-  /* 🔱 РЕЙДЫ — 5-9 в сутки, гарантированно */
-  const raidCount = 5 + Math.floor(Math.random() * 5); /* 5-9 */
+  /* 🔱 РЕЙДЫ — каждый час с 6 до 24 (16-19 в сутки) */
+  const raidCount = 16 + Math.floor(Math.random() * 4); /* 16-19 */
   const availableRaids = Object.keys(EVENT_TYPES).filter(k => EVENT_TYPES[k].isRaid && !EVENT_TYPES[k].hidden);
   for(let i = 0; i < raidCount && availableRaids.length; i++){
     pool.push(pick(availableRaids));
@@ -4812,7 +4861,7 @@ function generateDaySchedule(){
     let durMin;
     if(type === 'bourseup' || type === 'boursedown') durMin = 1;                     /* мгновенный эффект — 1 мин */
     else if(type === 'auction') durMin = 10;                                         /* аукцион фиксировано 10 мин */
-    else if(type.startsWith('raid')) durMin = 30;                                    /* рейд — 30 минут */
+    else if(type.startsWith('raid')) durMin = 20;                                    /* рейд — 20 минут */
     else if(type.startsWith('mega')) durMin = 10 + Math.random() * 5;                /* мега 10-15 мин */
     else if(type.startsWith('combo')) durMin = 6 + Math.random() * 4;                /* комбо 6-10 мин */
     else if(type.startsWith('mutRandom')) durMin = 5 + Math.random() * 5;            /* рандом 5-10 мин */
@@ -4845,11 +4894,10 @@ function generateDaySchedule(){
     }
   }
 
-  /* 🔱 Рейды не должны быть в самом конце дня */
+  /* 🔱 Рейды не должны быть в самом конце дня (только последние 2) */
   const totalEvts = schedule.length;
   schedule.forEach((ev, i) => {
     if(ev.type.startsWith('raid') && i >= totalEvts - 2){
-      /* переносим рейд на более раннюю позицию — swap с рандомным ранним бафом */
       const swapIdx = 5 + Math.floor(Math.random() * Math.max(1, totalEvts - 15));
       if(swapIdx < totalEvts - 2 && !schedule[swapIdx].type.startsWith('raid')){
         const tmp = schedule[swapIdx];
@@ -10159,6 +10207,37 @@ function openHelp(){
   html += '<div class="legendRow"><div class="ic">📦</div><div class="txt"><b>Сундук</b><small>+200 🪙 · +1 🧪</small></div></div>';
   html += '<div class="legendRow"><div class="ic">🥾</div><div class="txt"><b>Ботинок</b><small>−5 ⚡</small></div></div>';
   html += '<div class="legendRow"><div class="ic">🎁</div><div class="txt"><b>Подарок</b><small>+1 ✨ (5%)</small></div></div>';
+
+  html += '<div class="sectionTitle">⚔️ РЕЙДЫ И БОССЫ</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Рейды — <b>особые события</b> с 6:00 до 24:00 МСК. Каждый час с шансом. Плашка в шапке подскажет. Тап по ней — расписание.</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Во время рейда нужная глубина <b>подсвечивается красным</b>. Жми → бой!</div>';
+
+  html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin:10px 0">';
+  html += '<div style="font-size:12px;font-weight:700;color:#5eb1c9;margin-bottom:6px">🐟 ТОЛСТЫЙ СОМ · Пруд</div>';
+  html += '<div style="font-size:11px;opacity:.85;line-height:1.6">Удочка: любая<br>4 стадии, HP 100%<br>Тапай по боссу, не давай сорваться (пауза &gt;3 сек = срыв)<br>Способности: рывок, прыжок, регенерация<br>Награда: <b>500К – 1М 🪙</b></div>';
+  html += '</div>';
+
+  html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin:10px 0">';
+  html += '<div style="font-size:12px;font-weight:700;color:#3b82c9;margin-bottom:6px">🐍 РЕЧНАЯ ЗМЕЯ · Река</div>';
+  html += '<div style="font-size:11px;opacity:.85;line-height:1.6">Удочка: минимум 🎋 бамбук<br>4 стадии, между стадиями — <b>стражи</b><br>Стражи ловятся как рыба (зацеп + вываживание). 4 типа: обычный, нормальный, сложный, бешеный<br>Способности Змеи: яд (прогресс ×2 вниз), скольжение (быстрее рывки), волна (отбрасывает)<br>Награда: <b>1.5М – 3М 🪙</b></div>';
+  html += '</div>';
+
+  html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin:10px 0">';
+  html += '<div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:6px">🐸 ЛЯГУШКА-ОБМАНЩИЦА · Озеро</div>';
+  html += '<div style="font-size:11px;opacity:.85;line-height:1.6">Удочка: минимум 🎣 спиннинг<br>4 стадии, клоны: 1/2/3/4<br><b>Все клоны одинаковые!</b> Не знаешь настоящую пока не поймаешь<br>После каждой поимки — <b>перемешка ролей</b><br>Способности: слизь (пауза &gt;3.5 сек = −40%), квак (прыгают), язык (ускорение)<br>Награда: <b>4М – 8М 🪙</b></div>';
+  html += '</div>';
+
+  html += '<div class="legendRow"><div class="ic">⏱</div><div class="txt"><b>Бой 10-15 мин</b><small>не успел — сорвался</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🏆</div><div class="txt"><b>1 победа за рейд</b><small>поймал — жди следующего</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">📦</div><div class="txt"><b>Боссы не портятся</b><small>лежат в инвентаре вечно</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🎯</div><div class="txt"><b>Выйти из боя нельзя</b><small>только «🏳 Сдаться»</small></div></div>';
+
+  html += '<div class="sectionTitle">🧬 Шансы мутаций</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Шанс зависит от <b>тира</b> мутации и <b>количества уже наложенных</b> на рыбу:</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0;background:var(--bg2);border-radius:8px;padding:10px">1-я мутация — <b style="color:var(--green)">почти всегда</b> (×1.8 к базе)<br>2-я — сложнее (×1.2)<br>3-я — база (×1.0)<br>4-я+ — тяжело (×0.7)</div>';
+  html += '<div class="chanceRow"><span>☠️ Обычная (1-я)</span><b>~95%</b></div>';
+  html += '<div class="chanceRow"><span>💎 Эпическая (1-я)</span><b>~72%</b></div>';
+  html += '<div class="chanceRow"><span>👑 Легендарная (1-я)</span><b>~45%</b></div>';
 
   html += '<div class="sectionTitle">🍾 Бутылки энергии</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Мгновенно +50 ⚡. Хранятся, не сбрасываются при выходе. Максимум = 1 + уровень прокачки. Реген +1/7 мин.</div>';
