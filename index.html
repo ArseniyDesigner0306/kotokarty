@@ -777,7 +777,7 @@ body.reduce-motion .card.vis-cosmic,body.reduce-motion .card.vis-chaos{animation
 /* ============ МОБИЛЬНАЯ АДАПТАЦИЯ ============ */
 /* ============ УВЕДОМЛЕНИЯ (стек справа) ============ */
 #notifStack{position:fixed;top:60px;right:14px;z-index:280;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:300px;width:calc(100% - 28px)}
-.notifToast{background:linear-gradient(135deg,#1e1730,#2d2444);border:1px solid var(--border2);border-left:4px solid var(--acc);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 20px #000a;animation:notifIn .35s ease-out;pointer-events:auto}
+.notifToast{background:linear-gradient(135deg,#1e1730,#2d2444);border:1px solid var(--border2);border-left:4px solid var(--acc);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 20px #000a;animation:notifIn .35s ease-out;pointer-events:none}
 .notifToast .nIcon{font-size:22px;flex-shrink:0}
 .notifToast .nBody{flex:1;min-width:0}
 .notifToast .nTitle{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:2px}
@@ -1154,7 +1154,7 @@ const EVENT_TYPES = {
   raidPond:  {name:'РЕЙД: Пруд', icon:'⚔️', color:'#dc2626', class:4, desc:'Толстый Сом! Заряди удочку!', isRaid:true, bossId:'boss_pond', duration:20},
   raidRiver: {name:'РЕЙД: Река', icon:'⚔️', color:'#dc2626', class:4, desc:'Речная Змея!', isRaid:true, bossId:'boss_river', duration:20},
   raidLake:  {name:'РЕЙД: Озеро', icon:'⚔️', color:'#dc2626', class:4, desc:'Лягушка-Обманщица!', isRaid:true, bossId:'boss_lake', duration:20},
-  raidDeep:  {name:'РЕЙД: Глубина', icon:'⚔️', color:'#dc2626', class:4, desc:'Морской чёрт!', isRaid:true, bossId:'boss_deep', duration:20, hidden:true},
+  raidDeep:  {name:'РЕЙД: Глубина', icon:'⚔️', color:'#dc2626', class:4, desc:'Морской Чёрт!', isRaid:true, bossId:'boss_deep', duration:20},
   raidAbyss: {name:'РЕЙД: Бездна', icon:'⚔️', color:'#dc2626', class:4, desc:'Существо Бездны!', isRaid:true, bossId:'boss_abyss', duration:20, hidden:true}
 };
 const EVENT_DAY_START = 6;
@@ -1432,7 +1432,36 @@ const STAR_PRICES = { common:[50,100,150,200,300], epic:[2000,3000,5000,8000,120
 const STAR_CHANCES = { common:[1,0.95,0.90,0.85,0.80], epic:[0.80,0.75,0.70,0.65,0.60], legendary:[0.60,0.55,0.50,0.45,0.40], mythic:[0.30,0.27,0.24,0.21,0.18], secret:[0.15,0.13,0.11,0.09,0.07] };
 const STAR_PITY = { common:0, epic:5, legendary:8, mythic:12, secret:20 };
 const SLOT_PRICES = [0, 0, 10, 25, 50, 100];
-const DECK_PRICES = [0, 25, 75, 200, 500];
+/* 💰 Новые цены колод — цель на дни фарма */
+const DECK_PRICES = [0, 100, 500, 2500, 15000];
+
+/* ============================================================
+   🎴 РОЛИ КОЛОД
+   ============================================================ */
+const DECK_ROLES = {
+  0: { id:'money',   name:'Деньги',  icon:'💰', color:'#ffd93d', desc:'+50% монет с клика' },
+  1: { id:'science', name:'Учёный',  icon:'🧪', color:'#a855f7', desc:'+75% маны · +75% эссенции' },
+  2: { id:'miner',   name:'Шахтёр',  icon:'⛏️', color:'#a16207', desc:'+100% шанс золота' },
+  3: { id:'fisher',  name:'Рыбак',   icon:'🎣', color:'#3b82f6', desc:'2 попытки мутации на карту · +20% редких рыб' },
+  4: { id:'pro',     name:'Профи',   icon:'👑', color:'#ec4899', desc:'+20% всех ресурсов · −20% КД' }
+};
+const DECK_ROLE_BONUS = {
+  money:   { income: 0.50 },
+  science: { mana: 0.75, ess: 0.75 },
+  miner:   { gold: 1.00 },
+  fisher:  { mutAttemptsPerCard: 2, rarityBonus: 20 },
+  pro:     { income: 0.20, gold: 0.20, mana: 0.20, ess: 0.20, cd: -0.20 }
+};
+/* Утилита: активна ли роль (все открытые слоты заполнены) */
+function getDeckRoleBonus(){
+  const deck = getActiveDeck();
+  if(!deck || !deck.unlocked) return null;
+  const role = DECK_ROLES[state.activeDeckIdx];
+  if(!role) return null;
+  const filled = deck.cards.slice(0, deck.slotsMax).filter(Boolean).length;
+  if(filled < deck.slotsMax) return { role, bonus: {}, active: false };
+  return { role, bonus: DECK_ROLE_BONUS[role.id] || {}, active: true };
+}
 
 /* ============================================================
    🎒 ИНВЕНТАРЬ РЫБ
@@ -1939,6 +1968,24 @@ const BOSSES = [
     hasClones: true,
     desc: 'Создаёт клонов! Не знаешь кто настоящий пока не поймаешь.',
     flavor: 'Квакает, но звук идёт со всех сторон.'
+  },
+  {
+    id: 'boss_deep',
+    depthId: 3,
+    name: 'Морской Чёрт',
+    icon: '🐡',
+    color: '#dc2626',
+    minWeight: 60000,
+    maxWeight: 120000,
+    minPrice: 8000000,
+    maxPrice: 15000000,
+    rodRequired: 'carbon',
+    stages: 4,
+    hasCrystals: true,
+    dmgPerTap: [0, 0, 0, 3.2, 4.2],
+    decayRate: 1.1,
+    desc: 'Окружён кристаллами. Сломай их в такт!',
+    flavor: 'Светится в темноте бездны.'
   }
 ];const BOSS_BY_ID = {};
 BOSSES.forEach(b => BOSS_BY_ID[b.id] = b);
@@ -2483,6 +2530,96 @@ function endFrogFightLose(){
   notify('💢', 'Сорвалась!', 'Попробуй снова', '#dc2626');
   renderRaidHUD();
 }
+/* ============================================================
+   🐡 МОРСКОЙ ЧЁРТ — КРИСТАЛЛЫ
+   ============================================================ */
+function spawnCrystals(stage){
+  if(!state.raid) return;
+  const boss = BOSS_BY_ID[state.raid.bossId];
+  if(!boss || !boss.hasCrystals) return;
+  const canvas = $('fishingCanvas');
+  const w = (canvas && canvas.width) || 300;
+  const h = (canvas && canvas.height) || 300;
+  const crystals = [];
+  /* 4 угла */
+  const corners = [
+    { x: w * 0.2, y: h * 0.2 },
+    { x: w * 0.8, y: h * 0.2 },
+    { x: w * 0.2, y: h * 0.8 },
+    { x: w * 0.8, y: h * 0.8 }
+  ];
+  for(let i = 0; i < 4; i++){
+    crystals.push({
+      id: uid(),
+      x: corners[i].x,
+      y: corners[i].y,
+      radius: 32,
+      hp: (stage === 4 ? 2 : 3),
+      maxHp: (stage === 4 ? 2 : 3),
+      broken: false,
+      glowPulse: Math.random() * Math.PI * 2
+    });
+  }
+  state.raid.crystals = crystals;
+  state.raid.crystalsAlive = 4;
+  state.raid.stagePhase = 'crystals';
+  state.raid.timingGame = null;
+}
+function startTimingGame(crystal){
+  if(!state.raid || !crystal || crystal.broken) return;
+  if(state.raid.timingGame) return;
+  const stage = state.raid.stage;
+  /* Средняя сложность — сложнее чем сейчас, легче чем было */
+  const zoneWidth = Math.max(13, 30 - stage * 2.5);
+  const speed = 0.85 + stage * 0.20;
+  /* 🎲 Зона в случайном месте, 25..75% */
+  const zoneCenter = 25 + Math.random() * 50;
+  state.raid.timingGame = {
+    crystalId: crystal.id,
+    pos: Math.random() < 0.5 ? 0 : 100,
+    dir: Math.random() < 0.5 ? 1 : -1,
+    zoneStart: Math.max(0, zoneCenter - zoneWidth / 2),
+    zoneEnd: Math.min(100, zoneCenter + zoneWidth / 2),
+    zoneWidth,
+    speed,
+    attempts: crystal.maxHp - crystal.hp,
+    hits: 0,
+    tickTimer: 0
+  };
+  notify('🎵', 'ТАКТ!', 'Жми когда движок в зелёной зоне', '#f59e0b');
+  renderRaidHUD();
+  /* 🎵 Тик-музыка пока движок едет */
+  if(window._timingAudioTimer) clearInterval(window._timingAudioTimer);
+  window._timingAudioTimer = setInterval(() => {
+    if(!state.raid || !state.raid.timingGame){
+      if(window._timingAudioTimer){ clearInterval(window._timingAudioTimer); window._timingAudioTimer = null; }
+      return;
+    }
+    if(state.soundOn && !window._audioMuted){
+      playTimingTick();
+    }
+  }, 500);
+}
+function playTimingTick(){
+  if(!audioCtx || !state.soundOn) return;
+  if(window._audioMuted) return;
+  if(document.hidden) return;
+  try{
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = 1200;
+    g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.07);
+  }catch(e){}
+}
+function stopTimingGame(){
+  if(state.raid) state.raid.timingGame = null;
+  if(window._timingAudioTimer){ clearInterval(window._timingAudioTimer); window._timingAudioTimer = null; }
+  renderRaidHUD();
+}
 function spawnFrogs(stage){
   if(!state.raid) return;
   const boss = BOSS_BY_ID[state.raid.bossId];
@@ -2825,8 +2962,16 @@ function startRaid(boss){
       croakTimer: 7000 + Math.random() * 3000,
       tongueTimer: 5000 + Math.random() * 2000,
       tongueUntil: 0
-    } : null
+    } : null,
+    crystals: [],
+    crystalsAlive: 0,
+    timingGame: null,
+    stunUntil: 0,
+    grabGame: null,
+    grabTimer: 6000 + Math.random() * 3000
   };
+  /* 🐡 Спавним кристаллов если у босса они есть */
+  if(boss.hasCrystals) spawnCrystals(state.raid.stage);
   /* 🐸 Спавним лягушек если у босса есть клоны */
 if(boss.hasGuards) spawnStageGuards(state.raid.stage);
   if(boss.hasClones) spawnFrogs(state.raid.stage);
@@ -2846,13 +2991,12 @@ if(boss.hasGuards) spawnStageGuards(state.raid.stage);
   if(!giveUpBtn){
     giveUpBtn = document.createElement('button');
     giveUpBtn.id = 'raidGiveUpBtn';
-    giveUpBtn.style.cssText = 'position:absolute;bottom:10px;right:10px;z-index:25;padding:10px 16px;border-radius:10px;border:2px solid #dc2626;background:#1e1730ee;color:#dc2626;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:44px';
+    giveUpBtn.style.cssText = 'position:fixed;bottom:calc(72px + env(safe-area-inset-bottom, 0px));right:14px;z-index:250;padding:10px 16px;border-radius:10px;border:2px solid #dc2626;background:#1e1730f5;color:#dc2626;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:44px;box-shadow:0 4px 14px #0008';
     giveUpBtn.textContent = '🏳 Сдаться';
     giveUpBtn.onclick = () => {
       if(confirm('Сдаться? Прогресс обнулится.')) endRaidLose('surrender');
     };
-    const area = $('fishingArea');
-    if(area) area.appendChild(giveUpBtn);
+    document.body.appendChild(giveUpBtn);
   }
   renderRaidHUD();
   notify('⚔️', boss.name + ' появился!', 'Зацепи его тапом!', boss.color);
@@ -2876,6 +3020,10 @@ function renderRaidHUD(){
   const isGuardPhase = raid.stagePhase === 'guards';
   const isFrogPhase = raid.stagePhase === 'frogs';
   const isFrogFight = !!raid.frogFight;
+  const isCrystalPhase = raid.stagePhase === 'crystals';
+  const isTimingGame = !!raid.timingGame;
+  const isGrabGame = !!raid.grabGame;
+  const isStunned = raid.stunUntil > Date.now();
   let stageProgress;
   if(raid.stagePhase === 'frogs'){
     stageProgress = isFrogFight
@@ -2890,13 +3038,17 @@ function renderRaidHUD(){
   }
   const timeLeft = Math.max(0, raid.endTime - Date.now());
   const m = Math.floor(timeLeft/60000), s = Math.floor((timeLeft%60000)/1000);
-  const phaseText = isFrogFight
-    ? '🐸 НЕИЗВЕСТНО! ТАПАЙ ПО НЕЙ!'
-    : (isFrogPhase
-        ? '🐸 ЗАЦЕПИ ЛЮБУЮ'
-        : (isGuardFight
-            ? '🪝 ВЫВАЖИВАЙ СТРАЖА'
-            : (isGuardPhase ? '🛡 ЗАЦЕПИ СТРАЖА' : (raid.phase === 'swim' ? '🎣 ЗАЦЕПИ' : '💪 ВЫВАЖИВАЙ'))));
+  let phaseText;
+  if(isGrabGame) phaseText = '🚨 ВЫРЫВАЕТ УДОЧКУ!';
+  else if(isStunned) phaseText = '💀 ОГЛУШЁН';
+  else if(isTimingGame) phaseText = '🎵 ТАПНИ В ЗОНЕ';
+  else if(isCrystalPhase) phaseText = '💎 СЛОМАЙ КРИСТАЛЛЫ';
+  else if(isFrogFight) phaseText = '🐸 НЕИЗВЕСТНО! ТАПАЙ ПО НЕЙ!';
+  else if(isFrogPhase) phaseText = '🐸 ЗАЦЕПИ ЛЮБУЮ';
+  else if(isGuardFight) phaseText = '🪝 ВЫВАЖИВАЙ СТРАЖА';
+  else if(isGuardPhase) phaseText = '🛡 ЗАЦЕПИ СТРАЖА';
+  else if(raid.phase === 'swim') phaseText = '🎣 ЗАЦЕПИ';
+  else phaseText = '💪 ВЫВАЖИВАЙ';
   const pauseRatio = (!isGuardPhase && raid.phase === 'fight') ? Math.max(0, 1 - (Date.now() - raid.lastTapTime) / 3000) : 0;
   const pauseColor = pauseRatio > 0.6 ? '#10b981' : pauseRatio > 0.3 ? '#f59e0b' : '#dc2626';
   hud.innerHTML =
@@ -2914,7 +3066,9 @@ function renderRaidHUD(){
       '</div>' +
       (raid.snakeAbilities && raid.snakeAbilities.poisonActive ? '<div style="font-size:10px;font-weight:900;text-align:center;color:#10b981;margin-bottom:3px;animation:raidPoisonPulse 0.6s infinite">☠️ ЯД! Прогресс ×2 вниз</div>' : '') +
       (raid.frogAbilities && raid.frogAbilities.tongueUntil > Date.now() ? '<div style="font-size:10px;font-weight:900;text-align:center;color:#7c3aed;margin-bottom:3px;animation:raidPoisonPulse 0.5s infinite">👅 ЯЗЫК ТЯНЕТ!</div>' : '') +
-      (isFrogPhase
+      (isCrystalPhase
+        ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#a5b4fc">' + phaseText + ' (' + raid.crystalsAlive + '/4)</div>'
+        : (isFrogPhase
         ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#7c3aed">' + phaseText + ' (' + raid.frogs.filter(f => !f.isCaught).length + ' шт · ×' + (raid.frogDifficulty||1).toFixed(2) + ' слож.)</div>'
         : (isGuardPhase
         ? '<div style="font-size:10px;font-weight:700;text-align:center;color:#3b82c9">' + phaseText + ' (' + raid.guardsAlive + '/' + raid.guards.length + ')</div>'
@@ -2922,7 +3076,7 @@ function renderRaidHUD(){
           ? '<div style="font-size:10px;font-weight:700;text-align:center;color:' + pauseColor + '">' + phaseText + ' · тапай! (' + Math.ceil((3000 - (Date.now() - raid.lastTapTime))/1000) + 'с)</div>'
           : '<div style="font-size:10px;font-weight:700;text-align:center;color:#fff">' + phaseText + ' · тапни по боссу</div>'
         )
-      )) +
+      ))) +
     '</div>';
 }
 function startRaidLoop(){
@@ -2943,6 +3097,44 @@ function startRaidLoop(){
 
     const speed = 0.6 + raid.stage * 0.25;
 
+    /* 🐡 ТАКТ-МИНИ-ИГРА (движок едет) */
+    if(raid.timingGame){
+      const tg = raid.timingGame;
+      tg.pos += tg.dir * tg.speed * 100 * (dt/1000);
+      if(tg.pos >= 100){ tg.pos = 100; tg.dir = -1; }
+      if(tg.pos <= 0){ tg.pos = 0; tg.dir = 1; }
+    }
+    /* 🎣 GRAB-ИГРА (вырвать удочку) */
+    if(raid.grabGame){
+      const gg = raid.grabGame;
+      /* Активируется только после защиты */
+      if(Date.now() >= gg.safeUntil){
+        gg.timer -= dt;
+      }
+      gg.pos += gg.dir * gg.speed * 100 * (dt/1000);
+      if(gg.pos >= 100){ gg.pos = 100; gg.dir = -1; }
+      if(gg.pos <= 0){ gg.pos = 0; gg.dir = 1; }
+      if(gg.timer <= 0){
+        /* ⏰ Время вышло — провал */
+        playFishBreak();
+        notify('💀', 'УДОЧКУ ВЫРВАЛИ!', 'Прогресс обнулён', '#dc2626');
+        const _rg = canvas.getBoundingClientRect();
+        floatTextAt('💀 ВЫРВАЛ!', _rg.left + canvas.width/2, _rg.top + canvas.height/2, '#dc2626');
+        raid.progress = 0;
+        raid.grabGame = null;
+        raid.grabTimer = 8000 + Math.random() * 4000;
+        raid.phase = 'swim';
+      }
+    }
+    /* 🐡 Чёрт делает попытку вырвать — только в фазе боя, раз в 6-9 сек */
+    const _isDeepBoss = (boss.id === 'boss_deep');
+    if(_isDeepBoss && raid.stagePhase === 'boss' && raid.phase === 'fight' && !raid.grabGame && !raid.timingGame){
+      raid.grabTimer -= dt;
+      if(raid.grabTimer <= 0){
+        raid.grabTimer = 5000 + Math.random() * 3000;
+        startGrabGame();
+      }
+    }
     /* 🐸 ФАЗА ЛЯГУШЕК */
     if(raid.stagePhase === 'frogs'){
       const canvas2 = canvas;
@@ -3161,6 +3353,10 @@ function startRaidLoop(){
         if(Math.abs(raid.vy) < 0.6) raid.vy = raid.vy > 0 ? 1 : -1;
       }
     } else if(raid.phase === 'fight'){
+      /* 🎣 Если активна grab-игра — прогресс заморожен */
+      if(raid.grabGame){
+        /* Пропускаем весь блок decay / рывков / способностей */
+      } else {
       const s = raid.stage;
       /* 💀 Пассивный регресс — растёт со стадией */
       const _bossDecay = BOSS_BY_ID[raid.bossId];
@@ -3269,6 +3465,7 @@ function startRaidLoop(){
       if(now - raid.lastTapTime > pauseLimit){
         forceRaidBiteoff('Пауза! Сорвался');
       }
+      }
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -3299,6 +3496,38 @@ function startRaidLoop(){
       ctx.fillText(boss.icon, cx, cy);
     }
 
+    /* 🐡 Рендер кристаллов */
+    if(raid.stagePhase === 'crystals' && raid.crystals){
+      raid.crystals.forEach(cr => {
+        if(cr.broken) return;
+        cr.glowPulse += 0.05;
+        const pulse = 1 + Math.sin(cr.glowPulse) * 0.1;
+        const crColor = cr.hp === 2 ? '#a5b4fc' : '#dc2626';
+        /* Свечение */
+        const glow = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, cr.radius * 2.2 * pulse);
+        glow.addColorStop(0, crColor + 'cc');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * 2.2 * pulse, 0, Math.PI*2); ctx.fill();
+        /* Тело */
+        ctx.fillStyle = crColor;
+        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.stroke();
+        /* Эмодзи */
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '28px system-ui';
+        ctx.fillText('💎', cr.x, cr.y);
+        /* HP полоска */
+        const hpPct = cr.hp / cr.maxHp;
+        ctx.fillStyle = '#000000cc';
+        ctx.fillRect(cr.x - 24, cr.y - cr.radius - 14, 48, 6);
+        ctx.fillStyle = hpPct > 0.5 ? '#10b981' : '#f59e0b';
+        ctx.fillRect(cr.x - 24, cr.y - cr.radius - 14, 48 * hpPct, 6);
+      });
+    }
     /* 🐸 Рендер лягушек */
     if(raid.stagePhase === 'frogs' && raid.frogs){
       raid.frogs.forEach(f => {
@@ -3400,6 +3629,107 @@ function startRaidLoop(){
       ctx.stroke();
     }
 
+    /* 🎵 Рендер полоски такта */
+    if(raid.timingGame){
+      const tg = raid.timingGame;
+      const _isNarrow2 = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
+      const barW = canvas.width * (_isNarrow2 ? 0.9 : 0.8);
+      const barX = canvas.width * (_isNarrow2 ? 0.05 : 0.1);
+      const barY = canvas.height - (_isNarrow2 ? 85 : 60);
+      const barH = _isNarrow2 ? 40 : 26;
+      /* Фон */
+      ctx.fillStyle = '#000000dd';
+      ctx.fillRect(barX - 4, barY - 4, barW + 8, barH + 8);
+      ctx.fillStyle = '#1e1730';
+      ctx.fillRect(barX, barY, barW, barH);
+      /* Зелёная зона */
+      const zx1 = barX + (tg.zoneStart / 100) * barW;
+      const zx2 = barX + (tg.zoneEnd / 100) * barW;
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(zx1, barY, zx2 - zx1, barH);
+      /* Движок */
+      const _dxSize2 = _isNarrow2 ? 10 : 6;
+      const dx2 = barX + (tg.pos / 100) * barW;
+      ctx.fillStyle = '#ffd93d';
+      ctx.fillRect(dx2 - _dxSize2/2, barY - 8, _dxSize2, barH + 16);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(dx2 - _dxSize2/2, barY - 8, _dxSize2, barH + 16);
+      /* Подсказка */
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🎵 ТАПНИ В ЗЕЛЁНОЙ ЗОНЕ!', canvas.width/2, barY - 20);
+    }
+
+    /* 🎣 Рендер GRAB-игры */
+    if(raid.grabGame){
+      const gg = raid.grabGame;
+      const _safeLeft = Math.max(0, gg.safeUntil - Date.now());
+      const _safeRatio = _safeLeft / 700;
+      const _isNarrow = (typeof isTouch !== 'undefined' && isTouch) && window.innerWidth < 500;
+      const barW = canvas.width * (_isNarrow ? 0.92 : 0.85);
+      const barX = canvas.width * (_isNarrow ? 0.04 : 0.075);
+      const barY = canvas.height - (_isNarrow ? 90 : 70);
+      const barH = _isNarrow ? 46 : 32;
+      /* Красный фон — тревога */
+      ctx.fillStyle = '#000000dd';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      /* Подсказка */
+      ctx.fillStyle = '#dc2626';
+      ctx.font = 'bold ' + (_isNarrow ? '20' : '22') + 'px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🚨 ВЫРЫВАЕТ УДОЧКУ!', canvas.width/2, canvas.height/2 - 60);
+      ctx.fillStyle = _safeLeft > 0 ? '#f59e0b' : '#fff';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText(_safeLeft > 0 ? '⏳ ПОДОЖДИ...' : 'ТАПНИ В ЗЕЛЁНОЙ ЗОНЕ!', canvas.width/2, canvas.height/2 - 30);
+      /* Прогресс-бар защиты */
+      if(_safeLeft > 0){
+        const _sfW = canvas.width * 0.4;
+        const _sfX = canvas.width * 0.3;
+        ctx.fillStyle = '#000000cc';
+        ctx.fillRect(_sfX, canvas.height/2 + 5, _sfW, 8);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(_sfX, canvas.height/2 + 5, _sfW * (1 - _safeRatio), 8);
+      }
+      /* Полоска */
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(barX - 4, barY - 4, barW + 8, barH + 8);
+      ctx.fillStyle = '#1e1730';
+      ctx.fillRect(barX, barY, barW, barH);
+      const zx1 = barX + (gg.zoneStart / 100) * barW;
+      const zx2 = barX + (gg.zoneEnd / 100) * barW;
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(zx1, barY, zx2 - zx1, barH);
+      const _dxSize = _isNarrow ? 12 : 8;
+      const dx2 = barX + (gg.pos / 100) * barW;
+      ctx.fillStyle = '#ffd93d';
+      ctx.fillRect(dx2 - _dxSize/2, barY - 10, _dxSize, barH + 20);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(dx2 - _dxSize/2, barY - 10, _dxSize, barH + 20);
+      /* Таймер */
+      ctx.fillStyle = '#ffd93d';
+      ctx.font = 'bold 16px system-ui';
+      ctx.fillText(Math.ceil(gg.timer/1000) + 'с', canvas.width/2, barY - 25);
+    }
+
+    /* 💀 Оглушение */
+    if(raid.stunUntil > now){
+      ctx.fillStyle = '#000000aa';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 32px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💀 ОГЛУШЁН', canvas.width/2, canvas.height/2 - 20);
+      ctx.font = 'bold 20px system-ui';
+      const left = Math.ceil((raid.stunUntil - now)/1000);
+      ctx.fillText(left + ' сек', canvas.width/2, canvas.height/2 + 20);
+    }
+
     renderRaidHUD();
     fishingAnimId = requestAnimationFrame(loop);
   }
@@ -3414,6 +3744,103 @@ function handleRaidClick(e){
   const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
   const x = (clientX - rect.left) * (canvas.width / rect.width);
   const y = (clientY - rect.top) * (canvas.height / rect.height);
+
+  /* 🎣 GRAB-ИГРА — ПРИОРИТЕТ, ловим вырванную удочку */
+  if(raid.grabGame){
+    const gg = raid.grabGame;
+    /* 🛡 Первые 700мс — защита от случайного тапа */
+    if(Date.now() < gg.safeUntil){
+      floatTextAt('⏳ Дай секунду...', clientX, clientY, '#f59e0b');
+      return;
+    }
+    if(gg.pos >= gg.zoneStart && gg.pos <= gg.zoneEnd){
+      /* ✅ Отбились */
+      playRare();
+      flashRare();
+      notify('✅', 'УДОЧКА СПАСЕНА!', 'Продолжай ловить', '#10b981');
+      /* без floatText */
+      raid.grabGame = null;
+      raid.grabTimer = 5500 + Math.random() * 2500;
+    } else {
+      /* ❌ Промах — прогресс в 0, кристаллы не трогаем */
+      playFishBreak();
+      notify('💀', 'УДОЧКУ ВЫРВАЛИ!', 'Прогресс обнулён', '#dc2626');
+      /* без floatText */
+      raid.progress = 0;
+      raid.grabGame = null;
+      raid.phase = 'swim';
+      raid.grabTimer = 8000 + Math.random() * 4000;
+    }
+    renderRaidHUD();
+    return;
+  }
+
+  /* 🐡 ФАЗА КРИСТАЛЛОВ (Морской Чёрт) */
+  if(raid.stagePhase === 'crystals'){
+    /* 💀 Оглушение — ничего не работает */
+    if(raid.stunUntil > Date.now()) return;
+    /* 🎵 Мини-игра такта активна */
+    if(raid.timingGame){
+      const tg = raid.timingGame;
+      if(tg.pos >= tg.zoneStart && tg.pos <= tg.zoneEnd){
+        /* ✅ Попал */
+        if(window._timingAudioTimer){ clearInterval(window._timingAudioTimer); window._timingAudioTimer = null; }
+        const cr = raid.crystals.find(c => c.id === tg.crystalId);
+        if(cr){
+          cr.hp--;
+          playRare();
+          flashRare();
+          if(cr.hp <= 0){
+            cr.broken = true;
+            raid.crystalsAlive--;
+            notify('💥', 'КРИСТАЛЛ РАЗБИТ!', 'Осталось: ' + raid.crystalsAlive, '#10b981');
+            floatTextAt('💥 РАЗБИТ!', clientX, clientY - 40, '#10b981');
+            /* Все кристаллы сломаны → фаза босса */
+            if(raid.crystalsAlive <= 0){
+              raid.timingGame = null;
+              setTimeout(() => enterCrystalsBreakPhase(), 400);
+              return;
+            }
+          } else {
+            notify('✅', 'ПОПАЛ!', 'Кристалл слабее', '#10b981');
+            floatTextAt('+1 ПОПАЛ!', clientX, clientY - 40, '#10b981');
+          }
+        }
+        raid.timingGame = null;
+        renderRaidHUD();
+      } else {
+        /* ❌ Промах → оглушение */
+        if(window._timingAudioTimer){ clearInterval(window._timingAudioTimer); window._timingAudioTimer = null; }
+        playFishBreak();
+        raid.stunUntil = Date.now() + 5000;
+        notify('💀', 'ПРОМАХ!', 'Оглушён на 5 сек', '#dc2626');
+        floatTextAt('💀 ОГЛУШЕНИЕ!', clientX, clientY, '#dc2626');
+        raid.timingGame = null;
+        renderRaidHUD();
+      }
+      return;
+    }
+    /* 🎯 Клик по кристаллу — открыть мини-игру */
+    let hitC = null, hitCDist = Infinity;
+    raid.crystals.forEach(cr => {
+      if(cr.broken) return;
+      const ddx = cr.x - x, ddy = cr.y - y;
+      const d = Math.sqrt(ddx*ddx + ddy*ddy);
+      if(d < cr.radius + 15 && d < hitCDist){ hitC = cr; hitCDist = d; }
+    });
+    if(hitC){
+      const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
+      if(rodIdx < 3){
+        floatTextAt('🔒 Нужен карбон!', clientX, clientY, '#dc2626');
+        playFishMiss();
+        return;
+      }
+      startTimingGame(hitC);
+      return;
+    }
+    playFishMiss();
+    return;
+  }
 
   /* 🐸 ФАЗА ЛЯГУШЕК — ПРИОРИТЕТ, проверяем ПЕРВЫМ делом */
   if(raid.stagePhase === 'frogs' && raid.frogs){
@@ -3434,8 +3861,8 @@ function handleRaidClick(e){
         f.progress = Math.min(100, f.progress + gain);
         f.lastTapTime = Date.now();
         raid.taps++;
-        playFishReel();
-        floatTextAt('+' + gain.toFixed(1) + '%', clientX, clientY, '#10b981');
+    playFishReel();
+    /* Убрали floatText — мешает смотреть босса */
         if(f.progress >= 100){ endFrogFightReveal(); }
       } else {
         /* Промах — без штрафа, просто не растёт */
@@ -3475,7 +3902,7 @@ function handleRaidClick(e){
       /* Тап работает если попал в радиус 50px (легче попасть) */
       if(gdist < 50){
         const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
-        const rodMult = [0, 1, 1.25, 1.5, 1.75][rodIdx] || 0;
+        const rodMult = [0, 1.3, 1.9, 2.4, 3.0][rodIdx] || 0;
         const baseGain = GUARD_TYPES[g.type].progressBase;
         const gain = baseGain * rodMult;
         g.progress = Math.min(100, g.progress + gain);
@@ -3550,6 +3977,17 @@ function handleRaidClick(e){
       raid.lastTapTime = Date.now();
       raid.radius = [65, 52, 42, 35][raid.stage - 1] || 35;
       const _boss2 = BOSS_BY_ID[raid.bossId];
+      /* 🐡 Если у босса кристаллы — новая фаза кристаллов */
+      if(_boss2 && _boss2.hasCrystals){
+        spawnCrystals(raid.stage);
+        raid.bossX = canvas.width / 2;
+        raid.bossY = canvas.height / 2;
+        playFishBreak();
+        flashRare();
+        notify('💎', 'Стадия ' + raid.stage + '!', 'Кристаллы снова!', '#a5b4fc');
+        renderRaidHUD();
+        return;
+      }
       /* 🛡 Если у босса есть охрана — новая фаза стражей */
       if(_boss2 && _boss2.hasGuards){
         spawnStageGuards(raid.stage);
@@ -3577,6 +4015,50 @@ function handleRaidClick(e){
     }
   }
 }
+function startGrabGame(){
+  const raid = state.raid;
+  if(!raid || !raid.active || raid.grabGame) return;
+  const stage = raid.stage;
+  const zoneWidth = Math.max(11, 26 - stage * 3);
+  const speed = 0.9 + stage * 0.25;
+  const zoneCenter = 25 + Math.random() * 50;
+  raid.grabGame = {
+    pos: Math.random() < 0.5 ? 0 : 100,
+    dir: Math.random() < 0.5 ? 1 : -1,
+    zoneStart: Math.max(0, zoneCenter - zoneWidth / 2),
+    zoneEnd: Math.min(100, zoneCenter + zoneWidth / 2),
+    zoneWidth,
+    speed,
+    timer: 5000,
+    safeUntil: Date.now() + 700
+  };
+  playFishStruggle();
+  notify('🚨', 'ЧЁРТ ВЫРЫВАЕТ УДОЧКУ!', 'Спаси её — тапни в зоне!', '#dc2626');
+  renderRaidHUD();
+}
+function enterCrystalsBreakPhase(){
+  const raid = state.raid;
+  if(!raid || !raid.active) return;
+  const boss = BOSS_BY_ID[raid.bossId];
+  raid.stagePhase = 'boss';
+  raid.phase = 'swim';
+  raid.progress = 0;
+  raid.lastTapTime = Date.now();
+  const canvas = $('fishingCanvas');
+  if(canvas){
+    raid.bossX = canvas.width / 2;
+    raid.bossY = canvas.height / 2;
+    raid.vx = (Math.random() - 0.5) * 5;
+    raid.vy = (Math.random() - 0.5) * 5;
+    if(Math.abs(raid.vx) < 1) raid.vx = raid.vx > 0 ? 1.4 : -1.4;
+    if(Math.abs(raid.vy) < 1) raid.vy = raid.vy > 0 ? 1.4 : -1.4;
+  }
+  playAchievement();
+  flashRare();
+  notify('🐡', 'ЧЁРТ УЯЗВИМ!', 'Лови его!', '#dc2626');
+  floatTextAt('🐡 ЧЁРТ УЯЗВИМ!', (canvas ? canvas.width/2 : 200), (canvas ? canvas.height/2 : 200), '#dc2626');
+  renderRaidHUD();
+}
 function enterBossPhase(){
   const raid = state.raid;
   if(!raid || !raid.active) return;
@@ -3598,15 +4080,6 @@ function enterBossPhase(){
     raid.frogAbilities.croakTimer = 7000 + Math.random() * 3000;
     raid.frogAbilities.tongueTimer = 5000 + Math.random() * 2000;
     raid.frogAbilities.tongueUntil = 0;
-  }
-  const canvas = $('fishingCanvas');
-  if(canvas){
-    frog.fightX = canvas.width / 2;
-    frog.fightY = canvas.height / 2;
-    const spd = 200;
-    const ang = Math.random() * Math.PI * 2;
-    frog.fightVx = Math.cos(ang) * spd;
-    frog.fightVy = Math.sin(ang) * spd;
   }
   playAchievement();
   flashRare();
@@ -3711,7 +4184,10 @@ function endRaidWin(){
     state.pendingCatch = {
       caught: allCaught,
       depthId: -1,
-      mutAttempts: 5,
+      mutAttempts: 5 + (function(){
+        const r = getDeckRoleBonus();
+        return (r && r.active && r.bonus.mutAttempts) ? r.bonus.mutAttempts : 0;
+      })(),
       fromRaid: true
     };
     openCatchModal();
@@ -4135,6 +4611,11 @@ function load(){
     }
     if(typeof state.activeDeckIdx !== 'number') state.activeDeckIdx = 0;
     if(state.activeDeckIdx < 0 || state.activeDeckIdx > 4) state.activeDeckIdx = 0;
+    /* 🎴 Роли колод (миграция — если у колод нет роли) */
+    const _rolesOrder = ['money', 'science', 'miner', 'fisher', 'pro'];
+    state.decks.forEach((d, i) => {
+      if(!d.role) d.role = _rolesOrder[i] || 'money';
+    });
 
     if(state.fishing) state.fishing = null;
     if(state.raid && typeof state.raid === 'object') state.raid = null;
@@ -4635,9 +5116,16 @@ function getCD(){
   if(isBuffActive('cd')) cd *= 0.5;
   if(isEventActive('reflex')) cd *= 0.5;
   cd *= getPhaseCDMult();
+  const r = getDeckRoleBonus();
+  if(r && r.active && r.bonus.cd){ cd *= (1 + r.bonus.cd); }
   return Math.max(0.2, cd);
 }
-function getBaseClick(){ return Math.max(1, Math.round(BASE_CLICK * getIncomeMult() * getPhaseCoinMult())); }
+function getBaseClick(){
+  let m = BASE_CLICK * getIncomeMult() * getPhaseCoinMult();
+  const r = getDeckRoleBonus();
+  if(r && r.active && r.bonus.income){ m *= (1 + r.bonus.income); }
+  return Math.max(1, Math.round(m));
+}
 /* ============================================================
    🌗 МИР: ДЕНЬ / НОЧЬ (10 мин + 10 мин)
    ============================================================ */
@@ -5967,12 +6455,29 @@ function renderDeckSwitcher(){
     const active = i === state.activeDeckIdx;
     const fill = d.cards.filter(Boolean).length;
     const total = d.slotsMax;
-    const bg = active ? 'linear-gradient(135deg,#ffd93d,#f59e0b)' : (d.unlocked ? 'var(--panel)' : 'var(--panel2)');
+    const roleCfg = DECK_ROLES[i];
+    const roleIcon = d.unlocked && roleCfg ? roleCfg.icon : '';
+    const roleId = d.unlocked && roleCfg ? roleCfg.id : null;
+    /* Проверка: заполнена ли колода (роль активна) */
+    const filled = d.cards.slice(0, d.slotsMax).filter(Boolean).length;
+    const roleActive = d.unlocked && filled >= d.slotsMax;
+    const roleBonusStr = (roleActive && roleCfg) ? ' · актив' : '';
+    /* Цвет роли для активной колоды */
+    let bg, border;
+    if(active && roleCfg){
+      bg = 'linear-gradient(135deg,' + roleCfg.color + 'cc,' + roleCfg.color + '88)';
+      border = roleCfg.color;
+    } else if(active){
+      bg = 'linear-gradient(135deg,#ffd93d,#f59e0b)';
+      border = '#ffd93d';
+    } else {
+      bg = d.unlocked ? 'var(--panel)' : 'var(--panel2)';
+      border = 'var(--border)';
+    }
     const color = active ? '#15101f' : (d.unlocked ? 'var(--txt)' : 'var(--txt-dim)');
-    const border = active ? '#ffd93d' : 'var(--border)';
-    const label = d.unlocked ? d.name : '🔒';
-    const sub = d.unlocked ? (fill + '/' + total) : (DECK_PRICES[i] + '🥇');
-    html += '<button class="deckSwitchBtn" data-deck-i="' + i + '" style="flex:0 0 auto;min-width:80px;padding:6px 10px;border-radius:8px;background:' + bg + ';color:' + color + ';border:2px solid ' + border + ';font-family:inherit;font-weight:700;font-size:10px;cursor:pointer;line-height:1.3"><div style="font-size:11px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px">' + label + '</div><div style="font-size:9px;opacity:.75">' + sub + '</div></button>';
+    const label = d.unlocked ? (roleIcon + ' ' + d.name) : '🔒';
+    const sub = d.unlocked ? (fill + '/' + total + roleBonusStr) : (DECK_PRICES[i] + '🥇');
+    html += '<button class="deckSwitchBtn" data-deck-i="' + i + '" style="flex:0 0 auto;min-width:92px;padding:6px 10px;border-radius:8px;background:' + bg + ';color:' + color + ';border:2px solid ' + border + ';font-family:inherit;font-weight:700;font-size:10px;cursor:pointer;line-height:1.3"><div style="font-size:11px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px">' + label + '</div><div style="font-size:9px;opacity:.75">' + sub + '</div></button>';
   }
   el.innerHTML = html;
   el.querySelectorAll('.deckSwitchBtn').forEach(btn => {
@@ -6014,6 +6519,14 @@ function switchDeck(i){
   state.activeDeckIdx = i;
   playClick();
   save(); renderDeckSwitcher(); renderSlots(); renderHeader(); renderTop();
+  /* 🎴 Тост с ролью */
+  const roleCfg = DECK_ROLES[i];
+  if(roleCfg){
+    const filled = d.cards.slice(0, d.slotsMax).filter(Boolean).length;
+    const roleActive = filled >= d.slotsMax;
+    const msg = roleActive ? roleCfg.desc : 'Заполни все ' + d.slotsMax + ' слотов чтобы активировать';
+    notify(roleCfg.icon, roleCfg.name + (roleActive ? ' активна!' : ' (не активна)'), msg, roleCfg.color);
+  }
 }
 
 function buyDeck(i){
@@ -6448,7 +6961,9 @@ function rollFishRarity(depthTier){
   else if(depthTier <= 3){ weights.d=0; weights.m=0; weights.s=0; }
   else if(depthTier <= 4){ weights.m=0; weights.s=0; }
   else if(depthTier <= 5){ weights.s=0; }
-  const luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus;
+  const _roleFisherR = getDeckRoleBonus();
+  const _fisherBonus = (_roleFisherR && _roleFisherR.active && _roleFisherR.bonus.rarityBonus) ? _roleFisherR.bonus.rarityBonus : 0;
+  const luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus + _fisherBonus;
   if(luck > 0){
     const boost = 1 + luck/100;
     weights.r *= boost; weights.sr *= boost*1.2; weights.e *= boost*1.3;
@@ -6648,8 +7163,10 @@ function startFishing(depthId){
     endTime: Date.now() + depth.time*1000,
     energy: state.energy, maxEnergy: getMaxEnergy(),
     fish: [], lastSpawn: 0, spawnInterval: 800, caught: [],
-    lastClick: 0, lastAnyClick: 0, clickCd: getFishCD() * 1000,
-    mutAttempts: 1 + getUpgradeVal('mut_attempts'),
+    lastClick: 0, lastAnyClick: 0, clickCd: getFishCD() * 1000,    mutAttempts: 1 + getUpgradeVal('mut_attempts') + (function(){
+      const r = getDeckRoleBonus();
+      return (r && r.active && r.bonus.mutAttempts) ? r.bonus.mutAttempts : 0;
+    })(),
     hookCooldown: 0,
     lastEventSpawn: Date.now(),
 nextEventDelay: 15000 + Math.random() * 20000
@@ -7767,10 +8284,33 @@ function applyMutationToFish(mid){
   const _mutInfo = existingMuts === 0
     ? '✨ Это будет 1-я мутация — шанс повышен!'
     : '📊 Уже наложено: ' + existingMuts + ' (шанс ниже)';
-  if(!confirm('Использовать ' + m.icon + ' ' + m.name + '?\n\n⚠️ Карта «' + cardWithMut.name + '» снимется с экипировки и уйдёт в КД на ' + cdMin + ' мин.\n\n' + _mutInfo + '\nШанс успеха: ' + chancePct + '%.')) return;
+  /* 🎣 Считаем попытки для этой карты */
+  if(!state.cardMutAttempts) state.cardMutAttempts = {};
+  const _roleR3 = getDeckRoleBonus();
+  const _maxCardAttempts = (_roleR3 && _roleR3.active && _roleR3.role.id === 'fisher' && _roleR3.bonus.mutAttemptsPerCard)
+    ? _roleR3.bonus.mutAttemptsPerCard : 1;
+  const _curAttempts = state.cardMutAttempts[cardWithMut.id] || 0;
+  const _attemptsLeft = _maxCardAttempts - _curAttempts;
+  const _attemptInfo = _maxCardAttempts > 1
+    ? '\n🎣 Попыток на карту: ' + _attemptsLeft + '/' + _maxCardAttempts
+    : '';
+  if(!confirm('Использовать ' + m.icon + ' ' + m.name + '?\n\n⚠️ Карта «' + cardWithMut.name + '» может уйти в КД на ' + cdMin + ' мин.\n\n' + _mutInfo + _attemptInfo + '\nШанс успеха: ' + chancePct + '%.')) return;
   pc.mutAttempts--;
-  state.cardCooldowns[cardWithMut.id] = Date.now() + cdMs;
-  if(Math.random() < applyChance){
+  /* Логика КД: успех → всегда КД, провал → КД только если кончились попытки */
+  const _success = Math.random() < applyChance;
+  if(_success){
+    state.cardCooldowns[cardWithMut.id] = Date.now() + cdMs;
+    delete state.cardMutAttempts[cardWithMut.id];
+  } else {
+    const _newAttempts = _curAttempts + 1;
+    if(_newAttempts >= _maxCardAttempts){
+      state.cardCooldowns[cardWithMut.id] = Date.now() + cdMs;
+      delete state.cardMutAttempts[cardWithMut.id];
+    } else {
+      state.cardMutAttempts[cardWithMut.id] = _newAttempts;
+    }
+  }
+  if(_success){
     fish.mutations = fish.mutations || [];
     fish.mutations.push(mid);
     playRare(); flashRare();
@@ -7782,7 +8322,12 @@ function applyMutationToFish(mid){
     alert('✅ УСПЕХ!\n' + m.icon + ' ' + (m.fishName || m.name) + ' → 🪙 ' + fmtBig(newPrice) + '\n\nКарта «' + cardWithMut.name + '» в КД на ' + cdMin + ' мин.');
   } else {
     playFishMiss();
-    alert('❌ Провал!\n' + m.icon + ' не применился.\n\nКарта «' + cardWithMut.name + '» в КД на ' + cdMin + ' мин.');
+    const _afterFail = state.cardMutAttempts[cardWithMut.id] || 0;
+    if(_afterFail > 0){
+      alert('❌ Провал!\n' + m.icon + ' не применился.\n\n🎣 У тебя есть ещё ' + (_maxCardAttempts - _afterFail) + ' попытка с этой картой!');
+    } else {
+      alert('❌ Провал!\n' + m.icon + ' не применился.\n\nКарта «' + cardWithMut.name + '» в КД на ' + cdMin + ' мин.');
+    }
   }
   save();
   closeModal('mutPickModal');
@@ -8801,9 +9346,13 @@ function botClick(){
   const base = getBaseClick();
   const earned = Math.max(1, Math.round(base * 1));
   const luckMult = isBuffActive('luck') ? 2 : 1;
-  const goldBonus = (1 + sumStat('goldCh')/100) * luckMult;
-  const essBonus = (1 + sumStat('essCh')/100) * luckMult;
-  const manaBonus = (1 + sumStat('manaCh')/100) * luckMult;
+  const _roleR = getDeckRoleBonus();
+  const _roleGold = (_roleR && _roleR.active && _roleR.bonus.gold) ? (1 + _roleR.bonus.gold) : 1;
+  const _roleEss  = (_roleR && _roleR.active && _roleR.bonus.ess)  ? (1 + _roleR.bonus.ess)  : 1;
+  const _roleMana = (_roleR && _roleR.active && _roleR.bonus.mana) ? (1 + _roleR.bonus.mana) : 1;
+  const goldBonus = (1 + sumStat('goldCh')/100) * luckMult * _roleGold;
+  const essBonus = (1 + sumStat('essCh')/100) * luckMult * _roleEss;
+  const manaBonus = (1 + sumStat('manaCh')/100) * luckMult * _roleMana;
   state.coins += earned; state.coinsEarned += earned; state.totalClicks++;
   state.dailyStats.clicks++; state.dailyStats.coins += earned;
   state.questStats.clicks = (state.questStats.clicks||0) + 1;
@@ -9424,11 +9973,15 @@ function doClick(mult, e){
   playClick();
   ensureDailyStats();
   const base = getBaseClick();
-  const earned = Math.max(1, Math.round(base * mult));
+  const earned = Math.max(1, Math.round(base * 1));
   const luckMult = isBuffActive('luck') ? 2 : 1;
-  const goldBonus = (1 + sumStat('goldCh')/100) * luckMult;
-  const essBonus = (1 + sumStat('essCh')/100) * luckMult;
-  const manaBonus = (1 + sumStat('manaCh')/100) * luckMult;
+  const _roleR2 = getDeckRoleBonus();
+  const _roleGold2 = (_roleR2 && _roleR2.active && _roleR2.bonus.gold) ? (1 + _roleR2.bonus.gold) : 1;
+  const _roleEss2  = (_roleR2 && _roleR2.active && _roleR2.bonus.ess)  ? (1 + _roleR2.bonus.ess)  : 1;
+  const _roleMana2 = (_roleR2 && _roleR2.active && _roleR2.bonus.mana) ? (1 + _roleR2.bonus.mana) : 1;
+  const goldBonus = (1 + sumStat('goldCh')/100) * luckMult * _roleGold2;
+  const essBonus = (1 + sumStat('essCh')/100) * luckMult * _roleEss2;
+  const manaBonus = (1 + sumStat('manaCh')/100) * luckMult * _roleMana2;
   state.coins += earned; state.coinsEarned += earned; state.totalClicks++;
   state.dailyStats.clicks++; state.dailyStats.coins += earned;
   state.questStats.clicks = (state.questStats.clicks||0) + 1;
@@ -10144,7 +10697,20 @@ function openHelp(){
 
   html += '<div class="sectionTitle">🎮 Как пользоваться</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.7;padding:6px 0"><b>•</b> Тап по колоде в кликере → переключение<br><b>•</b> Тап по <b>активной</b> колоде → переименование (🥇 10)<br><b>•</b> Тап по карте в коллекции → выбор слота и колоды<br><b>•</b> Карта в колоде <b>автоматически</b> переносится, если поставишь в другую<br><b>•</b> Карту в колоде нельзя сжечь / удалить / пустить в крафт</div>';
-  html += '</div>';
+
+  html += '<div class="sectionTitle">🎭 Роли колод</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Каждая колода имеет <b>уникальную роль</b>. Роль активируется, когда <b>все открытые слоты заполнены</b>.</div>';
+  html += '<div class="chanceRow"><span>💰 Колода 1 · Деньги</span><b>бесплатно</b></div>';
+  html += '<div class="chanceRow"><span>🧪 Колода 2 · Учёный</span><b>🥇 100</b></div>';
+  html += '<div class="chanceRow"><span>⛏️ Колода 3 · Шахтёр</span><b>🥇 500</b></div>';
+  html += '<div class="chanceRow"><span>🎣 Колода 4 · Рыбак</span><b>🥇 2 500</b></div>';
+  html += '<div class="chanceRow"><span>👑 Колода 5 · Профи</span><b>🥇 15 000</b></div>';
+  Object.keys(DECK_ROLES).forEach(i => {
+    const r = DECK_ROLES[i];
+    html += '<div class="legendRow"><div class="ic">' + r.icon + '</div><div class="txt"><b>' + r.name + '</b> · Колода ' + (+i + 1) + '<small>' + r.desc + '</small></div></div>';
+  });
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">💡 <b>Совет:</b> специалисты дают <b>в 2-5 раз больше</b> в своей области. Профи — универсальный, но слабее в каждой конкретной задаче.</div>';
+  html += '<div style="font-size:12px;opacity:.85;padding:6px 0">🎣 <b>Рыбак:</b> с ним каждая карта может дать <b>2 попытки</b> мутации (успех → КД сразу, провал → вторая попытка без КД). +20% к шансу редких рыб.</div>';
 
   /* ============================================
      ⚒️ КРАФТ
