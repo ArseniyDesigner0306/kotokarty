@@ -545,6 +545,218 @@ body.reduce-motion .card.vis-cosmic,body.reduce-motion .card.vis-chaos{animation
 .avTilePhoto{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .avTileName{font-size:9px;padding:4px;text-align:center;font-weight:700;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* ============ 🎰 РУЛЕТКА ============ */
+.rouletteBox {
+  background: linear-gradient(135deg, #1a0f2e, #2d2444);
+  border: 2px solid var(--gold);
+}
+.rouletteWrap {
+  position: relative;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0f0820, #1a0f2e);
+  border: 2px solid #2d2444;
+  margin-bottom: 14px;
+}
+.rouletteMarker {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  color: var(--gold);
+  z-index: 10;
+  text-shadow: 0 0 12px var(--gold), 0 4px 8px #000;
+  pointer-events: none;
+  animation: rouletteMarkerPulse 1.2s ease-in-out infinite;
+}
+@keyframes rouletteMarkerPulse {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(3px); }
+}
+.rouletteLenta {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+  /* 🎬 Анимируем через JS (requestAnimationFrame + easeOutQuint) */
+}
+.rouletteLenta.no-transition {
+  transition: none;
+}
+.rouletteItem {
+  width: 100px;
+  height: 110px;
+  flex-shrink: 0;
+  margin: 0 4px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: linear-gradient(180deg, #2d2444, #1a1428);
+  border: 2px solid #3d3454;
+  position: relative;
+  overflow: hidden;
+}
+.rouletteItem .rIcon {
+  font-size: 38px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px #000);
+}
+.rouletteItem .rName {
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  padding: 0 4px;
+  color: #fff;
+  opacity: .9;
+  line-height: 1.2;
+}
+.rouletteItem.rCommon    { border-color: #6b7280; }
+.rouletteItem.rUncommon  { border-color: #10b981; background: linear-gradient(180deg, #10b98133, #0f0820); }
+.rouletteItem.rRare      { border-color: #3b82f6; background: linear-gradient(180deg, #3b82f633, #0f0820); }
+.rouletteItem.rEpic      { border-color: #a855f7; background: linear-gradient(180deg, #a855f733, #0f0820); }
+.rouletteItem.rLegendary { border-color: #f59e0b; background: linear-gradient(180deg, #f59e0b33, #0f0820); box-shadow: 0 0 20px #f59e0b66; }
+.rouletteItem.rJackpot   { border-color: #ffd93d; background: linear-gradient(180deg, #ffd93d33, #0f0820); box-shadow: 0 0 30px #ffd93daa, inset 0 0 20px #ffd93d33; animation: rouletteJackpot 1.5s ease-in-out infinite; }
+@keyframes rouletteJackpot {
+  0%, 100% { box-shadow: 0 0 30px #ffd93daa, inset 0 0 20px #ffd93d33; }
+  50% { box-shadow: 0 0 50px #ffd93dff, inset 0 0 30px #ffd93d66; }
+}
+.rouletteGradientLeft, .rouletteGradientRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 5;
+}
+.rouletteGradientLeft {
+  left: 0;
+  background: linear-gradient(90deg, #1a0f2e 20%, transparent);
+}
+.rouletteGradientRight {
+  right: 0;
+  background: linear-gradient(-90deg, #1a0f2e 20%, transparent);
+}
+.rouletteInfo {
+  background: var(--bg2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+}
+.rouletteInfoRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 3px 0;
+}
+.rouletteQtyBtn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  color: var(--txt);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  min-height: 42px;
+  transition: .15s;
+}
+.rouletteQtyBtn.active {
+  background: linear-gradient(135deg, var(--acc), var(--acc2));
+  border-color: var(--acc);
+  color: #fff;
+}
+.rouletteResult {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .3s;
+  pointer-events: none;
+}
+.rouletteResultBox {
+  text-align: center;
+  animation: rouletteResultPop .6s cubic-bezier(.2,.9,.3,1.4);
+}
+@keyframes rouletteResultPop {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.rouletteMiniResult {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9998;
+  background: linear-gradient(135deg, #1a0f2e, #2d2444);
+  border-radius: 16px;
+  padding: 20px 28px;
+  text-align: center;
+  border: 2px solid;
+  box-shadow: 0 12px 40px rgba(0,0,0,.85);
+  animation: rouletteMiniPop .35s cubic-bezier(.2,.9,.3,1.4);
+  pointer-events: none;
+}
+@keyframes rouletteMiniPop {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.rouletteMiniResult.out {
+  animation: rouletteMiniOut .3s ease-in forwards;
+}
+@keyframes rouletteMiniOut {
+  to { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+}
+.rouletteMiniResult .mIcon {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.rouletteMiniResult .mName {
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+.rouletteMiniResult .mValue {
+  font-size: 13px;
+  color: #fff;
+  opacity: .85;
+}
+.rouletteMiniResult .mStep {
+  font-size: 11px;
+  color: #ffd93d;
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+.rouletteResultIcon {
+  font-size: 100px;
+  line-height: 1;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 30px currentColor);
+}
+.rouletteResultName {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 20px currentColor;
+}
+
 /* ============ CROP ============ */
 .cropWrap{position:relative;padding:14px;background:var(--bg2);border-radius:12px;margin-bottom:10px;display:flex;justify-content:center}
 .cropViewport{position:relative;overflow:hidden;background:#000;border-radius:8px;touch-action:none;cursor:grab;user-select:none;border:2px dashed rgba(255,255,255,.8)}
@@ -881,7 +1093,8 @@ body.is-night #fishingArea{
     <span>✨ <b id="mana">0</b></span>
     <span id="phaseIndicator" style="font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:default">☀️ 10:00</span>
     <span id="raidBar" style="display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer"></span>
-    <span id="eventBar" style="display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer"></span>
+<span id="eventBar" style="display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer"></span>
+    <span id="ticketRaidBar" style="display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer"></span>
   </div>
   <div class="header-actions">
     <button id="themeToggle" title="Тема">🌙</button>
@@ -985,6 +1198,13 @@ body.is-night #fishingArea{
 
   <!-- ====== КАРТЫ ====== -->
   <div class="tab" id="tab-collection">
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="invTabBtn active" data-inv="cards" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--acc);background:var(--acc);color:#fff;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:42px">🎴 Карты</button>
+      <button class="invTabBtn" data-inv="potions" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:42px">🧪 Зелья</button>
+      <button class="invTabBtn" data-inv="tickets" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:42px">🎟 Билеты</button>
+    </div>
+
+    <div id="invSectionCards">
     <div class="collectionProgress">
       <div class="collectionProgressText"><span>Собрано карт</span><b id="colProgressText">0 / 25</b></div>
       <div class="collectionProgressBar"><div class="collectionProgressFill" id="colProgressFill" style="width:0%"></div></div>
@@ -1000,6 +1220,67 @@ body.is-night #fishingArea{
 <button id="bulkSacrificeBtn" style="width:100%;padding:12px;border-radius:10px;border:1px solid #dc262655;background:var(--panel);color:#dc2626;font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;margin-bottom:10px;min-height:44px">🗡 Режим жертвы</button>
 <button id="bulkDeleteBtn" style="width:100%;padding:12px;border-radius:10px;border:1px solid #dc262655;background:var(--panel);color:var(--red);font-weight:700;font-family:inherit;font-size:12px;cursor:pointer;margin-bottom:10px;min-height:44px">🗑 Режим удаления</button>
     <div class="cardGrid" id="collectionGrid"></div>
+    </div>
+
+    <div id="invSectionPotions" style="display:none">
+      <div id="potionsGrid"></div>
+    </div>
+
+    <div id="invSectionTickets" style="display:none">
+      <div id="raidTicketsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ====== РУЛЕТКА ====== -->
+  <div class="tab" id="tab-roulette">
+    <div style="text-align:center;font-size:18px;font-weight:900;color:var(--gold);margin-bottom:14px">🎁 Колесо наград</div>
+    <div class="rouletteWrap">
+      <div class="rouletteMarker">▼</div>
+      <div class="rouletteLenta" id="rouletteLenta"></div>
+      <div class="rouletteGradientLeft"></div>
+      <div class="rouletteGradientRight"></div>
+    </div>
+
+    <div class="rouletteInfo">
+      <div class="rouletteInfoRow">
+        <span>🎁 Бесплатных прокрутов:</span>
+        <b id="rouletteFree" style="color:#10b981">1</b>
+      </div>
+      <div class="rouletteInfoRow">
+        <span>🎟 Билетов колеса:</span>
+        <b id="rouletteTickets" style="color:#ffd93d">0</b>
+      </div>
+    </div>
+
+    <div style="font-size:11px;opacity:.6;margin-bottom:6px;text-align:center">Количество прокрутов:</div>
+    <div class="packQtyRow" id="rouletteQtyRow" style="margin-bottom:14px">
+      <button data-roulqty="1" class="rouletteQtyBtn active">×1</button>
+      <button data-roulqty="5" class="rouletteQtyBtn">×5</button>
+      <button data-roulqty="10" class="rouletteQtyBtn">×10</button>
+      <button data-roulqty="max" class="rouletteQtyBtn">МАКС</button>
+    </div>
+
+    <button id="rouletteSpinBtn" class="profileBtn btnPink" style="font-size:16px;margin-bottom:8px">🎁 КРУТИТЬ</button>
+
+    <button id="rouletteSkipBtn" style="display:none;width:100%;padding:12px;border-radius:10px;border:2px solid var(--gold);background:var(--panel2);color:var(--gold);font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:46px;margin-bottom:8px">⏩ Пропустить всё</button>
+
+    <button id="rouletteChancesBtn" class="profileBtn btnGray" style="font-size:12px;margin-bottom:8px">🎲 Шансы выпадения</button>
+
+    <div id="rouletteProgress" style="display:none;text-align:center;font-size:14px;font-weight:700;color:var(--gold);margin-top:8px">
+      Прокрут <span id="rouletteCur">0</span> / <span id="rouletteTotal">0</span>
+    </div>
+
+    <div style="font-size:11px;opacity:.6;text-align:center;margin-top:10px;line-height:1.5">
+      🎰 Билеты колеса:<br>
+      • Ежедневного бонуса (+3)<br>
+      • Заданий (15%)<br>
+      • Кликов (0.1%)<br>
+      • Рыбалки (2%)<br>
+      <br>
+      🎟 Билеты рейда:<br>
+      • Колесо наград<br>
+      • Сезонные события (скоро)
+    </div>
   </div>
 
   <!-- ====== ТОП ====== -->
@@ -1028,7 +1309,8 @@ body.is-night #fishingArea{
   <button data-tab="fishing" data-lvl="3"><span class="navIcon">🎣</span>Рыбалка</button>
   <button data-tab="craft"><span class="navIcon">⚒️</span>Крафт</button>
   <button data-tab="quests"><span class="navIcon">📋</span>Задания</button>
-  <button data-tab="collection"><span class="navIcon">📚</span>Карты</button>
+  <button data-tab="collection"><span class="navIcon">🎒</span>Инвентарь</button>
+  <button data-tab="roulette"><span class="navIcon">🎁</span>Колесо</button>
   <button data-tab="top"><span class="navIcon">🏆</span>Топ</button>
   <button data-tab="profile"><span class="navIcon">👤</span>Профиль</button>
 </nav>
@@ -1044,6 +1326,8 @@ body.is-night #fishingArea{
 <div class="modal" id="refModal"><div class="modalBox" id="refContent"></div></div>
 <div class="modal" id="batchResultModal"><div class="modalBox" id="batchResultContent"></div></div>
 <div class="modal" id="craftPickModal"><div class="modalBox" id="craftPickContent"></div></div>
+<div class="modal" id="notifModal"><div class="modalBox" id="notifContent"></div></div>
+
 <div class="modal" id="cropModal"><div class="modalBox">
   <button class="modalX" onclick="document.getElementById('cropModal').classList.remove('open')">✕</button>
   <h2 id="cropTitle">Обрезать</h2>
@@ -1071,9 +1355,7 @@ body.is-night #fishingArea{
 <div id="refToast"></div>
 
 <!-- ============ INPUTS ============ -->
-<input type="file" id="avatarFile" accept="image/*" style="display:none">
-<input type="file" id="bgFile" accept="image/*" style="display:none">
-<input type="file" id="musicFile" accept="audio/*" style="display:none">
+<!-- Все кастомные загрузки удалены — только эмодзи и встроенные треки -->
 
 <script>
 /* ============================================================
@@ -1103,7 +1385,7 @@ const BOURSE_UPDATE_MS = 15*60*1000;
 const BOURSE_SPREAD = 0.12;
 const BOURSE_CEIL = 1500;
 const BOURSE_FLOOR = 150;
-const BOURSE_HISTORY_MAX = 2000;
+const BOURSE_HISTORY_MAX = 160;
 const DAILY_SHOP_HOURS = [7, 12, 16, 20, 23];
 /* ============================================================
    🎉 СОБЫТИЯ ДНЯ
@@ -1926,6 +2208,7 @@ const BOSSES = [
     depthId: 0,
     name: 'Толстый Сом',
     icon: '🐟',
+    img: 'assets/bosses/boss_pond.png',
     color: '#5eb1c9',
     minWeight: 6000,
     maxWeight: 15000,
@@ -1943,7 +2226,8 @@ const BOSSES = [
     depthId: 1,
     name: 'Речная Змея',
     icon: '🐍',
-    color: '#3b82c9',
+    img: 'assets/bosses/boss_river.png',
+    color: '#10b981',
     minWeight: 15000,
     maxWeight: 30000,
     minPrice: 1500000,
@@ -1959,6 +2243,7 @@ const BOSSES = [
     depthId: 2,
     name: 'Лягушка-Обманщица',
     icon: '🐸',
+    img: 'assets/bosses/boss_lake.png',
     color: '#7c3aed',
     minWeight: 30000,
     maxWeight: 60000,
@@ -1975,6 +2260,7 @@ const BOSSES = [
     depthId: 3,
     name: 'Морской Чёрт',
     icon: '🐡',
+    img: 'assets/bosses/boss_deep.png',
     color: '#dc2626',
     minWeight: 60000,
     maxWeight: 120000,
@@ -1993,6 +2279,7 @@ const BOSSES = [
     depthId: 4,
     name: 'Король Бездны',
     icon: '👁',
+    img: 'assets/bosses/boss_abyss.png',
     color: '#4c1d95',
     minWeight: 200000,
     maxWeight: 500000,
@@ -2008,6 +2295,16 @@ const BOSSES = [
   }
 ];const BOSS_BY_ID = {};
 BOSSES.forEach(b => BOSS_BY_ID[b.id] = b);
+
+/* 👁 Отрисовка Короля Бездны картинкой (fallback на эмодзи) */
+function drawAbyssKing(ctx, x, y, size){
+  const im = window._bossImgCache && window._bossImgCache['boss_abyss'];
+  if(im && im.complete){
+    ctx.drawImage(im, x - size/2, y - size/2, size, size);
+    return true;
+  }
+  return false;
+}
 
 /* 🛡 ТИПЫ СТРАЖЕЙ */
 const GUARD_TYPES = {
@@ -2452,12 +2749,19 @@ function defaultState(){
     nick:'', coins:0, gold:0, essence:0, mana:0, exp:0,
     lvl:1, xp:0, xpTotal:0, showLvl:true,
     collection:[], equippedIds:[], invMax:50, slotsMax:1,
-    decks: null, activeDeckIdx: 0,
+    decks: [0,1,2,3,4].map(i => ({
+      id: 'deck_' + i,
+      name: 'Колода ' + (i + 1),
+      unlocked: i === 0,
+      slotsMax: 1,
+      cards: [null, null, null, null, null],
+      role: ['money','science','miner','fisher','pro'][i]
+    })),
+    activeDeckIdx: 0,
     soundOn:true, musicOn:true, currentTrack:0,
     theme:'dark', autoTheme:true, sawLightTheme:false, reduceMotion:false,
-    buffs:{money:0, cd:0, luck:0},
-    avatar:'', avatarType:'', avatarEmoji:'', bg:'', playTime:0,
-    customMusic:false, customMusicOn:false,
+    buffs:{money:0, cd:0, luck:0, mutLuck:0, ticketLuck:0, moneyMult:2, luckMult:2, mutLuckMult:2, ticketLuckMult:2},
+    avatar:'', avatarType:'', avatarEmoji:'', playTime:0,
     totalClicks:0, coinsEarned:0, goldEarned:0, essEarned:0, manaEarned:0,
     raritySeen:[], mutationsSeen:[], combosSeen:[], namesSeen:[], starsMax:0,
     achievements:{},
@@ -2485,17 +2789,28 @@ function defaultState(){
     fishing:null,
     raid:null,
     raidStats:{ caught:{}, attempts:0, totalTime:0 },
+    raidCaught: {},
     fishInventory:[],
     fishInvMax: 50,
     cardCooldowns:{},
     mutAttemptsLeft:0, pendingCatch:null,
-    craftSlots:[], craftSlotsMax:1, craftCounts:{}, sacrificePanel:[], craftReadyPanel:[],
+    craftSlots:[], craftSlotsMax:1, craftCounts:{}, sacrificePanel:[], sacrificePanelCache:{}, craftReadyPanel:[],
     referrals:{ code:'', count:0, applied:'', invitedBy:'', bonusClaimed:false },
     notifSettings:{ craft:true, fishing:true, daily:true, shop:false, quests:false, minigame:true },
     notifPermission:'default',
     minigame:{ lastPlay:0, wins:0 },
     tutorial:{ step:0, done:false, clicks:{base:null, target:null} },
     firstLaunch:true,
+    tutorialRewardClaimed:false,
+    rouletteFreeSpins:1,
+    rouletteLastFreeReset:0,
+    mutLuckMult:2,
+    ticketLuckMult:2,
+    rouletteTickets:0,
+    rouletteQty:1,
+    raidTickets: { case: 0, pond: 0, river: 0, lake: 0, deep: 0, abyss: 0 },
+    ticketRaid: null,
+    potions: {},
     lastSeenDailyShop:0,
     lastSeenQuests:0,
     worldStartTime: Date.now(),
@@ -2645,102 +2960,6 @@ function rollGuardRarity(type){
     if(r < 0) return rar;
   }
   return 'c';
-}
-/* ============================================================
-   🐸 ЛЯГУШКИ (клон-механика)
-   ============================================================ */
-function reshuffleFrogs(){
-  const raid = state.raid;
-  if(!raid) return;
-  const canvas = $('fishingCanvas');
-  const w = (canvas && canvas.width) || 300;
-  const h = (canvas && canvas.height) || 300;
-  const total = raid.stage + 1;
-  const realIdx = Math.floor(Math.random() * total);
-  const frogs = [];
-  for(let i = 0; i < total; i++){
-    const ang = (i / total) * Math.PI * 2 + Math.random() * 0.4;
-    const spd = 110 + raid.stage * 15;
-    frogs.push({
-      id: uid(),
-      isReal: i === realIdx,
-      isFighting: false,
-      isCaught: false,
-      isRevealed: false,
-      x: w/2 + Math.cos(ang) * 100,
-      y: h/2 + Math.sin(ang) * 100,
-      vx: Math.cos(ang) * spd * (0.8 + Math.random() * 0.4),
-      vy: Math.sin(ang) * spd * (0.8 + Math.random() * 0.4),
-      tugTimer: 1500,
-      progress: 0,
-      fightX: 0,
-      fightY: 0,
-      fightVx: 0,
-      fightVy: 0,
-      lastTapTime: 0,
-      jumpTimer: 7000 + Math.random() * 3000
-    });
-  }
-  raid.frogs = frogs;
-  raid.frogFight = null;
-  raid.frogCloneTimer = 15000;
-}
-function endFrogFightReveal(){
-  const raid = state.raid;
-  if(!raid || !raid.frogFight) return;
-  const f = raid.frogFight;
-  f.isFighting = false;
-  f.isRevealed = true;
-  const canvas = $('fishingCanvas');
-  const _r = canvas ? canvas.getBoundingClientRect() : {left:0, top:0};
-  if(f.isReal){
-    /* ✅ НАСТОЯЩАЯ — +25% к стадии */
-    raid.progress = Math.min(100, raid.progress + 34);
-    playFishWin();
-    flashRare();
-    floatTextAt('✅ НАСТОЯЩАЯ! +34%', _r.left + f.fightX, _r.top + f.fightY - 40, '#10b981');
-    notify('✅', 'Настоящая!', '+25% к стадии', '#10b981');
-    raid.frogFight = null;
-    /* Победа на стадии */
-    if(raid.progress >= 100){
-      if(raid.stage >= 4){ endRaidWin(); return; }
-      raid.stage++;
-      raid.progress = 0;
-      spawnFrogs(raid.stage);
-      playFishBreak();
-      flashRare();
-      notify('💢', 'Стадия ' + raid.stage + '!', 'Клонов больше!', '#7c3aed');
-      renderRaidHUD();
-      return;
-    }
-    /* 🔀 ПЕРЕМЕШКА — роли и позиции заново */
-    reshuffleFrogs();
-    notify('🔀', 'Роли перемешаны!', 'Кто теперь настоящая?', '#a855f7');
-    renderRaidHUD();
-    return;
-  } else {
-    /* ❌ КЛОН — -3% и исчезает, но тоже перемешиваем */
-    raid.progress = Math.max(0, raid.progress - 3);
-    playFishMiss();
-    floatTextAt('❌ КЛОН!', _r.left + f.fightX, _r.top + f.fightY - 40, '#dc2626');
-    notify('❌', 'Клон!', '-3% прогресса', '#dc2626');
-    raid.frogFight = null;
-    /* 🔀 Тоже перемешиваем — клоны восстанавливаются */
-    reshuffleFrogs();
-    renderRaidHUD();
-    return;
-  }
-}
-function endFrogFightLose(){
-  const raid = state.raid;
-  if(!raid || !raid.frogFight) return;
-  const f = raid.frogFight;
-  f.isFighting = false;
-  f.progress = 0;
-  raid.frogFight = null;
-  playFishBreak();
-  notify('💢', 'Сорвалась!', 'Попробуй снова', '#dc2626');
-  renderRaidHUD();
 }
 /* ============================================================
    🐡 МОРСКОЙ ЧЁРТ — КРИСТАЛЛЫ
@@ -4321,12 +4540,14 @@ raid.finalGuards.forEach(g => {
       ctx.setLineDash([8, 6]);
       ctx.beginPath(); ctx.arc(raid.kingWatchX, ky, kr + 12, 0, Math.PI*2); ctx.stroke();
       ctx.setLineDash([]);
-      /* Глаз — БЕЛЫЙ, яркий */
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + Math.round(kr * 1.8) + 'px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('👁', raid.kingWatchX, ky);
+      /* Глаз — картинкой или эмодзи */
+      if(!drawAbyssKing(ctx, raid.kingWatchX, ky, kr * 2)){
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold ' + Math.round(kr * 1.8) + 'px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('👁', raid.kingWatchX, ky);
+      }
     }
 
     const cx = raid.bossX, cy = raid.bossY;
@@ -4352,15 +4573,15 @@ raid.finalGuards.forEach(g => {
       ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + Math.round(rr2 * 1.6) + 'px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#000000aa';
-      ctx.fillText('👁', cx2 + 3, cy2 + 3);
-      ctx.fillStyle = '#ffffff';
-ctx.fillText('👁', cx2, cy2);
+      if(!drawAbyssKing(ctx, cx2, cy2, rr2 * 2)){
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold ' + Math.round(rr2 * 1.6) + 'px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+        ctx.fillStyle = '#000000aa';
+        ctx.fillText('👁', cx2 + 3, cy2 + 3);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('👁', cx2, cy2);
+      }
     }
     /* 👁 ФИНАЛ: РЕНДЕР СТРАЖЕЙ СТАДИИ 1 */
     if(_isFinalStage1 && raid.finalGuards){
@@ -4446,15 +4667,21 @@ ctx.fillText('👁', cx2, cy2);
       glow.addColorStop(1, 'transparent');
       ctx.fillStyle = glow;
       ctx.beginPath(); ctx.arc(cx, cy, rr * 2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = boss.color;
-      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = Math.round(rr * 1.4) + 'px system-ui';
-      ctx.fillText(boss.icon, cx, cy);
+      /* 🎨 Картинка босса вместо эмодзи */
+      if(boss.img && window._bossImgCache && window._bossImgCache[boss.id] && window._bossImgCache[boss.id].complete){
+        ctx.drawImage(window._bossImgCache[boss.id], cx - rr, cy - rr, rr * 2, rr * 2);
+      } else {
+        /* Фолбэк на эмодзи */
+        ctx.fillStyle = boss.color;
+        ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = Math.round(rr * 1.4) + 'px system-ui';
+        ctx.fillText(boss.icon, cx, cy);
+      }
     }
 /* 👁 ФИНАЛ: РЕНДЕР СТАДИИ 5 — SIMON (квадрат по центру) */
     if(raid.isFinal && raid.stagePhase === 'final_stage5' && raid.simonGame){
@@ -4479,10 +4706,12 @@ ctx.fillText('👁', cx2, cy2);
       ctx.beginPath(); ctx.arc(cxB, cyB, rB * 2, 0, Math.PI*2); ctx.fill();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'bold ' + Math.round(rB * 1.5) + 'px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
       ctx.globalAlpha = 0.9;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('👁', cxB, cyB);
+      if(!drawAbyssKing(ctx, cxB, cyB, rB * 2)){
+        ctx.font = 'bold ' + Math.round(rB * 1.5) + 'px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('👁', cxB, cyB);
+      }
       ctx.globalAlpha = 1;
       /* 4 КВАДРАТА 2x2 НА ВЕСЬ CANVAS */
       for(let i = 0; i < 4; i++){
@@ -4541,28 +4770,23 @@ ctx.fillText('👁', cx2, cy2);
       ctx.textBaseline = 'middle';
       ctx.fillText(_rTxt, canvas.width/2, 6 + _rh/2);
     }
-/* 👁 ФИНАЛ: РЕНДЕР СТАДИИ 2 */
-if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
-  raid.finalCrystals.forEach(cr => {
+    /* 👁 ФИНАЛ: РЕНДЕР СТАДИИ 2 */
+    if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
+      raid.finalCrystals.forEach(cr => {
         if(cr.broken) return;
         cr.glowPulse += 0.05;
         const pulse = 1 + Math.sin(cr.glowPulse) * 0.1;
-        const crColor = cr.mode === 'hold' ? '#7c3aed' : '#a855f7';
+        const _crGlow = getCrystalGlowColor(cr);
         const glow = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, cr.radius * 2.2 * pulse);
-        glow.addColorStop(0, crColor + 'cc');
+        glow.addColorStop(0, _crGlow + 'cc');
         glow.addColorStop(1, 'transparent');
         ctx.fillStyle = glow;
         ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * 2.2 * pulse, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = crColor;
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = 'bold 42px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-        ctx.fillText('💎', cr.x, cr.y);
-        ctx.font = 'bold 22px "Apple Color Emoji", sans-serif';
-        ctx.fillStyle = '#fff';
+        /* 💎 Картинка */
+        if(!drawCrystal(ctx, cr)){
+          ctx.fillStyle = _crGlow;
+          ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.fill();
+        }
         const hpPct = cr.hp / cr.maxHp;
         ctx.fillStyle = '#000000cc';
         ctx.fillRect(cr.x - 24, cr.y - cr.radius - 14, 48, 6);
@@ -4749,19 +4973,27 @@ if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
       raid.finalCrystals.forEach(cr => {
         if(cr.broken) return;
         const r = cr.radius;
-        ctx.fillStyle = cr.mode === 'hold' ? '#7c3aed' : '#a855f7';
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, r, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, r, 0, Math.PI*2); ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = 'bold 38px "Apple Color Emoji", sans-serif';
-        ctx.fillText('💎', cr.x, cr.y);
+        /* 💎 Свечение по HP */
+        const _megaGlow = getCrystalGlowColor(cr);
+        const _megaGlowRad = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, r * 2.2);
+        _megaGlowRad.addColorStop(0, _megaGlow + 'cc');
+        _megaGlowRad.addColorStop(1, 'transparent');
+        ctx.fillStyle = _megaGlowRad;
+        ctx.beginPath(); ctx.arc(cr.x, cr.y, r * 2.2, 0, Math.PI*2); ctx.fill();
+        /* 💎 Картинка мега-кристалла */
+        if(!drawCrystal(ctx, cr)){
+          ctx.fillStyle = _megaGlow;
+          ctx.beginPath(); ctx.arc(cr.x, cr.y, r, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(cr.x, cr.y, r, 0, Math.PI*2); ctx.stroke();
+        }
         /* HP из 5 */
         ctx.fillStyle = '#000000dd';
         ctx.fillRect(cr.x - 30, cr.y - r - 14, 60, 8);
         ctx.fillStyle = '#10b981';
         ctx.fillRect(cr.x - 30, cr.y - r - 14, 60 * (cr.hp / cr.maxHp), 8);
         ctx.font = 'bold 14px system-ui'; ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(cr.hp + '/5', cr.x, cr.y - r - 24);
       });
       /* Сам король — в 4.3 */
@@ -4777,11 +5009,13 @@ if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
         ctx.globalAlpha = 1;
         ctx.fillStyle = '#1e1730';
         ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.stroke();
-      ctx.font = 'bold 90px "Apple Color Emoji", sans-serif';
-      ctx.fillStyle = '#fff';
-      ctx.fillText('👁', cx2, cy2);
+      ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.stroke();
+      if(!drawAbyssKing(ctx, cx2, cy2, rr2 * 2)){
+        ctx.font = 'bold 90px "Apple Color Emoji", sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('👁', cx2, cy2);
+      }
       }
       /* Такт / Hold — как в стадии 2 */
       if(raid.finalTiming){
@@ -4888,24 +5122,18 @@ if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
         if(cr.broken) return;
         cr.glowPulse += 0.05;
         const pulse = 1 + Math.sin(cr.glowPulse) * 0.1;
-        const crColor = cr.hp === 2 ? '#a5b4fc' : '#dc2626';
-        /* Свечение */
+        /* Свечение вокруг (цвет по HP) */
+        const _glowColor = getCrystalGlowColor(cr);
         const glow = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, cr.radius * 2.2 * pulse);
-        glow.addColorStop(0, crColor + 'cc');
+        glow.addColorStop(0, _glowColor + 'cc');
         glow.addColorStop(1, 'transparent');
         ctx.fillStyle = glow;
         ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * 2.2 * pulse, 0, Math.PI*2); ctx.fill();
-        /* Тело */
-        ctx.fillStyle = crColor;
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.stroke();
-        /* Эмодзи */
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '28px system-ui';
-        ctx.fillText('💎', cr.x, cr.y);
+        /* 💎 Картинка кристалла */
+        if(!drawCrystal(ctx, cr)){
+          ctx.fillStyle = _glowColor;
+          ctx.beginPath(); ctx.arc(cr.x, cr.y, cr.radius * pulse, 0, Math.PI*2); ctx.fill();
+        }
         /* HP полоска */
         const hpPct = cr.hp / cr.maxHp;
         ctx.fillStyle = '#000000cc';
@@ -4916,40 +5144,68 @@ if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
     }
     /* 🐸 Рендер лягушек */
     if(raid.stagePhase === 'frogs' && raid.frogs){
+      const _frogImg = window._bossImgCache && window._bossImgCache['boss_lake'];
+      const _frogImgReady = _frogImg && _frogImg.complete;
       raid.frogs.forEach(f => {
         if(f.isCaught) return;
         const fx = f.isFighting ? f.fightX : f.x;
         const fy = f.isFighting ? f.fightY : f.y;
         const fColor = '#7c3aed';
-        const fRadius = 24;
-        const glow = ctx.createRadialGradient(fx, fy, 0, fx, fy, fRadius * 1.6);
+        const fRadius = 30;
+        const glow = ctx.createRadialGradient(fx, fy, 0, fx, fy, fRadius * 1.7);
         glow.addColorStop(0, fColor + 'cc');
         glow.addColorStop(1, 'transparent');
         ctx.fillStyle = glow;
-        ctx.beginPath(); ctx.arc(fx, fy, fRadius * 1.6, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = fColor;
-        ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.stroke();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '28px system-ui';
-        ctx.fillText('🐸', fx, fy);
+        ctx.beginPath(); ctx.arc(fx, fy, fRadius * 1.7, 0, Math.PI*2); ctx.fill();
+        if(_frogImgReady){
+          /* 🖼 Картинка лягушки вместо круга с эмодзи */
+          ctx.drawImage(_frogImg, fx - fRadius * 1.3, fy - fRadius * 1.3, fRadius * 2.6, fRadius * 2.6);
+        } else {
+          /* Фолбэк на эмодзи (если картинка не загрузилась) */
+          ctx.fillStyle = fColor;
+          ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(fx, fy, fRadius, 0, Math.PI*2); ctx.stroke();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = '28px system-ui';
+          ctx.fillText('🐸', fx, fy);
+        }
         /* Крест над мёртвым клоном — не нужен, они удаляются */
         if(f.isFighting){
           const pPct = Math.max(0, f.progress / 100);
-          ctx.fillStyle = '#000000cc';
-          ctx.fillRect(fx - 45, fy - 52, 90, 12);
+          /* 📊 Полоска НАД лягушкой (с проверкой края) */
+          const _barW = 100, _barH = 14;
+          const _barX = fx - _barW/2;
+          /* Над лягушкой, но не выше 8px от верха */
+          let _barY = fy - fRadius * 1.4 - _barH - 22;
+          if(_barY < 8) _barY = 8;
+          /* Тень */
+          ctx.fillStyle = '#000000dd';
+          ctx.fillRect(_barX - 2, _barY - 2, _barW + 4, _barH + 4);
+          /* Фон */
+          ctx.fillStyle = '#1e1730';
+          ctx.fillRect(_barX, _barY, _barW, _barH);
+          /* Заполнение */
           ctx.fillStyle = pPct > 0.5 ? '#10b981' : pPct > 0.25 ? '#f59e0b' : '#dc2626';
-          ctx.fillRect(fx - 45, fy - 52, 90 * pPct, 12);
+          ctx.fillRect(_barX, _barY, _barW * pPct, _barH);
+          /* Проценты внутри полоски */
           ctx.fillStyle = '#fff';
           ctx.font = 'bold 11px system-ui';
-          ctx.fillText(Math.floor(f.progress) + '% ?', fx, fy - 62);
-          /* 🐸 Метка "КТО ЭТО?" */
-          ctx.font = 'bold 12px system-ui';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(Math.floor(f.progress) + '%', fx, _barY + _barH/2);
+          /* 🐸 Метка "КТО ЭТО?" НАД полоской (с проверкой края) */
+          let _labelY = _barY - 20;
+          if(_labelY < 4) _labelY = 4;
+          ctx.font = 'bold 13px system-ui';
+          ctx.fillStyle = '#000000cc';
+          ctx.textBaseline = 'top';
+          ctx.fillText('КТО ЭТО?', fx + 1, _labelY + 1);
           ctx.fillStyle = '#a855f7';
-          ctx.fillText('КТО ЭТО?', fx, fy - 78);
+          ctx.fillText('КТО ЭТО?', fx, _labelY);
+          /* 🎣 Леска */
           ctx.strokeStyle = '#ffd93d';
           ctx.lineWidth = 2;
           ctx.beginPath();
@@ -5195,10 +5451,12 @@ if(raid.isFinal && raid.stagePhase === 'final_stage2' && raid.finalCrystals){
       ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.fill();
       ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(cx2, cy2, rr2, 0, Math.PI*2); ctx.stroke();
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = 'bold 90px "Apple Color Emoji", sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('👁', cx2, cy2);
+      if(!drawAbyssKing(ctx, cx2, cy2, rr2 * 2)){
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 90px "Apple Color Emoji", sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('👁', cx2, cy2);
+      }
       /* HP-бар */
       if(raid.phase === 'fight'){
         ctx.fillStyle = '#000000dd';
@@ -6521,6 +6779,28 @@ function startFinalStage4Sub(idx){
       });
     }
     notify('👁', '4.3', '💎 2 мега-кристалла (5 стадий)', '#a5b4fc');
+  } else if(idx === 3){
+    /* 👁 Подстадия 3 — САМ КОРОЛЬ (4.4) */
+    raid.phase = 'swim';
+    raid.progress = 0;
+    raid.bossX = w / 2;
+    raid.bossY = h / 2;
+    raid.radius = 65;
+    raid.vx = (Math.random() - 0.5) * 4;
+    raid.vy = (Math.random() - 0.5) * 4;
+    if(Math.abs(raid.vx) < 0.8) raid.vx = raid.vx > 0 ? 1.2 : -1.2;
+    if(Math.abs(raid.vy) < 0.8) raid.vy = raid.vy > 0 ? 1.2 : -1.2;
+    raid.lastTapTime = Date.now();
+    /* Сброс скиллов Короля */
+    raid.kingPoisonTimer = null;
+    raid.kingPoisonActive = false;
+    raid.kingRegenTimer = null;
+    raid.kingJumpTimer = null;
+    raid.kingBiteTimer = null;
+    raid.kingTugTimer2 = null;
+    notify('👁', '4.4', '👑 САМ КОРОЛЬ БЕЗДНЫ!', '#7c3aed');
+    playAchievement();
+    flashRare();
   }
   renderRaidHUD();
 }
@@ -6608,9 +6888,11 @@ function endRaidWin(){
   const hud = $('raidHud');
   if(hud) hud.remove();
 
-  /* 🔒 Флаг «пойман за событие» */
+  /* 🔒 Флаг «пойман за событие» — только для рейдов по расписанию */
   if(!state.raidCaught) state.raidCaught = {};
-  state.raidCaught[boss.id] = true;
+  if(!state.ticketRaid || state.ticketRaid.bossId !== boss.id){
+    state.raidCaught[boss.id] = true;
+  }
 
   /* 🎬 Анимация победы 2.5 сек */
   const area = $('fishingArea');
@@ -6618,8 +6900,11 @@ function endRaidWin(){
     const winDiv = document.createElement('div');
     winDiv.id = 'raidWinAnim';
     winDiv.style.cssText = 'position:absolute;inset:0;z-index:30;background:radial-gradient(circle,#000000dd,#000000ff);display:flex;align-items:center;justify-content:center;flex-direction:column;animation:raidWinFadeIn .4s ease-out';
+    const _winBossHtml = boss.img
+      ? '<img src="' + boss.img + '" style="width:180px;height:180px;object-fit:contain;filter:drop-shadow(0 0 30px ' + boss.color + ');animation:raidWinBossIn 1.2s cubic-bezier(.2,.9,.3,1.2) forwards">'
+      : '<div style="font-size:100px;filter:drop-shadow(0 0 30px ' + boss.color + ');animation:raidWinBossIn 1.2s cubic-bezier(.2,.9,.3,1.2) forwards">' + boss.icon + '</div>';
     winDiv.innerHTML =
-      '<div style="font-size:100px;filter:drop-shadow(0 0 30px ' + boss.color + ');animation:raidWinBossIn 1.2s cubic-bezier(.2,.9,.3,1.2) forwards">' + boss.icon + '</div>' +
+      _winBossHtml +
       '<div style="margin-top:20px;font-size:22px;font-weight:900;color:#ffd93d;text-shadow:0 0 20px #ffd93d;animation:raidWinTextIn .8s .8s ease-out backwards">🏆 ПОБЕДА!</div>' +
       '<div style="margin-top:8px;font-size:14px;color:#fff;opacity:.9;animation:raidWinTextIn .8s 1.2s ease-out backwards">' + boss.name + '</div>';
     area.appendChild(winDiv);
@@ -6653,6 +6938,10 @@ function endRaidWin(){
   if(!state.raidStats.caught) state.raidStats.caught = {};
   state.raidStats.caught[boss.id] = (state.raidStats.caught[boss.id] || 0) + 1;
   state.raidStats.totalTime = (state.raidStats.totalTime || 0) + Math.floor((Date.now() - raid.startedAt) / 1000);
+  /* 🎟 Отмечаем билетный рейд как пройденный */
+  if(state.ticketRaid && state.ticketRaid.bossId === boss.id){
+    state.ticketRaid.claimed = true;
+  }
   state.raid = null;
   save();
   playFishWin();
@@ -6682,25 +6971,51 @@ function endRaidWin(){
   }, 2500);
 }
 function restoreFishingAfterRaid(){
+  /* 🔓 Разблокировка nav — ПЕРВЫМ делом */
+  const nav = document.querySelector('nav');
+  if(nav){
+    nav.style.pointerEvents = '';
+    nav.style.opacity = '';
+    nav.style.removeProperty('pointer-events');
+    nav.style.removeProperty('opacity');
+  }
+  const giveUpBtn = $('raidGiveUpBtn');
+  if(giveUpBtn) giveUpBtn.remove();
+  const hudEl = $('raidHud');
+  if(hudEl) hudEl.remove();
   const overlay = document.querySelector('#fishingArea .fishingOverlay');
   if(overlay) overlay.style.display = '';
   const bottleBtn = $('fishBottleBtn');
   if(bottleBtn) bottleBtn.style.display = '';
   const quitBtn = $('fishQuitBtn');
   if(quitBtn) quitBtn.style.display = '';
-  /* 🔓 Разблокируем nav */
-  const nav = document.querySelector('nav');
-  if(nav){ nav.style.pointerEvents = ''; nav.style.opacity = ''; }
-  const giveUpBtn = $('raidGiveUpBtn');
-  if(giveUpBtn) giveUpBtn.remove();
   const winAnim = $('raidWinAnim');
   if(winAnim) winAnim.remove();
   closeModal('catchModal');
   showFishingLobby();
 }
 function endRaidLose(reason){
+  /* 🔓 САМОЕ ПЕРВОЕ — снять блок с nav (до раннего return!) */
+  const _navF = document.querySelector('nav');
+  if(_navF){ _navF.style.pointerEvents = ''; _navF.style.opacity = ''; }
+  const _gubF = document.getElementById('raidGiveUpBtn');
+  if(_gubF) _gubF.remove();
+  const _hudF = document.getElementById('raidHud');
+  if(_hudF) _hudF.remove();
+  /* 🏳 Если это билетный рейд — помечаем как сгоревший */
+  if(state.ticketRaid && reason === 'surrender'){
+    state.ticketRaid.surrendered = true;
+    state.ticketRaid.claimed = true;
+    save();
+  }
   const raid = state.raid;
-  if(!raid || !raid.active) return;
+  if(!raid || !raid.active){
+    /* Бой уже не активен — просто убеждаемся что всё разблокировано и выходим */
+    if(fishingAnimId){ cancelAnimationFrame(fishingAnimId); fishingAnimId = null; }
+    state.raid = null;
+    showFishingLobby();
+    return;
+  }
   raid.active = false;
   if(fishingAnimId){ cancelAnimationFrame(fishingAnimId); fishingAnimId = null; }
   const hud = $('raidHud');
@@ -6755,22 +7070,31 @@ function getPackPrice(p){
 /* ============================================================
    УРОВНИ / XP
    ============================================================ */
-function xpForLevel(n){
-  if(n <= 1) return 0;
-  let total = 0;
-  for(let i = 2; i <= n; i++){
+const _XP_CACHE = [0, 0];
+function _buildXPUpTo(n){
+  if(_XP_CACHE.length > n) return;
+  for(let i = _XP_CACHE.length; i <= n; i++){
     let step;
     if(i <= 20) step = Math.round(50 * Math.pow(i, 1.5));
     else if(i <= 50) step = Math.round(200 * Math.pow(i, 1.9));
     else step = Math.round(600 * Math.pow(i, 2.1));
-    total += step;
+    _XP_CACHE[i] = (_XP_CACHE[i-1] || 0) + step;
   }
-  return total;
+}
+function xpForLevel(n){
+  if(n <= 1) return 0;
+  _buildXPUpTo(n);
+  return _XP_CACHE[n];
 }
 function getLvlFromXp(xpTotal){
-  let lvl = 1;
-  while(lvl < MAX_LVL && xpForLevel(lvl+1) <= xpTotal) lvl++;
-  return lvl;
+  _buildXPUpTo(MAX_LVL);
+  let lo = 1, hi = MAX_LVL;
+  while(lo < hi){
+    const mid = Math.floor((lo + hi + 1) / 2);
+    if(_XP_CACHE[mid] <= xpTotal) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
 }
 function getXpThisLevel(){ return xpForLevel(state.lvl + 1) - xpForLevel(state.lvl); }
 function addXP(amount){
@@ -6880,6 +7204,12 @@ function getUpgradeCost(id){
 function syncInvMax(){
   state.invMax = getUpgradeVal('inv_cap') || 50;
 }
+/* 🎒 Реальный размер инвентаря (без карт в панели жертв и крафта) */
+function getRealInvCount(){
+  const sacIds = state.sacrificePanel || [];
+  const crfIds = state.craftReadyPanel || [];
+  return state.collection.filter(c => !sacIds.includes(c.id) && !crfIds.includes(c.id)).length;
+}
 function getEnergyRegenSec(){
   const base = getUpgradeVal('energy_speed') || ENERGY_REGEN_SEC;
   return base / getPhaseRegenMult();
@@ -6947,12 +7277,17 @@ function showToast(msg){
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 1200);
 }
-function save(){
+function save(silent){
   if(resetting) return;
   try{
     if(!state || typeof state !== 'object') return;
     if(!Array.isArray(state.collection)) return;
     if(typeof state.coins !== 'number') return;
+    /* 🧹 Чистим старые КД карт */
+    if(state.cardCooldowns){
+      const _now = Date.now();
+      for(const k in state.cardCooldowns){ if(state.cardCooldowns[k] < _now) delete state.cardCooldowns[k]; }
+    }
     
     const now = Date.now();
     const lastBak = state._lastBackupTs || 0;
@@ -6960,18 +7295,16 @@ function save(){
     
     if(needRotate){
       try{
-        const cur  = localStorage.getItem(SAVE_KEY);
-        const bak1 = localStorage.getItem(SAVE_KEY + '_bak1');
-        const bak2 = localStorage.getItem(SAVE_KEY + '_bak2');
-        if(bak2) localStorage.setItem(SAVE_KEY + '_bak3', bak2);
-        if(bak1) localStorage.setItem(SAVE_KEY + '_bak2', bak1);
-        if(cur)  localStorage.setItem(SAVE_KEY + '_bak1', cur);
+        const cur = localStorage.getItem(SAVE_KEY);
+        if(cur) localStorage.setItem(SAVE_KEY + '_bak1', cur);
         state._lastBackupTs = now;
       }catch(e){ console.warn('backup rotate failed:', e); }
     }
     
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    showToast();
+    /* 🧹 Удаляем старые бэкапы bak2 и bak3 (если остались) */
+    try{ localStorage.removeItem(SAVE_KEY + '_bak2'); localStorage.removeItem(SAVE_KEY + '_bak3'); }catch(e){}
+    if(!silent) showToast();
   }catch(e){ console.error('save error:', e); }
 }
 function tryParseSave(raw){
@@ -7007,6 +7340,8 @@ function clampAllCardStats(){
 
 function load(){
   try {
+    /* 🧹 Удаляем устаревшие ключи */
+    try{ localStorage.removeItem('kotokarty'); localStorage.removeItem('kotokarty_v7'); }catch(e){}
     let raw = localStorage.getItem(SAVE_KEY);    if(!raw) raw = localStorage.getItem('kotokarty');
     let p = tryParseSave(raw);
     if(!p){
@@ -7026,6 +7361,8 @@ function load(){
       if(!Array.isArray(state[k])) state[k] = [];
     });
     if(!Array.isArray(state.rodsUnlocked)) state.rodsUnlocked = ['stick'];
+    /* 🛡 Чистим ник от XSS (старые сейвы могли сохранить опасные символы) */
+    if(state.nick) state.nick = String(state.nick).replace(/[<>"'`&]/g, '').slice(0, 20);
     if(!state.rodsUnlocked.includes('stick')) state.rodsUnlocked.push('stick');
     if(!Array.isArray(state.titles?.unlocked)) state.titles = {unlocked:[], active:[]};
     if(!Array.isArray(state.titles.active)) state.titles.active = [];
@@ -7060,8 +7397,18 @@ function load(){
       if(typeof state[k] !== 'string') state[k] = (k==='theme'?'dark':k==='currentRod'?'stick':'');
     });
 
-    if(!state.buffs || typeof state.buffs !== 'object') state.buffs = {money:0,cd:0,luck:0};
-    if(!state.achievements || typeof state.achievements !== 'object') state.achievements = {};
+    if(!state.buffs || typeof state.buffs !== 'object') state.buffs = {money:0,cd:0,luck:0,mutLuck:0,ticketLuck:0,moneyMult:2,luckMult:2,mutLuckMult:2,ticketLuckMult:2};
+    if(typeof state.buffs.moneyMult !== 'number') state.buffs.moneyMult = 2;
+    if(typeof state.buffs.luckMult !== 'number') state.buffs.luckMult = 2;
+    if(typeof state.buffs.mutLuck !== 'number') state.buffs.mutLuck = 0;
+    if(typeof state.buffs.ticketLuck !== 'number') state.buffs.ticketLuck = 0;
+    if(typeof state.buffs.mutLuckMult !== 'number') state.buffs.mutLuckMult = 2;
+    if(typeof state.buffs.ticketLuckMult !== 'number') state.buffs.ticketLuckMult = 2;
+/* 🗑 Удаляем поля лака звёзд из старых сейвов */
+if(state.buffs.starLuck !== undefined) delete state.buffs.starLuck;
+if(state.buffs.starLuckMult !== undefined) delete state.buffs.starLuckMult;
+if(state.starLuckMult !== undefined) delete state.starLuckMult;
+if(!state.achievements || typeof state.achievements !== 'object') state.achievements = {};
     if(!state.packCounts || typeof state.packCounts !== 'object') state.packCounts = {classic:0,improved:0,rare:0,epic:0,legendary:0,diamond:0,mythic:0,divine:0};
     ['classic','improved','rare','epic','legendary','diamond','mythic','divine'].forEach(k=>{
       if(typeof state.packCounts[k] !== 'number') state.packCounts[k] = 0;
@@ -7077,6 +7424,7 @@ function load(){
     });
     if(typeof state.bottlesLeft !== 'number') state.bottlesLeft = 1 + (state.upgrades.bottle || 0);
     if(typeof state.lastBottleTick !== 'number') state.lastBottleTick = Date.now();
+    if(typeof state.lastEnergyTick !== 'number' || state.lastEnergyTick <= 0) state.lastEnergyTick = Date.now();
     if(!state.fishStats || typeof state.fishStats !== 'object') state.fishStats = {totalCaught:0,raritySeen:[],biggestSize:0,biggestWeight:0,earned:0,fishNamesSeen:[],fishRecords:{}};
     if(!Array.isArray(state.fishStats.raritySeen)) state.fishStats.raritySeen = [];
     if(!Array.isArray(state.fishStats.fishNamesSeen)) state.fishStats.fishNamesSeen = [];
@@ -7087,7 +7435,58 @@ function load(){
     if(!state.notifSettings || typeof state.notifSettings !== 'object') state.notifSettings = {craft:true,fishing:true,daily:true,shop:false,quests:false,minigame:true};
     if(!state.minigame || typeof state.minigame !== 'object') state.minigame = {lastPlay:0,wins:0};
     if(!state.tutorial || typeof state.tutorial !== 'object') state.tutorial = {step:0,done:false,clicks:{base:null,target:null}};
-    if(!state.tutorial.clicks) state.tutorial.clicks = {base:null, target:null};
+    if(typeof state.tutorialRewardClaimed !== 'boolean') state.tutorialRewardClaimed = false;
+    if(typeof state.rouletteFreeSpins !== 'number') state.rouletteFreeSpins = 1;
+    if(typeof state.rouletteLastFreeReset !== 'number') state.rouletteLastFreeReset = 0;
+    if(typeof state.rouletteTickets !== 'number') state.rouletteTickets = 0;
+    if(typeof state.rouletteQty !== 'number' && state.rouletteQty !== 'max') state.rouletteQty = 1;
+    if(typeof state.raidTickets === 'number' || !state.raidTickets || typeof state.raidTickets !== 'object'){
+      state.raidTickets = { case: 0, pond: 0, river: 0, lake: 0, deep: 0, abyss: 0 };
+    }
+    ['case','pond','river','lake','deep','abyss'].forEach(k => {
+      if(typeof state.raidTickets[k] !== 'number') state.raidTickets[k] = 0;
+    });
+    if(state.ticketRaid && state.ticketRaid.endsAt && state.ticketRaid.endsAt <= Date.now()) state.ticketRaid = null;
+    /* 🛡 Миграция старого сейва: карты в жертвах лежат в collection, переносим в cache */
+    if(!state.sacrificePanelCache || typeof state.sacrificePanelCache !== 'object') state.sacrificePanelCache = {};
+    if(Array.isArray(state.sacrificePanel)){
+      const _lostIds = [];
+      state.sacrificePanel = state.sacrificePanel.filter(id => {
+        if(state.sacrificePanelCache[id]) return true;
+        const _fromCollection = state.collection.find(c => c.id === id);
+        if(_fromCollection){
+          state.sacrificePanelCache[id] = _fromCollection;
+          state.collection = state.collection.filter(c => c.id !== id);
+          return true;
+        }
+        _lostIds.push(id);
+        return false;
+      });
+      if(_lostIds.length > 0){
+        console.warn('⚠️ Восстановлено карт из collection:', state.sacrificePanel.length, '· потеряно:', _lostIds.length);
+      }
+    }
+    /* 🛡 Восстановление панели жертв: id без объекта — ищем в коллекции или помечаем как потерянные */
+    if(!state.sacrificePanelCache || typeof state.sacrificePanelCache !== 'object') state.sacrificePanelCache = {};
+    if(Array.isArray(state.sacrificePanel)){
+      const _lostIds = [];
+      state.sacrificePanel = state.sacrificePanel.filter(id => {
+        if(state.sacrificePanelCache[id]) return true; /* уже в кэше — ок */
+        const _fromCollection = state.collection.find(c => c.id === id);
+        if(_fromCollection){
+          state.sacrificePanelCache[id] = _fromCollection;
+          state.collection = state.collection.filter(c => c.id !== id);
+          return true;
+        }
+        /* объекта нет — потерянная карта */
+        _lostIds.push(id);
+        return false;
+      });
+      if(_lostIds.length > 0){
+        console.warn('⚠️ Потеряно карт в жертвах:', _lostIds.length, _lostIds);
+      }
+    }
+    if(!state.potions || typeof state.potions !== 'object') state.potions = {};
     if(typeof state.tutorial.step !== 'number') state.tutorial.step = 0;
     if(typeof state.tutorial.done !== 'boolean') state.tutorial.done = false;    if(!state.bots || typeof state.bots !== 'object') state.bots = {level: 0, lastClick: 0};
     if(typeof state.bots.level !== 'number') state.bots.level = 0;
@@ -7130,6 +7529,7 @@ function load(){
 
     if(state.fishing) state.fishing = null;
     if(state.raid && typeof state.raid === 'object') state.raid = null;
+    /* 🛡 Если был необработанный улов — оставляем pendingCatch, откроем в startGame */
     if(!state.fishStats.bossCaught) state.fishStats.bossCaught = [];
     if(!state.achievements['abyss_king']){}  /* ачивку добавим позже */
     if(!Array.isArray(state.fishInventory)) state.fishInventory = [];
@@ -7175,11 +7575,6 @@ function load(){
   }catch(e){ console.error('load error:', e); state = defaultState(); }
     /* 💎 Автомиграция: обрезаем статы старых карт */
     try {
-      const clamped = clampAllCardStats();
-      if(clamped > 0) console.log('%c💎 Обрезано карт: ' + clamped, 'color:#a855f7;font-weight:700');
-    }catch(e){ console.error('load error:', e); state = defaultState(); }
-    /* 💎 Автомиграция: обрезаем статы старых карт */
-       try {
       const _clamped = clampAllCardStats();
       if(_clamped > 0){
         console.log('%c💎 Обрезано карт: ' + _clamped, 'color:#a855f7;font-weight:700');
@@ -7367,6 +7762,8 @@ function beep(freq, dur, vol, type){
   if(!audioCtx || !state.soundOn) return;
   if(window._audioMuted) return;
   if(document.hidden) return;
+  /* 🔇 Во время прокрута колеса обычные звуки не играют */
+  if(window._rouletteSpinning) return;
   const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
   osc.type = type || 'sine';
   osc.frequency.value = freq;
@@ -7442,7 +7839,6 @@ function playEventSound(type){
 
 function playMusicNote(){
   if(!audioCtx || !state.musicOn){ musicTimer = null; return; }
-  if(state.customMusicOn){ musicTimer = null; return; }
   const track = TRACKS[state.currentTrack || 0];
   const [m, b, dur] = track.notes[noteIdx];
   if(m > 0){
@@ -7471,7 +7867,7 @@ function playMusicNote(){
   musicTimer = setTimeout(playMusicNote, dur*1000);
 }
 function startMusic(){
-  if(!audioCtx || !state.musicOn || state.customMusicOn) return;
+  if(!audioCtx || !state.musicOn) return;
   if(musicTimer) clearTimeout(musicTimer);
   noteIdx = 0;
   playMusicNote();
@@ -7482,7 +7878,7 @@ function stopMusic(){
 function nextTrack(){
   state.currentTrack = ((state.currentTrack||0) + 1) % TRACKS.length;
   stopMusic();
-  if(audioCtx && state.musicOn && !state.customMusicOn) startMusic();
+  if(audioCtx && state.musicOn) startMusic();
   save();
   showToast('🎵 ' + TRACKS[state.currentTrack].name);
 }
@@ -7498,9 +7894,12 @@ document.addEventListener('visibilitychange', () => {
     _wasMusicOnBeforeHide = state && state.musicOn;
     if(typeof stopMusic === 'function') stopMusic();
     if(typeof stopCustomMusic === 'function') stopCustomMusic();
+    /* 🎰 Таймер звука колеса НЕ убиваем — пусть продолжает идти */
     window._audioMuted = true;
   } else {
     window._audioMuted = false;
+    /* 🎰 Если крутится колесо — музыку НЕ запускаем (иначе заглушит тики) */
+    if(window._rouletteSpinning) return;
     if(_wasMusicOnBeforeHide && state && state.musicOn){
       if(typeof firstInteract === 'function') firstInteract();
       if(state.customMusicOn && customAudio) startCustomMusic();
@@ -7512,11 +7911,14 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', () => {
   if(typeof stopMusic === 'function') stopMusic();
   if(typeof stopCustomMusic === 'function') stopCustomMusic();
+  /* 🎰 Таймер звука колеса НЕ убиваем */
   window._audioMuted = true;
 });
 
 window.addEventListener('focus', () => {
   window._audioMuted = false;
+  /* 🎰 Если крутится колесо — музыку НЕ запускаем */
+  if(window._rouletteSpinning) return;
   if(state && state.musicOn){
     if(state.customMusicOn && customAudio) startCustomMusic();
     else if(!state.customMusicOn && typeof startMusic === 'function') startMusic();
@@ -7608,7 +8010,20 @@ function removeCardFromAllDecks(cardId){
     const idx = d.cards.indexOf(cardId);
     if(idx >= 0){ d.cards[idx] = null; changed = true; }
   });
+  if(Array.isArray(state.equippedIds)){
+    state.equippedIds = state.equippedIds.filter(id => id !== cardId);
+  }
   return changed;
+}
+/* 🧹 Полное удаление карты из всех ID-массивов (при dismantle / bulk delete) */
+function fullyRemoveCard(cardId){
+  removeCardFromAllDecks(cardId);
+  if(Array.isArray(state.craftReadyPanel)) state.craftReadyPanel = state.craftReadyPanel.filter(x => x !== cardId);
+  if(Array.isArray(state.sacrificePanel)) state.sacrificePanel = state.sacrificePanel.filter(x => x !== cardId);
+  if(state.sacrificePanelCache && state.sacrificePanelCache[cardId]) delete state.sacrificePanelCache[cardId];
+  if(state.cardCooldowns && state.cardCooldowns[cardId]) delete state.cardCooldowns[cardId];
+  if(state.cardMutAttempts && state.cardMutAttempts[cardId]) delete state.cardMutAttempts[cardId];
+  if(Array.isArray(state.newCards)) state.newCards = state.newCards.filter(x => x !== cardId);
 }
 function getEquippedCards(){
   return getActiveDeckCards();
@@ -7621,7 +8036,7 @@ function sumStat(key){
 }function isBuffActive(k){ return (state.buffs[k] || 0) > Date.now(); }
 function getIncomeMult(){
   let m = 1 + sumStat('income')/100;
-  if(isBuffActive('money')) m *= 2;
+  if(isBuffActive('money')) m *= (state.buffs.moneyMult || 2);
   return Math.max(0.05, m);
 }
 function getCD(){
@@ -7784,9 +8199,9 @@ function trackBalance(){
   const now = Date.now();
   const h = state.balanceHistory;
   const last = h[h.length-1];
-  if(last && now - last.t < 1800000) return;
+  if(last && now - last.t < 3600000) return;
   h.push({t: now, coins: Math.floor(state.coins)});
-  if(h.length > 2000) h.splice(0, h.length - 2000);
+  if(h.length > 50) h.splice(0, h.length - 50);
 }
 
 /* ============================================================
@@ -8074,7 +8489,54 @@ function clearEventVisual(){
   document.body.classList.remove('event-radiation','event-iceage','event-apocalypse','event-fire','event-crystal');
 }
 
+/* 🎟 Плашка билетного рейда */
+function renderTicketRaidBar(){
+  const _trBar = $('ticketRaidBar');
+  if(!_trBar) return;
+  if(state.ticketRaid && state.ticketRaid.endsAt > Date.now()){
+    const _boss = BOSS_BY_ID[state.ticketRaid.bossId];
+    const _left = Math.max(0, Math.ceil((state.ticketRaid.endsAt - Date.now()) / 1000));
+    const _m = Math.floor(_left / 60), _s = _left % 60;
+    _trBar.style.display = 'inline-block';
+    _trBar.style.color = _boss ? _boss.color : '#f59e0b';
+    _trBar.style.borderColor = (_boss ? _boss.color : '#f59e0b') + '66';
+    _trBar.innerHTML = '🎟 ' + (_boss ? _boss.name : '') + ' · ' + _m + ':' + String(_s).padStart(2, '0') + (state.ticketRaid.claimed ? ' ✅' : '');
+    _trBar.onclick = () => {
+      switchTab('fishing');
+      setTimeout(() => { if(typeof showFishingLobby === 'function') showFishingLobby(); }, 200);
+    };
+  } else {
+    _trBar.style.display = 'none';
+  }
+}
+
 function renderEventBar(){
+  /* 🎟 Плашка билетного рейда */
+  let _trBar = $('ticketRaidBar');
+  if(!_trBar){
+    _trBar = document.createElement('span');
+    _trBar.id = 'ticketRaidBar';
+    _trBar.style.cssText = 'display:none;font-size:11px;font-weight:700;padding:4px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border);white-space:nowrap;cursor:pointer';
+    const _cur = $('currencies') || document.querySelector('header');
+    if(_cur) _cur.appendChild(_trBar);
+  }
+  if(_trBar){
+    if(state.ticketRaid && state.ticketRaid.endsAt > Date.now()){
+      const _boss = BOSS_BY_ID[state.ticketRaid.bossId];
+      const _left = Math.max(0, Math.ceil((state.ticketRaid.endsAt - Date.now()) / 1000));
+      const _m = Math.floor(_left / 60), _s = _left % 60;
+      _trBar.style.display = 'inline-block';
+      _trBar.style.color = _boss ? _boss.color : '#f59e0b';
+      _trBar.style.borderColor = (_boss ? _boss.color : '#f59e0b') + '66';
+      _trBar.innerHTML = '🎟 ' + (_boss ? _boss.name : '') + ' · ' + _m + ':' + String(_s).padStart(2, '0') + (state.ticketRaid.claimed ? ' ✅' : '');
+      _trBar.onclick = () => {
+        switchTab('fishing');
+        setTimeout(() => { if(typeof showFishingLobby === 'function') showFishingLobby(); }, 200);
+      };
+    } else {
+      _trBar.style.display = 'none';
+    }
+  }
   /* 🎉 Обычное событие — eventBar */
   const el = $('eventBar');
   if(el){
@@ -8235,7 +8697,9 @@ function startGameTick(){
     if($('tab-quests').classList.contains('active')) renderQuests();
     if($('tab-bourse').classList.contains('active')) renderBourseHead();
     if($('tab-fishing').classList.contains('active') && (!state.fishing || !state.fishing.active) && (!state.raid || !state.raid.active)) showFishingLobby();
-    if($('tab-collection').classList.contains('active')) renderCollection();
+    if($('tab-collection').classList.contains('active')){
+      if(typeof renderCollectionProgress === 'function') renderCollectionProgress();
+    }
     if($('tab-craft').classList.contains('active')) renderCraft();
 
     ensureQuests();
@@ -8244,6 +8708,12 @@ function startGameTick(){
     tickCrafts();
     trackBalance();
     checkEventSchedule();
+    /* 🎟 Очистка билетного рейда по времени */
+    if(state.ticketRaid && state.ticketRaid.endsAt <= Date.now()){
+      state.ticketRaid = null;
+      save();
+      if(currentTab === 'fishing') showFishingLobby();
+    }
     renderEventBar();
 
     checkCraftNotifs();
@@ -8326,9 +8796,11 @@ function makeCardOfRarity(rarity, bonus){
   const ridx = Object.keys(RARITY).indexOf(base.rarity);
   const tier = RARITY[base.rarity].tier;
   const slotsMax = Math.min(10, 1 + ridx*2 + Math.floor(rnd(0,3)));
-  const slots = Math.floor(rnd(1, slotsMax+1));
-  const mutations = rollMutations(tier, slots);
+  const _baseSlots = Math.floor(rnd(1, slotsMax+1));
   const stars = rollStars(tier);
+  /* ⭐ Стартовые звёзды сразу дают слоты (синхрон с tryUpgradeStar) */
+  const slots = Math.min(20, _baseSlots + (stars || 0));
+  const mutations = rollMutations(tier, slots);
 
   /* 💎 Статы зависят от тира редкости + bias к верху */
   const s = getRarityStats(base.rarity);
@@ -8379,6 +8851,15 @@ function rollCardWithPity(pack){
     /* 🍀 Кот-везунчик — шанс апгрейда редкости */
     if(isEventActive('luckycat') && Math.random() < 0.25){
       rarity = bumpRarityUp(rarity);
+    }
+    /* 🎰 Буст удачи — реально влияет на шанс апгрейда */
+    if(isBuffActive('luck')){
+      const _luckMult = state.buffs.luckMult || 2;
+      /* ×2 = 12%, ×3 = 18%, ×5 = 30%, ×10 = 60% */
+      const _upgradeChance = Math.min(0.6, 0.06 * _luckMult);
+      if(Math.random() < _upgradeChance){
+        rarity = bumpRarityUp(rarity);
+      }
     }
   } else {
     rarity = 'Обычная';
@@ -8594,6 +9075,8 @@ for(let i = 0; i < 100; i++){
    📦 БАТЧ-ОТКРЫТИЕ ПАКЕТОВ
    ============================================================ */
 function openBatchResult(cards, qty){
+  /* 🛡 Сохраняем карты чтобы не потерять при закрытии через ✕ */
+  window._pendingBatchCards = cards;
   const rarityOrder = Object.keys(RARITY);
   const stats = {};
   cards.forEach(c => { stats[c.rarity] = (stats[c.rarity]||0) + 1; });
@@ -8631,6 +9114,41 @@ function openBatchResult(cards, qty){
 }
 
 function closeBatchResult(){
+  /* 🛡 Если игрок закрыл ✕ — авто-забираем карты, чтобы не потерять */
+  const _cont = $('batchResultContent');
+  const _hasUnclaimed = _cont && _cont.querySelector('#batchClaimBtn');
+  if(_hasUnclaimed){
+    const _cards = window._pendingBatchCards;
+    if(_cards && _cards.length){
+      window._pendingBatchCards = null;
+      /* ⚠️ НЕ вызываем claimBatch — он закроет модалку сам, а мы уже в closeModal */
+      let _added = 0, _sold = 0, _soldCoins = 0;
+      _cards.forEach(c => {
+        if(shouldAutoSell(c)){
+          const refund = Math.round(20 + RARITY[c.rarity].points*0.5);
+          state.coins += refund; _soldCoins += refund; _sold++;
+        } else if(state.collection.length < state.invMax){
+          state.collection.push(c);
+          registerCardStats(c);
+          _added++;
+          if(!state.newCards.includes(c.id)) state.newCards.push(c.id);
+          if(state.newCards.length > 50) state.newCards = state.newCards.slice(-50);
+        } else {
+          const refund = Math.round(20 + RARITY[c.rarity].points*0.5);
+          state.coins += refund; _soldCoins += refund; _sold++;
+        }
+      });
+      state.exp += _cards.length;
+      state.coinsEarned += _soldCoins;
+      state.totalSold = (state.totalSold||0) + _sold;
+      state.totalSoldCoins = (state.totalSoldCoins||0) + _soldCoins;
+      state.dailyStats.sold += _sold;
+      state.dailyStats.soldCoins += _soldCoins;
+      state.dailyStats.cards += _cards.length;
+      notify('📦', 'Карты сохранены', _added + ' в инвентарь · ' + _soldCoins + ' 🪙 с продажи', '#10b981');
+    }
+  }
+  window._pendingBatchCards = null;
   closeModal('batchResultModal');
   packOpening = false;
   renderHeader(); renderCollection(); save();
@@ -8647,6 +9165,7 @@ function claimBatch(cards){
       registerCardStats(c);
       added++;
       if(!state.newCards.includes(c.id)) state.newCards.push(c.id);
+      if(state.newCards.length > 50) state.newCards = state.newCards.slice(-50);
     } else {
       const refund = Math.round(20 + RARITY[c.rarity].points*0.5);
       state.coins += refund; soldCoins += refund; sold++;
@@ -8804,6 +9323,7 @@ function openPackAnim(cards){
         registerCardStats(c);
         added++;
         if(!state.newCards.includes(c.id)) state.newCards.push(c.id);
+        if(state.newCards.length > 50) state.newCards = state.newCards.slice(-50);
       } else {
         const refund = Math.round(20 + RARITY[c.rarity].points*0.5);
         state.coins += refund; soldCoins += refund; sold++;
@@ -9012,7 +9532,7 @@ function updateSacrificeBar(){
       sacrificeSelected.clear();
       state.collection.forEach(c => {
         if(sacPanel.includes(c.id)) return;
-        if(state.equippedIds.includes(c.id)) return;
+        if(isCardInAnyDeck(c.id)) return;
         sacrificeSelected.add(c.id);
       });
     }
@@ -9038,9 +9558,16 @@ function confirmSacrificeBatch(){
     'Продолжить?'
   )) return;
   let moved = 0;
+  if(!state.sacrificePanelCache) state.sacrificePanelCache = {};
   sacrificeSelected.forEach(id => {
-    if(state.equippedIds.includes(id)) return;
+    if(isCardInAnyDeck(id)) return;
     if(state.sacrificePanel.includes(id)) return;
+    const _c = state.collection.find(x => x.id === id);
+    if(!_c) return;
+    state.sacrificePanelCache[id] = _c;
+    state.collection = state.collection.filter(x => x.id !== id);
+    state.newCards = (state.newCards||[]).filter(x => x !== id);
+    state.equippedIds = (state.equippedIds||[]).filter(x => x !== id);
     state.sacrificePanel.push(id);
     moved++;
   });
@@ -9087,7 +9614,9 @@ function bulkDeleteConfirm(){
   if(_inDeckDel.length > 0){
     return alert('⚠️ Некоторые карты в колодах — сначала сними их:\n\n' + _inDeckDel.length + ' шт.');
   }
+  const _idsToRemove = [...bulkSelected];
   state.collection = state.collection.filter(c => !bulkSelected.has(c.id));
+  _idsToRemove.forEach(id => fullyRemoveCard(id));
   state.newCards = state.newCards.filter(id => state.collection.some(c => c.id === id));
   state.coins += refund; state.coinsEarned += refund;
   state.totalSold = (state.totalSold||0) + n;
@@ -9242,9 +9771,28 @@ function renderSlots(){
 function renderBuffs(){
   const row = $('buffsRow'); if(!row) return;
   const items = [];
-  if(isBuffActive('money')){ const s = Math.ceil((state.buffs.money-Date.now())/1000); items.push('<div class="buffChip">💰 x2 монеты · ' + s + 'с</div>'); }
-  if(isBuffActive('cd')){ const s = Math.ceil((state.buffs.cd-Date.now())/1000); items.push('<div class="buffChip cd">⚡ -50% КД · ' + s + 'с</div>'); }
-  if(isBuffActive('luck')){ const s = Math.ceil((state.buffs.luck-Date.now())/1000); items.push('<div class="buffChip luck">🍀 x2 шансы · ' + s + 'с</div>'); }
+  if(isBuffActive('money')){
+    const s = Math.ceil((state.buffs.money-Date.now())/1000);
+    items.push('<div class="buffChip">💰 ×' + (state.buffs.moneyMult || 2) + ' монеты · ' + s + 'с</div>');
+  }
+  if(isBuffActive('cd')){
+    const s = Math.ceil((state.buffs.cd-Date.now())/1000);
+    items.push('<div class="buffChip cd">⚡ −50% КД · ' + s + 'с</div>');
+  }
+  if(isBuffActive('luck')){
+    const s = Math.ceil((state.buffs.luck-Date.now())/1000);
+    items.push('<div class="buffChip luck">🍀 ×' + (state.buffs.luckMult || 2) + ' карт · ' + s + 'с</div>');
+  }
+  /* 🧬 Лак мутаций */
+  if(state.buffs.mutLuck && state.buffs.mutLuck > Date.now()){
+    const s = Math.ceil((state.buffs.mutLuck - Date.now())/1000);
+    items.push('<div class="buffChip" style="background:linear-gradient(135deg,#10b981,#065f46)">🧬 ×' + (state.buffs.mutLuckMult || 2) + ' мутаций · ' + s + 'с</div>');
+  }
+  /* 🎟 Лак билетов */
+  if(state.buffs.ticketLuck && state.buffs.ticketLuck > Date.now()){
+    const s = Math.ceil((state.buffs.ticketLuck - Date.now())/1000);
+    items.push('<div class="buffChip" style="background:linear-gradient(135deg,#dc2626,#7f1d1d)">🎟 ×' + (state.buffs.ticketLuckMult || 2) + ' билетов · ' + s + 'с</div>');
+  }
   row.innerHTML = items.join('');
 }
 
@@ -9327,6 +9875,7 @@ function openSlotPickModal(slotIndex){
       /* Убираем из всех колод (карта только в одном месте) */
       removeCardFromAllDecks(cardId);
       deck.cards[slotIndex] = cardId;
+      if(!state.equippedIds.includes(cardId)) state.equippedIds.push(cardId);
       save(); renderCollection(); renderSlots(); renderTop();
       closeModal('cardModal');
       notify('🎴', 'Экипировано!', card.name + ' → колода «' + deck.name + '», слот ' + (slotIndex+1), '#10b981');
@@ -9429,7 +9978,8 @@ function openCardModal(card){
       /* Карта ставится в выбранную колоду — из всех других убираем */
       removeCardFromAllDecks(card.id);
       deck.cards[si] = card.id;
-      state.activeDeckIdx = di; /* переключаем активную на эту колоду */
+      state.activeDeckIdx = di;
+      if(!state.equippedIds.includes(card.id)) state.equippedIds.push(card.id); /* переключаем активную на эту колоду */
       save(); closeModal('cardModal');
       renderCollection(); renderSlots(); renderTop();
       notify('🎴', 'Экипировано!', card.name + ' → «' + deck.name + '», слот ' + (si+1), '#10b981');
@@ -9469,23 +10019,13 @@ function openCardModal(card){
     }
     save(); openCardModal(card); renderCollection(); checkAchievements();
   };
-  $('mMana').onclick = ()=>{
-    if(state.mana<1) return;
-    if(card.stars >= 5) return alert('Максимум 5 звёзд!');
-    state.mana -= 1;
-    const chances = [0.5,0.25,0.125,0.0625,0.03125];
-    const chance = chances[card.stars];
-    if(Math.random() < chance){
-      card.stars += 1;
-      if(card.stars > state.starsMax) state.starsMax = card.stars;
-      addXP(30); playResource();
-      alert('Успех! Теперь ' + card.stars + '★');
-    } else alert('Мана рассеялась.');
-    save(); openCardModal(card); renderCollection(); checkAchievements();
-  };
   if($('mSacrifice')) $('mSacrifice').onclick = ()=>{ moveToSacrifice(card.id); };
   if($('mToCraft')) $('mToCraft').onclick = ()=>{ moveToCraftReady(card.id); };
-  if($('mReturnFromCraft')) $('mReturnFromCraft').onclick = ()=>{ returnFromCraftReady(card.id); closeModal('cardModal'); };  $('mMana').onclick = ()=>tryUpgradeStar(card); $('mDismantle').onclick = ()=>{
+  if($('mReturnFromCraft')) $('mReturnFromCraft').onclick = ()=>{ returnFromCraftReady(card.id); closeModal('cardModal'); };  $('mMana').onclick = ()=>tryUpgradeStar(card);   $('mDismantle').onclick = ()=>{
+    /* 🛡 Нельзя разбирать карту в колоде */
+    if(isCardInAnyDeck(card.id)){
+      return alert('⚠️ Сначала сними карту из колоды!\n\nОткрой карту → «Снять» или перетащи в другой слот.');
+    }
     const baseReward = Math.round((20 + RARITY[card.rarity].points*0.5) * (1 + (card.stars||0) * 0.15));
     if(!state.quickDismantle){ if(!confirm('Разобрать ' + card.name + '?')) return; }
     ensureDailyStats();
@@ -9494,8 +10034,7 @@ function openCardModal(card){
     state.totalSoldCoins = (state.totalSoldCoins||0) + baseReward;
     state.dailyStats.sold += 1; state.dailyStats.soldCoins += baseReward;
     state.collection = state.collection.filter(c=>c.id!==card.id);
-    state.equippedIds = state.equippedIds.filter(id=>id!==card.id);
-    state.newCards = state.newCards.filter(id=>id!==card.id);
+    fullyRemoveCard(card.id);
     addXP(3); save();
     closeModal('cardModal');
     renderCollection(); renderSlots(); renderTop();
@@ -9607,6 +10146,7 @@ function renderAchievements(){
    ============================================================ */
 function rollFishRarity(depthTier){
   const weights = {c:30, u:30, r:17, sr:10, e:6, l:4, d:1.5, m:0.8, s:0.2};
+  /* 🎰 Буст удачи влияет на вес редких рыб */
   if(depthTier <= 2){ weights.l=0; weights.d=0; weights.m=0; weights.s=0; }
   else if(depthTier <= 3){ weights.d=0; weights.m=0; weights.s=0; }
   else if(depthTier <= 4){ weights.m=0; weights.s=0; }
@@ -9623,7 +10163,12 @@ function rollFishRarity(depthTier){
   else if(depthTier <= 5){ weights.s=0; }
   const _roleFisherR = getDeckRoleBonus();
   const _fisherBonus = (_roleFisherR && _roleFisherR.active && _roleFisherR.bonus.rarityBonus) ? _roleFisherR.bonus.rarityBonus : 0;
-  const luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus + _fisherBonus;
+  let luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus + _fisherBonus;
+  /* 🎰 Буст удачи — ×2/×3/×5/×10 к эффективной удаче */
+  if(isBuffActive('luck')){
+    const _luckMult = state.buffs.luckMult || 2;
+    luck += (_luckMult - 1) * 50; /* ×2 = +50, ×3 = +100, ×5 = +200, ×10 = +450 */
+  }
   if(luck > 0){
     const boost = 1 + luck/100;
     weights.r *= boost; weights.sr *= boost*1.2; weights.e *= boost*1.3;
@@ -9739,12 +10284,24 @@ let fishingAnimId = null;
 let fishingHookRef = null;
 
 function renderFishing(){
+  /* 🛡 Если идёт бой с боссом — ничего не трогаем */
+  if(state.raid && state.raid.active) return;
   if(state.fishing && state.fishing.active){ showFishingPlay(); return; }
   showFishingLobby();
 }
 function showFishingLobby(){
   const lobby = $('fishingLobby'), play = $('fishingPlay');
   if(!lobby || !play) return;
+  /* 🔓 Если бой не активен — снимаем блок с nav */
+  if(!state.raid || !state.raid.active){
+    const _navL = document.querySelector('nav');
+    if(_navL && _navL.style.pointerEvents === 'none'){
+      _navL.style.pointerEvents = '';
+      _navL.style.opacity = '';
+    }
+    const _gubL = document.getElementById('raidGiveUpBtn');
+    if(_gubL) _gubL.remove();
+  }
   lobby.style.display = '';
   play.style.display = 'none';
   updateFishInvCount();
@@ -9769,15 +10326,47 @@ function showFishingLobby(){
   cont.innerHTML = DEPTHS.map(d => {
     const energyOk = state.energy >= d.recommend;
     const raid = isRaidActiveOnDepth(d.id);
+    const ticketRaid = getTicketRaidOnDepth(d.id);
     if(raid){
       const boss = BOSS_BY_ID[raid.bossId];
-      return '<button class="depthBtn" data-d="' + d.id + '" data-raid="1" style="border-color:#dc2626;box-shadow:0 0 15px #dc262688"><span class="dEmoji">⚔️</span><div class="dName" style="color:#dc2626;font-weight:900">РЕЙД!</div><div class="dTime">' + (boss && boss.name ? boss.name : '') + '</div><div class="dEnergy" style="color:#dc2626">Нажми!</div></button>';
+      const _bossIco = boss && boss.img
+        ? '<img src="' + boss.img + '" style="width:48px;height:48px;object-fit:contain">'
+        : '<span class="dEmoji">⚔️</span>';
+      return '<button class="depthBtn" data-d="' + d.id + '" data-raid="1" style="border-color:#dc2626;box-shadow:0 0 15px #dc262688">' + _bossIco + '<div class="dName" style="color:#dc2626;font-weight:900">РЕЙД!</div><div class="dTime">' + (boss && boss.name ? boss.name : '') + '</div><div class="dEnergy" style="color:#dc2626">Нажми!</div></button>';
+    }
+    /* 🎟 Билетный рейд */
+    if(ticketRaid){
+      const boss = BOSS_BY_ID[ticketRaid.bossId];
+      const _mins = Math.max(1, Math.ceil((ticketRaid.endsAt - Date.now()) / 60000));
+      const _isDead = ticketRaid.claimed && ticketRaid.surrendered;
+      const _deadStyle = _isDead ? 'border-color:#6b7280;box-shadow:none;opacity:.5' : 'border-color:#f59e0b;box-shadow:0 0 15px #f59e0b88';
+      const _deadLabel = _isDead ? '💀 СГОРЕЛ' : '🎟 РЕЙД';
+      const _bossIco2 = boss && boss.img
+        ? '<img src="' + boss.img + '" style="width:48px;height:48px;object-fit:contain">'
+        : '<span class="dEmoji">🎟</span>';
+      return '<button class="depthBtn" data-d="' + d.id + '" data-ticket-raid="1" style="' + _deadStyle + '">' + _bossIco2 + '<div class="dName" style="color:' + (_isDead ? '#6b7280' : '#f59e0b') + ';font-weight:900">' + _deadLabel + '</div><div class="dTime">' + (boss && boss.name ? boss.name : '') + '</div><div class="dEnergy" style="color:' + (_isDead ? '#6b7280' : '#f59e0b') + '">' + (_isDead ? '❌ больше нельзя' : '⏱ ' + _mins + ' мин') + '</div></button>';
     }
     return '<button class="depthBtn" data-d="' + d.id + '" ' + (energyOk?'':'disabled') + '><span class="dEmoji">' + d.emoji + '</span><div class="dName">' + d.name + '</div><div class="dTime">' + fmtTime(d.time) + '</div><div class="dEnergy">⚡ ' + d.recommend + '+</div></button>';
   }).join('');
   cont.querySelectorAll('.depthBtn').forEach(btn => {
     btn.onclick = ()=>{
       const dId = +btn.dataset.d;
+      /* 🎟 Билетный рейд — приоритет */
+      if(btn.dataset.ticketRaid === '1'){
+        const tr = getTicketRaidOnDepth(dId);
+        if(tr){
+          if(tr.claimed){
+            if(tr.surrendered) return notify('💀', 'Билет сгорел', 'Ты сдался — жди новый билет', '#6b7280');
+            return notify('✅', 'Босс уже пойман', 'Жди новый билет', '#10b981');
+          }
+          const boss = BOSS_BY_ID[tr.bossId];
+          if(!confirm('⚔️ Начать бой с ' + boss.name + '?\n\n🚪 Можно выйти, билет уже потрачен\n🏆 Победа = билет отработан')) return;
+          state.currentRod = 'legendary';
+          if(boss.isFinal) startFinalRaid(boss);
+          else startRaid(boss);
+        }
+        return;
+      }
       if(btn.dataset.raid === '1'){
         if(tryStartRaid(dId)) return;
       }
@@ -10216,6 +10805,12 @@ function handleFishingClick(e){
           state.essence += essReward; state.essEarned += essReward;
           floatTextAt('+' + essReward + '🧪', clientX, clientY + 90, '#10b981');
         }
+        /* 🎟 2% шанс билета рулетки с рыбы */
+        if(Math.random() < 0.02){
+          state.rouletteTickets = (state.rouletteTickets || 0) + 1;
+          floatTextAt('🎰 +1 билет!', clientX, clientY - 60, '#ffd93d');
+          notify('🎰', 'Билет рулетки!', 'С рыбы выпал билет', '#ffd93d');
+        }
         state.fishStats.totalCaught = (state.fishStats.totalCaught||0) + 1;
         if(!state.fishStats.raritySeen.includes(fishData.rarity)) state.fishStats.raritySeen.push(fishData.rarity);
         if(!state.fishStats.fishNamesSeen.includes(fishData.fishId)) state.fishStats.fishNamesSeen.push(fishData.fishId);
@@ -10438,8 +11033,16 @@ function openFishInventoryModal(){
     const name = f.name || 'Рыба';
     const opacity = spoilt ? '0.6' : '1';
     const priceStr = spoilt ? '<span style="color:#dc2626">🪙 ' + fmtBig(price) + '</span><br><small style="opacity:.6;text-decoration:line-through">' + fmtBig(basePrice) + '</small>' : '🪙 ' + fmtBig(price);
+    /* 🖼 Иконка: картинка для боссов, эмодзи для рыб и стражей */
+    let _iconHtml = emoji;
+    if(f.isBoss && f.bossId){
+      const _bossDef = BOSS_BY_ID[f.bossId];
+      if(_bossDef && _bossDef.img){
+        _iconHtml = '<img src="' + _bossDef.img + '" style="width:100%;height:100%;object-fit:contain">';
+      }
+    }
     return '<div style="background:var(--panel);border-radius:10px;padding:10px;margin-bottom:6px;border:1px solid var(--border);display:flex;gap:10px;align-items:center;opacity:' + opacity + '">' +
-      '<div style="width:46px;height:46px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:2px solid ' + rarColor + '44">' + emoji + '</div>' +
+      '<div style="width:46px;height:46px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:2px solid ' + rarColor + '44;overflow:hidden">' + _iconHtml + '</div>' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + ' <span style="color:' + rarColor + ';font-size:10px">· ' + rarName + '</span></div>' +
         '<div style="font-size:10px;opacity:.7;margin-top:2px">📏 ' + fmtWeight(f.weight) + (muts ? ' · ' + muts : '') + '</div>' +
@@ -10539,6 +11142,28 @@ function sellAllFishFromInv(){
 }
 if($('colIndexBtn')) $('colIndexBtn').addEventListener('click', openCardsIndexModal);
 
+/* 🎒 Переключение под-табов инвентаря */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.invTabBtn');
+  if(!btn) return;
+  const tab = btn.dataset.inv;
+  document.querySelectorAll('.invTabBtn').forEach(b => {
+    const isActive = b === btn;
+    b.classList.toggle('active', isActive);
+    b.style.borderColor = isActive ? 'var(--acc)' : 'var(--border)';
+    b.style.background = isActive ? 'var(--acc)' : 'var(--panel2)';
+    b.style.color = isActive ? '#fff' : 'var(--txt)';
+  });
+  const cardsEl = $('invSectionCards');
+  const potionsEl = $('invSectionPotions');
+  const ticketsEl = $('invSectionTickets');
+  if(cardsEl) cardsEl.style.display = tab === 'cards' ? '' : 'none';
+  if(potionsEl) potionsEl.style.display = tab === 'potions' ? '' : 'none';
+  if(ticketsEl) ticketsEl.style.display = tab === 'tickets' ? '' : 'none';
+  if(tab === 'potions') renderPotions();
+  if(tab === 'tickets') renderRaidTickets();
+});
+
 function endFishing(){
   if(!state.fishing) return;
   const f = state.fishing;
@@ -10617,7 +11242,7 @@ function openCatchModal(){  const pc = state.pendingCatch;
       const checked = f._toInv ? 'checked' : '';
       html += '<div class="fishCard raidCatchCard" data-i="' + i + '" style="cursor:pointer;' + (checked?'border-color:var(--green);box-shadow:0 0 8px #10b98144':'border:2px solid ' + (f.isBoss ? (f.color||'#dc2626') : rarColor) + '44') + '">' +
         '<input type="checkbox" class="raidCatchCb" data-i="' + i + '" ' + checked + ' style="width:22px;height:22px;accent-color:var(--green);flex-shrink:0;cursor:pointer">' +
-        '<div class="fPhoto" style="background:' + (f.isBoss ? (f.color||'#dc2626') : rarColor) + '33">' + f.emoji + '</div>' +
+        '<div class="fPhoto" style="background:' + (f.isBoss ? (f.color||'#dc2626') : rarColor) + '33">' + (f.isBoss && BOSS_BY_ID[f.bossId] && BOSS_BY_ID[f.bossId].img ? '<img src="' + BOSS_BY_ID[f.bossId].img + '" style="width:100%;height:100%;object-fit:contain">' : f.emoji) + '</div>' +
         '<div class="fInfo"><div class="fName">' + f.name + ' <span style="color:' + rarColor + '">· ' + rarName + '</span></div>' +
         '<div class="fMeta">📏 ' + fmtWeight(f.weight) + ' · ' + (f.isBoss ? '🔱 БОСС' : '🛡 Страж') + '</div>' + mutsHtml + '</div>' +
         '<div class="fPrice">🪙 ' + fmtBig(price) + '</div>' +
@@ -10951,7 +11576,12 @@ function applyMutationToFish(mid){
   const baseChance = MUT_APPLY_CHANCE[m.tier] !== undefined ? MUT_APPLY_CHANCE[m.tier] : 0.5;
   const existingMuts = (fish.mutations || []).length;
   const mutMult = existingMuts === 0 ? 1.8 : existingMuts === 1 ? 1.2 : existingMuts === 2 ? 1.0 : 0.7;
-  const applyChance = Math.min(0.95, baseChance * mutMult);
+  /* 🧬 Лак мутаций — множитель к шансу */
+  let _luckMutMult = 1;
+  if(state.buffs.mutLuck && state.buffs.mutLuck > Date.now()){
+    _luckMutMult = state.buffs.mutLuckMult || 2;
+  }
+  const applyChance = Math.min(0.95, baseChance * mutMult * _luckMutMult);
   const chancePct = Math.round(applyChance * 100);
   const _mutInfo = existingMuts === 0
     ? '✨ Это будет 1-я мутация — шанс повышен!'
@@ -11026,7 +11656,8 @@ function openFishIndexModal(){
     BOSSES.forEach(b => {
       const caughtTimes = caughtBosses[b.id] || 0;
       if(caughtTimes > 0){
-        html += '<div class="rarCard" style="background:linear-gradient(160deg,#dc262644,#7f1d1d11);border:1px solid #dc262655"><div class="em">' + b.icon + '</div><div class="nm">' + b.name + '</div><div class="pr">🪙 ' + fmtBig(b.minPrice) + '+</div><div class="pr" style="color:#fff">×' + caughtTimes + '</div></div>';
+        const _bImg = b.img ? '<img src="' + b.img + '" style="width:60px;height:60px;object-fit:contain">' : '<div class="em">' + b.icon + '</div>';
+        html += '<div class="rarCard" style="background:linear-gradient(160deg,#dc262644,#7f1d1d11);border:1px solid #dc262655">' + _bImg + '<div class="nm">' + b.name + '</div><div class="pr">🪙 ' + fmtBig(b.minPrice) + '+</div><div class="pr" style="color:#fff">×' + caughtTimes + '</div></div>';
       } else {
         html += '<div class="rarCard locked"><div class="q">?</div><div class="nm" style="opacity:.6">Не пойман</div></div>';
       }
@@ -11509,6 +12140,9 @@ function startCraftWithPicks(){
     state.collection = state.collection.filter(x => x.id !== c.id);
     state.equippedIds = state.equippedIds.filter(x => x !== c.id);
     state.newCards = state.newCards.filter(x => x !== c.id);
+    /* 🧹 Чистим карту из панелей жертв и крафта (иначе они считаются "занятыми" без карты) */
+    if(Array.isArray(state.sacrificePanel)) state.sacrificePanel = state.sacrificePanel.filter(x => x !== c.id);
+    if(Array.isArray(state.craftReadyPanel)) state.craftReadyPanel = state.craftReadyPanel.filter(x => x !== c.id);
   }
   state.craftCounts[recipe.id] = (state.craftCounts[recipe.id] || 0) + 1;
   const hours = rnd(recipe.timeMinH, recipe.timeMaxH);
@@ -11517,7 +12151,7 @@ function startCraftWithPicks(){
     recipeId: recipe.id,
     startedAt: now,
     endsAt: now + Math.round(hours * 3600 * 1000),
-    cardsSpent: allCards.map(c => ({name: c.name, rarity: c.rarity})),
+    cardsCount: allCards.length,
     ready: false,
     notifSent: false
   };
@@ -11571,7 +12205,10 @@ function returnAllFromCraftReady(){
 }
 
 function getSacrificeCards(){
-  return (state.sacrificePanel || []).map(id => state.collection.find(c => c.id === id)).filter(Boolean);
+  /* 🗡 Карты жертв хранятся отдельно — они удалены из коллекции */
+  if(!state.sacrificePanel) return [];
+  if(!state.sacrificePanelCache) state.sacrificePanelCache = {};
+  return (state.sacrificePanel || []).map(id => state.sacrificePanelCache[id]).filter(Boolean);
 }
 function countSacrificeByRarity(rarity){
   return getSacrificeCards().filter(c => c.rarity === rarity).length;
@@ -11582,7 +12219,7 @@ function moveToSacrifice(cardId){
   if(state.sacrificePanel.includes(cardId)) return;
   const card = state.collection.find(c => c.id === cardId);
   if(!card) return;
-  /* 🎴 Нельзя в крафт, пока карта в колоде */
+  /* 🎴 Нельзя в жертвы, пока карта в колоде */
   if(isCardInAnyDeck(cardId)) return alert('⚠️ Сначала сними карту из колоды!\n\nОткрой карту → «Снять» или перетащи в другой слот.');
   const ok = confirm(
     '🗡 Перевести в жертвы?\n\n' +
@@ -11592,12 +12229,21 @@ function moveToSacrifice(cardId){
     '• Карта исчезнет из коллекции\n' +
     '• Вернуть её обратно НЕЛЬЗЯ\n' +
     '• Она уйдёт в панель жертв в Крафте\n' +
+    '• Освободит слот инвентаря\n' +
     '• Использовать можно только в крафте или уничтожить (65% возврата)\n\n' +
     'Продолжить?'
   );
   if(!ok) return;
+  /* 🛡 Сохраняем объект карты в кэш (иначе она потеряется навсегда!) */
+  if(!state.sacrificePanelCache) state.sacrificePanelCache = {};
+  state.sacrificePanelCache[cardId] = card;
+  /* 🛡 Убираем карту из коллекции (освобождаем слот инвентаря) */
+  state.collection = state.collection.filter(c => c.id !== cardId);
+  state.sacrificePanel = state.sacrificePanel.filter(id => id !== cardId);
+  state.newCards = state.newCards.filter(id => id !== cardId);
+  /* 🗡 Добавляем в панель жертв */
   state.sacrificePanel.push(cardId);
-  notify('🗡', 'В жертвы', card.name, '#dc2626');
+  notify('🗡', 'В жертвы', card.name + ' · слот освобождён', '#dc2626');
   save(); renderHeader();
   if(typeof renderCollection === 'function' && $('tab-collection').classList.contains('active')) renderCollection();
   if(typeof renderCraft === 'function' && $('tab-craft').classList.contains('active')) renderCraft();
@@ -11605,7 +12251,7 @@ function moveToSacrifice(cardId){
 }
 function destroySacrificeCard(cardId){
   if(!state.sacrificePanel) return;
-  const card = state.collection.find(c => c.id === cardId);
+  const card = state.sacrificePanelCache ? state.sacrificePanelCache[cardId] : null;
   if(!card) return;
   const fullRefund = Math.round((20 + RARITY[card.rarity].points * 0.5) * (1 + (card.stars||0) * 0.15));
   const refund = Math.round(fullRefund * 0.65);
@@ -11616,6 +12262,10 @@ function destroySacrificeCard(cardId){
   state.collection = state.collection.filter(c => c.id !== cardId);
   state.sacrificePanel = state.sacrificePanel.filter(id => id !== cardId);
   state.newCards = state.newCards.filter(id => id !== cardId);
+  /* 🧹 Чистим кэш (иначе карта «висит» в памяти) */
+  if(state.sacrificePanelCache && state.sacrificePanelCache[cardId]){
+    delete state.sacrificePanelCache[cardId];
+  }
   playDrop(); save(); renderHeader(); renderCraft();
   notify('🔥', 'Уничтожено', '+ ' + refund + ' 🪙', '#dc2626');
 }
@@ -11628,9 +12278,9 @@ function destroyAllSacrifice(){
   ensureDailyStats();
   state.coins += total; state.coinsEarned += total;
   state.dailyStats.sold += cards.length; state.dailyStats.soldCoins += total;
-  state.collection = state.collection.filter(c => !state.sacrificePanel.includes(c.id));
-  state.newCards = state.newCards.filter(id => !state.sacrificePanel.includes(id));
+  /* 🛡 Карты уже удалены из коллекции при moveToSacrifice — просто чистим панель */
   state.sacrificePanel = [];
+  state.sacrificePanelCache = {};
   playDrop(); save(); renderHeader(); renderCraft();
   notify('🔥', 'Уничтожено', cards.length + ' карт · +' + total + ' 🪙', '#dc2626');
 }
@@ -11678,7 +12328,7 @@ function startCraft(recipeId){
     recipeId: recipe.id,
     startedAt: now,
     endsAt: now + Math.round(hours * 3600 * 1000),
-    cardsSpent: search.cards.map(c => ({name: c.name, rarity: c.rarity})),
+    cardsCount: search.cards.length,
     ready: false,
     notifSent: false
   };
@@ -11724,6 +12374,7 @@ function claimCraft(slotIdx){
   state.collection.push(card);
   registerCardStats(card);
   if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
+  if(state.newCards.length > 50) state.newCards = state.newCards.slice(-50);
   state.craftSlots[slotIdx] = null;
   addXP(1000);
   playRare(); flashRare(); playAchievement();
@@ -11752,7 +12403,7 @@ function renderCraft(){
   /* ⚒️ Панель карт для крафта */
   if(!Array.isArray(state.craftReadyPanel)) state.craftReadyPanel = [];
   const craftReadyCards = getCraftReadyCards();
-  let craftReadyHTML = '<div style="background:linear-gradient(135deg,#1a0f2e,#1e1730);border:2px solid #a855f744;border-radius:14px;padding:14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:700;color:#a855f7">⚒️ Карты для крафта · ' + craftReadyCards.length + ' / ' + CRAFT_READY_MAX + '</div>' + (craftReadyCards.length > 0 ? '<button id="craftReadyReturnAllBtn" style="padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#10b981,#065f46);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">↩️ Вернуть все</button>' : '') + '</div><div style="font-size:11px;opacity:.75;line-height:1.5;margin-bottom:8px">Сюда откладывай карты для крафта (обязательные). Из панели можно вернуть обратно в коллекцию если есть место. Крафт берёт обязательные ТОЛЬКО отсюда.</div>';
+  let craftReadyHTML = '<div style="background:linear-gradient(135deg,#1a0f2e,#1e1730);border:2px solid #a855f744;border-radius:14px;padding:14px;margin-bottom:14px;color:#fff"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:700;color:#a855f7">⚒️ Карты для крафта · ' + craftReadyCards.length + ' / ' + CRAFT_READY_MAX + '</div>' + (craftReadyCards.length > 0 ? '<button id="craftReadyReturnAllBtn" style="padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#10b981,#065f46);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">↩️ Вернуть все</button>' : '') + '</div><div style="font-size:11px;opacity:.75;line-height:1.5;margin-bottom:8px">Сюда откладывай карты для крафта (обязательные). Из панели можно вернуть обратно в коллекцию если есть место. Крафт берёт обязательные ТОЛЬКО отсюда.</div>';
   if(craftReadyCards.length > 0){
     craftReadyHTML += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:4px;max-height:180px;overflow-y:auto;padding:4px;background:rgba(0,0,0,.25);border-radius:8px">';
     craftReadyCards.slice(0, 100).forEach(c => {
@@ -11783,7 +12434,7 @@ function renderCraft(){
     }
   });
   if(!sacHTML) sacHTML = '<span style="font-size:11px;opacity:.6">Панель пуста — закидывай карты через 🗡 В жертвы в карточке</span>';
-  let sacrificePanelHTML = '<div style="background:linear-gradient(135deg,#2d1b1b,#1e1730);border:2px solid #dc262644;border-radius:14px;padding:14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:700;color:#dc2626">🗡 Панель жертв · ' + sacCards.length + ' / ' + SACRIFICE_MAX + '</div>' + (sacCards.length > 0 ? '<button id="sacDestroyAllBtn" style="padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#dc2626,#7f1d1d);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🔥 Уничтожить всё</button>' : '') + '</div><div style="font-size:11px;opacity:.75;line-height:1.5;margin-bottom:8px">Карты отсюда уходят ТОЛЬКО в крафт или на уничтожение. Обратно в коллекцию вернуть нельзя. Возврат при уничтожении: 65%.</div><div style="display:flex;flex-wrap:wrap;margin-bottom:' + (sacCards.length>0?'10px':'0') + '">' + sacHTML + '</div>';
+  let sacrificePanelHTML = '<div style="background:linear-gradient(135deg,#2d1b1b,#1e1730);border:2px solid #dc262644;border-radius:14px;padding:14px;margin-bottom:14px;color:#fff"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:700;color:#dc2626">🗡 Панель жертв · ' + sacCards.length + ' / ' + SACRIFICE_MAX + '</div>' + (sacCards.length > 0 ? '<button id="sacDestroyAllBtn" style="padding:6px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#dc2626,#7f1d1d);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🔥 Уничтожить всё</button>' : '') + '</div><div style="font-size:11px;opacity:.75;line-height:1.5;margin-bottom:8px">Карты отсюда уходят ТОЛЬКО в крафт или на уничтожение. Обратно в коллекцию вернуть нельзя. Возврат при уничтожении: 65%.</div><div style="display:flex;flex-wrap:wrap;margin-bottom:' + (sacCards.length>0?'10px':'0') + '">' + sacHTML + '</div>';
 
   /* Мини-сетка жертв */
   if(sacCards.length > 0){
@@ -12268,6 +12919,11 @@ function claimQuestReward(idx){
   if(r.mana){ state.mana += r.mana; state.manaEarned += r.mana; }
   const xp = getQuestXP(q, idx);
   q.claimed = true;
+  /* 🎰 15% шанс билета рулетки за задание */
+  if(Math.random() < 0.15){
+    state.rouletteTickets = (state.rouletteTickets || 0) + 1;
+    notify('🎁', 'Билет колеса!', '+1 билет за задание', '#ffd93d');
+  }
   state.totalQuestsClaimed = (state.totalQuestsClaimed || 0) + 1;
   addXP(xp);
   playAchievement(); save(); renderHeader(); renderQuests(); checkAchievements();
@@ -12353,6 +13009,8 @@ function openDailyModal(){
       if(r.mana){ state.mana += r.mana; state.manaEarned += r.mana; }
       state.dailyStreak = (state.dailyStreak || 0) + 1;
       state.dailyLast = todayKey();
+      /* 🎰 +3 билета рулетки за ежедневку */
+      state.rouletteTickets = (state.rouletteTickets || 0) + 3;
       const xp = 30 + currentDay*20;
       addXP(xp);
       playDaily(); playAchievement(); save(); renderHeader(); checkAchievements();
@@ -12410,7 +13068,11 @@ function normalizeText(str){
 }
 function containsBad(str){
   const norm = normalizeText(str);
-  return BAD_ROOTS.some(root => norm.includes(root));
+  /* Кириллица — по полному списку */
+  if(BAD_ROOTS.some(root => norm.includes(root))) return true;
+  /* Латиница — только корни ≥5 символов (чтобы не банить Hancock, Dickens, Analytics) */
+  const lower = String(str).toLowerCase().replace(/[^a-z]/g, '');
+  return BAD_ROOTS.some(root => /^[a-z]+$/.test(root) && root.length >= 5 && lower.includes(root));
 }
 function censorNick(nick){
   return containsBad(nick) ? '█'.repeat(Math.min(String(nick).length, 10)) : nick;
@@ -12420,6 +13082,8 @@ function isValidNick(nick){
   if(nick.length < 2) return { ok:false, msg:'Ник от 2 до 20 символов' };
   if(nick.length > 20) return { ok:false, msg:'Ник слишком длинный' };
   if(/^\d+$/.test(nick)) return { ok:false, msg:'Ник не может быть только из цифр' };
+  /* 🛡 XSS-защита: запрещаем HTML-символы */
+  if(/[<>"'`&]/.test(nick)) return { ok:false, msg:'Спецсимволы < > " \' ` & запрещены' };
   if(containsBad(nick)) return { ok:false, msg:'Недопустимое слово в нике' };
   if(/(.)\1{5,}/.test(nick)) return { ok:false, msg:'Слишком много одинаковых букв' };
   return { ok:true };
@@ -12552,16 +13216,16 @@ function renderHeader(){
   const sb = $('staticBtn'); if(sb) sb.textContent = '+' + getBaseClick();
   const _ad = getActiveDeck();
   set('slotCount', (_ad.cards.filter(Boolean).length) + '/' + _ad.slotsMax);  const st = $('soundToggle'); if(st) st.textContent = state.soundOn ? '🔊' : '🔇';
-  const mt = $('musicToggle'); if(mt) mt.textContent = state.musicOn ? (state.customMusicOn ? '🎧' : '🎵') : '🚫';
+  const mt = $('musicToggle'); if(mt) mt.textContent = state.musicOn ? '🎵' : '🚫';
   const db = $('dailyBtn'); if(db) db.style.opacity = canClaimDaily() ? '1' : '0.5';
   const badge = $('lvlBadge');
   if(badge) badge.onclick = (e)=>{ e.stopPropagation(); openLevelModal(); };
   checkUnlocks();
 }
 function applyBackground(){
+  /* Фон кликера убран для экономии БД */
   const pa = $('playArea'); if(!pa) return;
-  if(state.bg) pa.style.backgroundImage = 'linear-gradient(rgba(21,16,31,.55),rgba(21,16,31,.55)), url(' + JSON.stringify(state.bg) + ')';
-  else pa.style.backgroundImage = 'none';
+  pa.style.backgroundImage = 'none';
 }
 function openLevelModal(){
   const cur = state.xpTotal - xpForLevel(state.lvl);
@@ -12579,7 +13243,7 @@ function checkUnlocks(){
   $$('nav button[data-lvl]').forEach(btn => {
     const need = +btn.dataset.lvl;
     btn.classList.toggle('locked', state.lvl < need);
-    btn.classList.toggle('active', false);
+    /* ❌ НЕ сбрасываем active — этим занимается renderNav() / switchTab() */
   });
 }
 function renderNav(){
@@ -12595,9 +13259,22 @@ let bulkSelected = new Set();
 let sacrificeMode = false;
 let sacrificeSelected = new Set();
 function switchTab(tabId){
+  /* 🔓 Аварийная разблокировка nav: бой не активен, а nav всё ещё заблокирован */
+  const _navChk = document.querySelector('nav');
+  if(_navChk && _navChk.style.pointerEvents === 'none' && (!state.raid || !state.raid.active)){
+    _navChk.style.pointerEvents = '';
+    _navChk.style.opacity = '';
+    const _gub = document.getElementById('raidGiveUpBtn');
+    if(_gub) _gub.remove();
+  }
   /* 🚫 Из боя с боссом выйти нельзя */
   if(state.raid && state.raid.active && tabId !== 'fishing'){
     notify('🚫', 'Выйти нельзя', 'Сначала добей босса!', '#dc2626');
+    return;
+  }
+  /* 🚫 Во время прокрута колеса выйти нельзя */
+  if(window._rouletteSpinning && tabId !== 'roulette'){
+    notify('🎁', 'Подожди', 'Колесо крутится...', '#ffd93d');
     return;
   }
   const btn = document.querySelector('nav button[data-tab="' + tabId + '"]');
@@ -12608,8 +13285,9 @@ function switchTab(tabId){
   if(tabEl) tabEl.classList.add('active');
   $$('nav button').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  if(tabId === 'collection') renderCollection();
+  if(tabId === 'collection'){ renderCollection(); renderPotions(); renderRaidTickets(); }
   if(tabId === 'top') renderTop();
+  if(tabId === 'roulette') openRoulette();
   if(tabId === 'achievements') renderAchievements();
   if(tabId === 'profile') renderProfile();
   if(tabId === 'shop'){ renderShop(); bindPackClicks(); renderDailyShop(); renderUpgrades(); }
@@ -12653,7 +13331,8 @@ function doClick(mult, e){
   playClick();
   ensureDailyStats();
   const base = getBaseClick();
-  const earned = Math.max(1, Math.round(base * 1));
+  /* ✅ Множитель кнопки учитывается (было багом — ×3/×10 давали как ×1) */
+  const earned = Math.max(1, Math.round(base * (mult || 1)));
   const luckMult = isBuffActive('luck') ? 2 : 1;
   const _roleR2 = getDeckRoleBonus();
   const _roleGold2 = (_roleR2 && _roleR2.active && _roleR2.bonus.gold) ? (1 + _roleR2.bonus.gold) : 1;
@@ -12670,6 +13349,12 @@ function doClick(mult, e){
   if(Math.random() < GOLD_CH*goldBonus){ state.gold += 1; state.goldEarned += 1; gains.push({t:'🥇 +1',c:'#ffd93d'}); }
   if(Math.random() < ESS_CH*essBonus){ state.essence += 0.5; state.essEarned += 0.5; gains.push({t:'🧪 +0.5',c:'#10b981'}); }
   if(Math.random() < MANA_CH*manaBonus){ state.mana += 1; state.manaEarned += 1; gains.push({t:'✨ +1',c:'#a855f7'}); }
+  /* 🎟 Редкий дроп билета рулетки с клика (0.1%) */
+  if(Math.random() < 0.001){
+    state.rouletteTickets = (state.rouletteTickets || 0) + 1;
+    gains.push({t:'🎰 +1 билет',c:'#ffd93d'});
+    notify('🎁', 'Билет колеса!', 'С клика выпал билет', '#ffd93d');
+  }
   addXP(1);
   if(e) floatText('+' + earned, e);
   if(gains.length) playResource();
@@ -12733,18 +13418,17 @@ function renderProfile(){
 
     '<div class="profileCard"><h3>🎨 Тема</h3><div style="font-size:11px;opacity:.7;margin-bottom:8px">Авто: днём — светлая, ночью — тёмная</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="themeModeBtn" data-mode="auto" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + (state.autoTheme?'var(--acc)':'var(--border)') + ';background:' + (state.autoTheme?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🔄 Авто</button><button class="themeModeBtn" data-mode="dark" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🌙 Тёмная</button><button class="themeModeBtn" data-mode="light" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">☀️ Светлая</button></div></div>' +
 
-    '<div class="profileCard"><h3>🎨 Аватарка</h3><button class="profileBtn btnPink" id="pickAvatar">📷 Из галереи</button><button class="profileBtn btnGreen" id="pickFromCards">🎴 Из карт</button>' + ((state.avatar || state.avatarType) ? '<button class="profileBtn btnGray" id="clearAvatar">✖ Убрать</button>' : '') + '</div>' +
+    '<div class="profileCard"><h3>🎨 Аватарка</h3><button class="profileBtn btnGreen" id="pickFromCards">🎴 Выбрать из карт</button>' + ((state.avatarEmoji) ? '<button class="profileBtn btnGray" id="clearAvatar">✖ Убрать</button>' : '') + '</div>' +
 
-    '<div class="profileCard"><h3>✏️ Ник</h3><input class="profileInput" id="nickEdit" maxlength="20" value="' + (state.nick||'').replace(/"/g,'&quot;') + '" placeholder="Новый ник"><button class="profileBtn btnGreen" id="saveNick">Сохранить</button></div>' +
+    '<div class="profileCard"><h3>✏️ Ник</h3><input class="profileInput" id="nickEdit" maxlength="20" value="' + (state.nick||'').replace(/"/g,'&quot;') + '" placeholder="Новый ник"><button class="profileBtn btnGreen" id="saveNick">Сохранить</button><div style="font-size:11px;opacity:.6;margin-top:6px">⚠️ Ник можно менять 1 раз в сутки</div></div>' +
 
-    '<div class="profileCard"><h3>🖼 Фон кликера</h3><button class="profileBtn btnPink" id="pickBg">📷 Из галереи</button>' + (state.bg ? '<button class="profileBtn btnGray" id="clearBg">✖ Убрать</button>' : '') + '</div>' +
-
-    '<div class="profileCard"><h3>🎵 Своя музыка</h3><button class="profileBtn btnPink" id="pickMusic">📁 Загрузить mp3</button>' + (state.customMusic ? '<button class="profileBtn ' + (state.customMusicOn ? 'btnGreen' : 'btnGray') + '" id="toggleCustomMusic">' + (state.customMusicOn ? '⏸ Выкл' : '▶️ Вкл') + '</button>' : '') + (state.customMusic ? '<button class="profileBtn btnGray" id="clearMusic">🗑 Удалить</button>' : '') + '<div style="font-size:11px;opacity:.6;margin-top:6px">Сейчас играет: <b>' + TRACKS[state.currentTrack||0].name + '</b> <button class="profileBtn btnGray" id="nextTrackBtn" style="margin-top:6px">⏭ Следующий трек</button></div></div>' +
+    '<div class="profileCard"><h3>🎵 Музыка</h3><div style="font-size:11px;opacity:.6;margin-bottom:6px">Сейчас играет: <b>' + TRACKS[state.currentTrack||0].name + '</b></div><button class="profileBtn btnGray" id="nextTrackBtn">⏭ Следующий трек</button></div>' +
 
 
     '<div class="profileCard"><h3>🔔 Уведомления</h3><button class="profileBtn btnGold" id="notifBtn">Настройки уведомлений</button></div>' +
 
     '<div class="profileCard"><h3>🎵 Звуки событий</h3><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><span style="font-size:13px">Включены</span><input type="checkbox" id="eventSoundsToggle" ' + (state.eventSounds?'checked':'') + ' style="width:auto;accent-color:var(--purple);transform:scale(1.3)"></div></div>' +
+
 
     '<div class="profileCard"><h3>🎁 Ежедневный бонус</h3><div class="profileRow"><span class="lbl">Серия</span><span class="val">' + (state.dailyStreak || 0) + ' 🔥</span></div><button class="profileBtn btnPink" id="dailyProfileBtn">' + (canClaimDaily() ? '🎁 Забрать' : '🌙 Завтра') + '</button></div>' +
 
@@ -12783,6 +13467,8 @@ function renderProfile(){
       (state.autoSellEnabled ? '<div style="font-size:11px;opacity:.7;margin:12px 0 6px">Редкости:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' + Object.keys(RARITY).map(r => '<button class="autoSellRarity" data-r="' + r + '" style="padding:8px 12px;border-radius:8px;border:2px solid ' + (state.autoSellRarities.includes(r)?'var(--acc)':'var(--border)') + ';background:' + (state.autoSellRarities.includes(r)?'var(--acc)':'var(--panel2)') + ';color:#fff;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700;min-height:36px">' + r + '</button>').join('') + '</div>' : '') +
       '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border);margin-top:8px"><span style="font-size:13px">Быстрый разбор</span><input type="checkbox" id="quickDisToggle" ' + (state.quickDismantle?'checked':'') + ' style="width:auto;accent-color:var(--acc);transform:scale(1.3)"></div>' +
     '</div>' +
+
+    '<div class="profileCard"><h3>💾 Сохранение</h3><button class="profileBtn btnGreen" id="manualSaveBtn">💾 Сохранить сейчас</button><div style="font-size:11px;opacity:.6;margin-top:6px">Прогресс сохраняется автоматически при выходе, но можно сохранить вручную.</div></div>' +
 
     '<div class="profileCard"><h3>⚠️ Опасная зона</h3><button class="profileBtn btnRed" id="resetBtn">🗑 Сбросить прогресс</button></div>';
 
@@ -12878,14 +13564,8 @@ const nameClick = $('profileNameClick');
       playResource();
     };
   });
-  $('pickAvatar').onclick = ()=>{ const f = $('avatarFile'); if(f) f.click(); };
-  $('pickFromCards').onclick = openAvatarPickModal;
-
-  $('pickAvatar').onclick = ()=>{ const f = $('avatarFile'); if(f) f.click(); };
   $('pickFromCards').onclick = openAvatarPickModal;
   if($('clearAvatar')) $('clearAvatar').onclick = ()=>{ state.avatar=''; state.avatarType=''; state.avatarEmoji=''; save(); renderProfile(); renderHeader(); };
-  $('pickBg').onclick = ()=>{ const f = $('bgFile'); if(f) f.click(); };
-  if($('clearBg')) $('clearBg').onclick = ()=>{ state.bg=''; save(); applyBackground(); renderProfile(); };
 
   /* 🚫 Сохранение ника С ФИЛЬТРОМ */
   $('saveNick').onclick = ()=>{
@@ -12898,22 +13578,6 @@ const nameClick = $('profileNameClick');
     topCache = {points:null, lvl:null, coins:null};
     save(); renderHeader(); renderProfile(); renderTop();
     alert('Ник изменён');
-  };
-  $('pickMusic').onclick = ()=>{ const f = $('musicFile'); if(f) f.click(); };
-  if($('toggleCustomMusic')) $('toggleCustomMusic').onclick = ()=>{
-    state.customMusicOn = !state.customMusicOn;
-    save();
-    if(state.customMusicOn){ stopMusic(); initAudio(); startCustomMusic(); }
-    else { stopCustomMusic(); if(state.musicOn) startMusic(); }
-    renderProfile(); renderHeader();
-  };
-  if($('clearMusic')) $('clearMusic').onclick = async ()=>{
-    if(!confirm('Удалить?')) return;
-    await dbDeleteMusic();
-    state.customMusic = false; state.customMusicOn = false;
-    stopCustomMusic(); customAudio = null;
-    if(state.musicOn) startMusic();
-    save(); renderProfile(); renderHeader();
   };
   if($('nextTrackBtn')) $('nextTrackBtn').onclick = ()=>{ initAudio(); nextTrack(); renderProfile(); };
 
@@ -12935,6 +13599,10 @@ const nameClick = $('profileNameClick');
     };
   });
   $('resetBtn').onclick = resetProgress;
+  if($('manualSaveBtn')) $('manualSaveBtn').onclick = ()=>{
+    save(); /* не silent — покажет тост */
+    notify('💾', 'Сохранено', 'Прогресс сохранён', '#10b981');
+  };
 }
 
 /* График баланса */
@@ -12965,6 +13633,907 @@ function renderBalanceChart(){
   set('balMin', fmtBig(min));
   set('balNow', fmtBig(state.coins));
   set('balMax', fmtBig(max));
+}
+
+/* ============================================================
+   🎟 БИЛЕТЫ РЕЙДА
+   ============================================================ */
+const TICKET_TYPES = {
+  case:  { id:'case',  name:'Билет-кейс',  img:'assets/tickets/ticket_case.png',  boss:null,        rarity:'Необычный',    color:'#dc2626' },
+  pond:  { id:'pond',  name:'Пруд',        img:'assets/tickets/ticket_pond.png',  boss:'boss_pond', rarity:'Обычный',      color:'#5eb1c9' },
+  river: { id:'river', name:'Река',        img:'assets/tickets/ticket_river.png', boss:'boss_river',rarity:'Обычный',      color:'#10b981' },
+  lake:  { id:'lake',  name:'Озеро',       img:'assets/tickets/ticket_lake.png',  boss:'boss_lake', rarity:'Редкий',       color:'#7c3aed' },
+  deep:  { id:'deep',  name:'Глубина',     img:'assets/tickets/ticket_deep.png',  boss:'boss_deep', rarity:'Редкий',       color:'#dc2626' },
+  abyss: { id:'abyss', name:'Бездна',      img:'assets/tickets/ticket_abyss.png', boss:'boss_abyss',rarity:'Легендарный', color:'#4c1d95' }
+};
+
+const CASE_CHANCES = [
+  { id:'pond',  weight:35 },
+  { id:'river', weight:30 },
+  { id:'lake',  weight:20 },
+  { id:'deep',  weight:12 },
+  { id:'abyss', weight:3 }
+];
+
+function addRaidTicket(type, count){
+  if(!TICKET_TYPES[type]) return;
+  count = count || 1;
+  if(!state.raidTickets || typeof state.raidTickets !== 'object'){
+    state.raidTickets = { case: 0, pond: 0, river: 0, lake: 0, deep: 0, abyss: 0 };
+  }
+  state.raidTickets[type] = (state.raidTickets[type] || 0) + count;
+  save();
+}
+
+function totalRaidTickets(){
+  if(!state.raidTickets || typeof state.raidTickets !== 'object') return 0;
+  return Object.values(state.raidTickets).reduce((s, n) => s + (n || 0), 0);
+}
+
+/* 🎰 Открыть кейс — рулетка билетов */
+function openTicketCase(){
+  if(!state.raidTickets || state.raidTickets.case <= 0){
+    return notify('❌', 'Нет кейсов', 'Кейсов больше нет', '#dc2626');
+  }
+  state.raidTickets.case--;
+  save();
+  /* 🎲 Выбираем билет заранее */
+  /* 🎟 Лак билетов — множитель к весам редких (Озеро / Глубина / Бездна) */
+  let _luckTicketMult = 1;
+  if(state.buffs.ticketLuck && state.buffs.ticketLuck > Date.now()){
+    _luckTicketMult = state.buffs.ticketLuckMult || 2;
+  }
+  const _weighted = CASE_CHANCES.map(c => {
+    const _isRare = (c.id === 'lake' || c.id === 'deep' || c.id === 'abyss');
+    return { id: c.id, weight: c.weight * (_isRare ? _luckTicketMult : 1) };
+  });
+  const total = _weighted.reduce((s, c) => s + c.weight, 0);
+  let r = Math.random() * total;
+  let picked = _weighted[0].id;
+  for(const c of _weighted){
+    r -= c.weight;
+    if(r < 0){ picked = c.id; break; }
+  }
+  /* 🎬 Модалка с рулеткой */
+  let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button>';
+  html += '<h2 style="text-align:center">🎰 Открытие билета</h2>';
+  html += '<div style="position:relative;height:130px;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#0f0820,#1a0f2e);border:2px solid #2d2444;margin-bottom:14px">';
+  html += '<div style="position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:28px;color:#ffd93d;z-index:10;text-shadow:0 0 12px #ffd93d">▼</div>';
+  html += '<div id="ticketCaseLenta" style="display:flex;height:100%;align-items:center;position:absolute;left:0;top:0;transition:transform 3s cubic-bezier(.15,.85,.25,1)"></div>';
+  html += '</div>';
+  html += '<div id="ticketCaseResult" style="text-align:center;font-size:14px;opacity:0;transition:opacity .4s;min-height:40px;font-weight:700;color:var(--gold)"></div>';
+  html += '<button class="btnClose" id="ticketCaseClose" style="margin-top:10px;display:none">Закрыть</button>';
+  $('helpContent').innerHTML = html;
+  openModal('helpModal');
+
+  /* Строим ленту */
+  const WINNER_IDX = 30;
+  let lentaHtml = '';
+  for(let i = 0; i < 40; i++){
+    const tId = (i === WINNER_IDX) ? picked : CASE_CHANCES[Math.floor(Math.random() * CASE_CHANCES.length)].id;
+    const t = TICKET_TYPES[tId];
+    lentaHtml += '<div style="width:140px;height:100px;flex-shrink:0;margin:0 6px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.06);border:2px solid #3d3454"><img src="' + t.img + '" style="max-width:100%;max-height:100%;object-fit:contain"></div>';
+  }
+  const lenta = $('ticketCaseLenta');
+  lenta.innerHTML = lentaHtml;
+
+  /* 🔊 Инициализируем звук */
+  if(typeof initAudio === 'function') initAudio();
+  if(typeof stopMusic === 'function') stopMusic();
+
+  /* Анимация */
+  setTimeout(() => {
+    const ITEM_W = 152;
+    const wrapW = lenta.parentElement.offsetWidth;
+    const itemCenter = WINNER_IDX * ITEM_W + 76;
+    const offset = (Math.random() - 0.5) * 60;
+    const targetX = wrapW / 2 - itemCenter + offset;
+    lenta.style.transform = 'translateX(' + targetX + 'px)';
+
+    playRouletteSpinSound(3000);
+
+    setTimeout(() => {
+      const t = TICKET_TYPES[picked];
+      addRaidTicket(picked, 1);
+      const res = $('ticketCaseResult');
+      res.innerHTML = '🎉 Выпал билет: <b style="color:#ffd93d">' + t.name + '</b>!';
+      res.style.opacity = '1';
+      $('ticketCaseClose').style.display = 'block';
+      $('ticketCaseClose').onclick = () => { closeModal('helpModal'); renderRaidTickets(); };
+      playRare(); flashRare();
+      if(state.musicOn && typeof startMusic === 'function') setTimeout(startMusic, 800);
+      renderRaidTickets();
+    }, 3200);
+  }, 100);
+}
+
+/* ⚔️ Активировать рейд по билету (событие 20 мин, не стартует бой сразу) */
+function useRaidTicket(tid){
+  const t = TICKET_TYPES[tid];
+  if(!t || !t.boss) return;
+  if(!state.raidTickets || state.raidTickets[tid] <= 0){
+    return notify('❌', 'Нет билета', 'Билеты закончились', '#dc2626');
+  }
+  const boss = BOSS_BY_ID[t.boss];
+  if(!boss) return;
+  if(state.ticketRaid && state.ticketRaid.endsAt > Date.now()){
+    return notify('⚠️', 'Рейд уже активен', 'Сначала дождись окончания', '#f59e0b');
+  }
+  /* 🚫 Нельзя во время активного боя */
+  if(state.raid && state.raid.active){
+    return notify('🚫', 'Идёт бой', 'Сначала заверши текущий бой', '#dc2626');
+  }
+  /* 🚫 Проверка 1: сейчас идёт рейд по расписанию на этой же глубине? */
+  const _activeSched = isRaidActiveOnDepth(boss.depthId);
+  if(_activeSched){
+    return notify('🚫', 'Глубина занята', 'На этой глубине уже идёт рейд по расписанию', '#dc2626');
+  }
+  /* 🚫 Проверка 2: рейд по расписанию на этой же глубине начнётся в ближайшие 20 минут? */
+  const _now = Date.now();
+  const _raidEndWindow = _now + 20 * 60 * 1000;
+  const _schedule = (state.events && state.events.raidSchedule) || [];
+  const _conflict = _schedule.find(ev => {
+    if(ev.done) return false;
+    if(ev.startsAt <= _now) return false;
+    if(ev.startsAt >= _raidEndWindow) return false;
+    const _cfg = EVENT_TYPES[ev.type];
+    if(!_cfg || !_cfg.isRaid || !_cfg.bossId) return false;
+    const _evBoss = BOSS_BY_ID[_cfg.bossId];
+    if(!_evBoss || _evBoss.depthId !== boss.depthId) return false;
+    return true;
+  });
+  if(_conflict){
+    const _minsLeft = Math.max(1, Math.ceil((_conflict.startsAt - _now) / 60000));
+    return notify('⚠️', 'Скоро рейд по расписанию', 'На этой глубине через ' + _minsLeft + ' мин — билет сгорит. Попробуй другую глубину', '#f59e0b');
+  }
+  if(!confirm('⚔️ Активировать рейд на ' + boss.name + '?\n\n⏱ 20 минут окно\n🚪 Можно заходить и выходить свободно\n🛡 Награда: 1 раз\n\nГотов?')) return;
+  /* Списываем билет */
+  state.raidTickets[tid]--;
+  save();
+  /* Создаём event на 20 минут */
+  state.ticketRaid = {
+    bossId: t.boss,
+    eventType: 'raidPond', /* заглушка, подсветку делаем через bossId */
+    endsAt: Date.now() + 20 * 60 * 1000,
+    startedAt: Date.now(),
+    claimed: false,
+    surrendered: false  /* 🏳 сдался = билет сгорел */
+  };
+  save();
+  closeModal('helpModal');
+  notify('⚔️', 'РЕЙД АКТИВЕН!', boss.name + ' · 20 минут', boss.color);
+  playEventSound('megaApoc');
+  if(typeof renderEventBar === 'function') renderEventBar();
+  switchTab('fishing');
+  setTimeout(() => { if(typeof showFishingLobby === 'function') showFishingLobby(); }, 300);
+}
+
+/* 🎟 Проверка: активен ли билетный рейд на глубине */
+function getTicketRaidOnDepth(depthId){
+  if(!state.ticketRaid || !state.ticketRaid.endsAt) return null;
+  if(state.ticketRaid.endsAt <= Date.now()) return null;
+  const boss = BOSS_BY_ID[state.ticketRaid.bossId];
+  if(!boss || boss.depthId !== depthId) return null;
+  return state.ticketRaid;
+}
+
+function renderRaidTickets(){
+  const grid = $('raidTicketsGrid');
+  if(!grid) return;
+  if(!state.raidTickets || typeof state.raidTickets !== 'object'){
+    state.raidTickets = { case: 0, pond: 0, river: 0, lake: 0, deep: 0, abyss: 0 };
+  }
+  let html = '';
+  let anyTicket = false;
+  Object.values(TICKET_TYPES).forEach(t => {
+    const cnt = state.raidTickets[t.id] || 0;
+    if(cnt <= 0) return;
+    anyTicket = true;
+    const rColor = t.color || '#fff';
+    const isCase = t.id === 'case';
+    html += '<div style="background:linear-gradient(135deg,' + rColor + '22,var(--bg2));border:2px solid ' + rColor + ';border-radius:12px;padding:10px;margin-bottom:8px;display:flex;gap:12px;align-items:center">' +
+      '<img src="' + t.img + '" style="width:100px;height:50px;object-fit:contain;flex-shrink:0">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:700;color:' + rColor + '">' + t.name + ' <span style="opacity:.7;font-size:11px">×' + cnt + '</span></div>' +
+        '<div style="font-size:11px;opacity:.7;margin-top:3px">' + (isCase ? 'Открыть — случайный билет' : 'Активировать рейд на ' + t.name) + '</div>' +
+      '</div>' +
+      '<button class="useTicketBtn" data-tid="' + t.id + '" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,' + rColor + ',' + rColor + 'cc);color:#fff;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:44px;flex-shrink:0">' + (isCase ? '🎰 Открыть' : '⚔️ Рейд') + '</button>' +
+    '</div>';
+  });
+  if(!anyTicket){
+    grid.innerHTML = '<div class="empty"><div class="em">🎟</div><div class="tx">Пока нет билетов</div><div class="sub">Падают с ежедневки, заданий, кликов, рыбалки и колеса</div></div>';
+    return;
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll('.useTicketBtn').forEach(btn => {
+    btn.onclick = () => {
+      const tid = btn.dataset.tid;
+      if(tid === 'case') openTicketCase();
+      else useRaidTicket(tid);
+    };
+  });
+}
+
+/* ============================================================
+   🧪 ЗЕЛЬЯ (бусты как предметы)
+   ============================================================ */
+const POTIONS = {
+  money2_1:  { id:'money2_1',  icon:'💰', name:'Эликсир ×2 монет',  desc:'×2 монеты на 1 минуту',  effect:'money',   mult:2,  duration:60,  rarity:'common',    color:'#9ca3af' },
+  money2_5:  { id:'money2_5',  icon:'💰', name:'Эликсир ×2 монет',  desc:'×2 монеты на 5 минут',   effect:'money',   mult:2,  duration:300, rarity:'uncommon',  color:'#10b981' },
+  money3_1:  { id:'money3_1',  icon:'💸', name:'Сильный ×3 монет',  desc:'×3 монеты на 1 минуту',  effect:'money',   mult:3,  duration:60,  rarity:'rare',      color:'#3b82f6' },
+  money3_5:  { id:'money3_5',  icon:'💸', name:'Сильный ×3 монет',  desc:'×3 монеты на 5 минут',   effect:'money',   mult:3,  duration:300, rarity:'epic',      color:'#a855f7' },
+  money5_1:  { id:'money5_1',  icon:'💎', name:'Мощный ×5 монет',   desc:'×5 монеты на 1 минуту',  effect:'money',   mult:5,  duration:60,  rarity:'legendary', color:'#f59e0b' },
+  money5_5:  { id:'money5_5',  icon:'💎', name:'Мощный ×5 монет',   desc:'×5 монеты на 5 минут',   effect:'money',   mult:5,  duration:300, rarity:'legendary', color:'#f59e0b' },
+  luck2_5:   { id:'luck2_5',   icon:'🍀', name:'Эликсир ×2 удачи',  desc:'×2 удача на 5 минут',    effect:'luck',    mult:2,  duration:300, rarity:'uncommon',  color:'#10b981' },
+  luck3_5:   { id:'luck3_5',   icon:'🍀', name:'Сильный ×3 удачи',  desc:'×3 удача на 5 минут',    effect:'luck',    mult:3,  duration:300, rarity:'rare',      color:'#3b82f6' },
+  luck5_5:   { id:'luck5_5',   icon:'🍀', name:'Мощный ×5 удачи',   desc:'×5 удача на 5 минут',    effect:'luck',    mult:5,  duration:300, rarity:'epic',      color:'#a855f7' },
+  luck10_5:  { id:'luck10_5',  icon:'🌈', name:'Божественная удача', desc:'×10 удача на 5 минут',   effect:'luck',    mult:10, duration:300, rarity:'legendary', color:'#f59e0b' },
+
+  /* 🧬 ЛАК МУТАЦИЙ — наложение мутаций на рыбу с карт */
+  mutLuck2_5:  { id:'mutLuck2_5',  icon:'🧬', name:'Эликсир ×2 мутаций', desc:'×2 шанс мутаций на рыбу · 5 мин', effect:'mutLuck',    mult:2, duration:300, rarity:'uncommon',  color:'#10b981' },
+  mutLuck3_5:  { id:'mutLuck3_5',  icon:'🧬', name:'Сильный ×3 мутаций', desc:'×3 шанс мутаций на рыбу · 5 мин', effect:'mutLuck',    mult:3, duration:300, rarity:'rare',      color:'#3b82f6' },
+
+  /* 🎟 ЛАК БИЛЕТОВ — шанс редкого билета в кейсе */
+  ticketLuck2_5:  { id:'ticketLuck2_5',  icon:'🎟', name:'Эликсир ×2 билетов', desc:'×2 шанс редкого билета в кейсе · 5 мин', effect:'ticketLuck', mult:2, duration:300, rarity:'rare',      color:'#3b82f6' },
+  ticketLuck3_5:  { id:'ticketLuck3_5',  icon:'🎟', name:'Сильный ×3 билетов', desc:'×3 шанс редкого билета в кейсе · 5 мин', effect:'ticketLuck', mult:3, duration:300, rarity:'epic',      color:'#a855f7' },
+
+};
+
+/* 🧪 Добавить зелье в инвентарь */
+function addPotion(potionId, count){
+  if(!POTIONS[potionId]) return;
+  count = count || 1;
+  if(!state.potions) state.potions = {};
+  state.potions[potionId] = (state.potions[potionId] || 0) + count;
+  save();
+}
+
+/* 🧪 Использовать зелье */
+function usePotion(potionId){
+  const potion = POTIONS[potionId];
+  if(!potion) return;
+  if(!state.potions || !state.potions[potionId] || state.potions[potionId] <= 0){
+    return notify('❌', 'Нет зелья', 'Зелье закончилось', '#dc2626');
+  }
+  /* Применяем буст (универсально для всех 5 эффектов) */
+  const now = Date.now();
+  const _effectsMap = {
+    money:      { field:'money',      multField:'moneyMult',      label:'монет' },
+    luck:       { field:'luck',       multField:'luckMult',       label:'карт' },
+    mutLuck:    { field:'mutLuck',    multField:'mutLuckMult',    label:'мутаций' },
+    ticketLuck: { field:'ticketLuck', multField:'ticketLuckMult', label:'билетов' }
+  };
+  const _eff = _effectsMap[potion.effect];
+  if(_eff){
+    const curMult = state.buffs[_eff.multField] || 2;
+    const curUntil = state.buffs[_eff.field] || 0;
+    const isActive = curUntil > now;
+    if(!isActive){
+      state.buffs[_eff.multField] = potion.mult;
+      state.buffs[_eff.field] = now + potion.duration * 1000;
+    } else if(potion.mult > curMult){
+      state.buffs[_eff.multField] = potion.mult;
+      state.buffs[_eff.field] = curUntil + potion.duration * 1000;
+    } else {
+      return notify('⚠️', 'Уже активен', 'Более сильный эликсир уже действует', '#f59e0b');
+    }
+  }
+  state.potions[potionId]--;
+  if(state.potions[potionId] <= 0) delete state.potions[potionId];
+  save();
+  renderBuffs();
+  renderPotions();
+  renderHeader();
+  playResource();
+  notify(potion.icon, 'Зелье использовано!', potion.name, potion.color);
+}
+
+/* 🧪 Рендер зелий в инвентаре */
+function renderPotions(){
+  const grid = $('potionsGrid');
+  if(!grid) return;
+  if(!state.potions) state.potions = {};
+  const entries = Object.entries(state.potions).filter(([id, c]) => c > 0 && POTIONS[id]);
+  if(!entries.length){
+    grid.innerHTML = '<div class="empty"><div class="em">🧪</div><div class="tx">Пока нет зелий</div><div class="sub">Крути 🎁 Колесо — оттуда выпадают эликсиры</div></div>';
+    return;
+  }
+  let html = '';
+  entries.forEach(([id, count]) => {
+    const p = POTIONS[id];
+    html += '<div style="background:linear-gradient(135deg,' + p.color + '22,var(--bg2));border:2px solid ' + p.color + ';border-radius:12px;padding:12px;margin-bottom:8px;display:flex;gap:12px;align-items:center">' +
+      '<div style="font-size:44px;flex-shrink:0">' + p.icon + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:14px;font-weight:700;color:' + p.color + '">' + p.name + ' <span style="opacity:.7;font-size:11px">×' + count + '</span></div>' +
+        '<div style="font-size:11px;opacity:.75;margin-top:3px">' + p.desc + '</div>' +
+      '</div>' +
+      '<button class="usePotionBtn" data-pid="' + id + '" style="padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,' + p.color + ',' + p.color + 'cc);color:#fff;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:44px;flex-shrink:0">▶ Использовать</button>' +
+    '</div>';
+  });
+  grid.innerHTML = html;
+  grid.querySelectorAll('.usePotionBtn').forEach(btn => {
+    btn.onclick = () => { usePotion(btn.dataset.pid); };
+  });
+}
+
+/* ============================================================
+   🎰 РУЛЕТКА УДАЧИ
+   ============================================================ */
+const ROULETTE_PRIZES = [
+  /* 🎟 БИЛЕТЫ РЕЙДА */
+  { id:'ticketCase1',  icon:'🎟', name:'Билет-кейс',     rarity:'common',    weight:5,   type:'raidticket', ticketType:'case',  value:1 },
+  { id:'ticketPond1',  icon:'🎟', name:'Билет: Пруд',    rarity:'uncommon',  weight:2,   type:'raidticket', ticketType:'pond',  value:1 },
+  { id:'ticketRiver1', icon:'🎟', name:'Билет: Река',    rarity:'uncommon',  weight:2,   type:'raidticket', ticketType:'river', value:1 },
+  { id:'ticketLake1',  icon:'🎟', name:'Билет: Озеро',   rarity:'rare',      weight:1,   type:'raidticket', ticketType:'lake',  value:1 },
+  { id:'ticketDeep1',  icon:'🎟', name:'Билет: Глубина', rarity:'epic',      weight:0.5, type:'raidticket', ticketType:'deep',  value:1 },
+  { id:'ticketAbyss1', icon:'🎟', name:'Билет: Бездна',  rarity:'legendary', weight:0.2, type:'raidticket', ticketType:'abyss', value:1 },
+  /* 🟢 ОБЫЧНЫЕ */
+  { id:'coins1k',         icon:'🪙', name:'1 000 монет',       rarity:'common',    weight:12,  type:'coins',   value:1000 },
+  { id:'coins5k',         icon:'🪙', name:'5 000 монет',       rarity:'common',    weight:10,  type:'coins',   value:5000 },
+  { id:'potion_money2_1', icon:'💰', name:'Эликсир ×2 монет',  rarity:'common',    weight:6,   type:'potion',  potionId:'money2_1' },
+
+  /* 🔵 НЕОБЫЧНЫЕ */
+  { id:'coins25k',        icon:'🪙', name:'25 000 монет',      rarity:'uncommon',  weight:6,   type:'coins',   value:25000 },
+  { id:'gold10',          icon:'🥇', name:'10 золота',         rarity:'uncommon',  weight:5,   type:'gold',    value:10 },
+  { id:'potion_money2_5', icon:'💰', name:'Эликсир ×2 монет',  rarity:'uncommon',  weight:4,   type:'potion',  potionId:'money2_5' },
+  { id:'potion_luck2_5',  icon:'🍀', name:'Эликсир ×2 удачи',  rarity:'uncommon',  weight:3,   type:'potion',  potionId:'luck2_5' },
+
+  /* 🔷 РЕДКИЕ */
+  { id:'coins50k',        icon:'🪙', name:'50 000 монет',      rarity:'rare',      weight:4,   type:'coins',   value:50000 },
+  { id:'coins100k',       icon:'🪙', name:'100 000 монет',     rarity:'rare',      weight:3,   type:'coins',   value:100000 },
+  { id:'gold50',          icon:'🥇', name:'50 золота',         rarity:'rare',      weight:3,   type:'gold',    value:50 },
+  { id:'ess10',           icon:'🧪', name:'10 эссенции',       rarity:'rare',      weight:3,   type:'essence', value:10 },
+  { id:'mana50',          icon:'✨', name:'50 маны',           rarity:'rare',      weight:2,   type:'mana',    value:50 },
+  { id:'roulTick1',       icon:'🎰', name:'1 билет колеса',    rarity:'rare',      weight:2,   type:'roulTicket', value:1 },
+  { id:'potion_money3_1', icon:'💸', name:'Эликсир ×3 монет',  rarity:'rare',      weight:2,   type:'potion',  potionId:'money3_1' },
+  { id:'potion_luck3_5',  icon:'🍀', name:'Эликсир ×3 удачи',  rarity:'rare',      weight:2,   type:'potion',  potionId:'luck3_5' },
+
+  /* 🟣 ЭПИЧЕСКИЕ */
+  { id:'gold100',         icon:'🥇', name:'100 золота',        rarity:'epic',      weight:2,   type:'gold',    value:100 },
+  { id:'ess50',           icon:'🧪', name:'50 эссенции',       rarity:'epic',      weight:2,   type:'essence', value:50 },
+  { id:'roulTick2',       icon:'🎰', name:'2 билета колеса',   rarity:'epic',      weight:1,   type:'roulTicket', value:2 },
+  { id:'potion_money3_5', icon:'💸', name:'Эликсир ×3 монет',  rarity:'epic',      weight:1.5, type:'potion',  potionId:'money3_5' },
+  { id:'potion_luck5_5',  icon:'🍀', name:'Эликсир ×5 удачи',  rarity:'epic',      weight:1,   type:'potion',  potionId:'luck5_5' },
+
+  /* 🟠 ЛЕГЕНДАРНЫЕ */
+  { id:'gold500',         icon:'🥇', name:'500 золота',        rarity:'legendary', weight:0.8, type:'gold',    value:500 },
+  { id:'roulTick5',       icon:'🎰', name:'5 билетов колеса',  rarity:'legendary', weight:0.6, type:'roulTicket', value:5 },
+  { id:'potion_money5_1', icon:'💎', name:'Эликсир ×5 монет',  rarity:'legendary', weight:0.8, type:'potion',  potionId:'money5_1' },
+  { id:'potion_money5_5', icon:'💎', name:'Эликсир ×5 монет',  rarity:'legendary', weight:0.5, type:'potion',  potionId:'money5_5' },
+  { id:'potion_luck10_5', icon:'🌈', name:'Божественная удача', rarity:'legendary', weight:0.3, type:'potion',  potionId:'luck10_5' },
+
+  /* 🧬 ЛАКИ */
+  { id:'potion_mutLuck2',    icon:'🧬', name:'Эликсир ×2 мутаций', rarity:'uncommon',  weight:2,   type:'potion', potionId:'mutLuck2_5' },
+  { id:'potion_mutLuck3',    icon:'🧬', name:'Сильный ×3 мутаций', rarity:'rare',      weight:1,   type:'potion', potionId:'mutLuck3_5' },
+  { id:'potion_ticketLuck2', icon:'🎟', name:'Эликсир ×2 билетов', rarity:'rare',      weight:1,   type:'potion', potionId:'ticketLuck2_5' },
+  { id:'potion_ticketLuck3', icon:'🎟', name:'Сильный ×3 билетов', rarity:'epic',      weight:0.6, type:'potion', potionId:'ticketLuck3_5' },
+  /* 💎 ДЖЕКПОТ */
+  { id:'jackpot',         icon:'💎', name:'ДЖЕКПОТ',           rarity:'jackpot',   weight:0.05, type:'jackpot', value:1 }
+];
+
+/* 🎁 Активировать буст (монеты или удача)
+   Если буст уже активен — берём максимальный множитель и продлеваем время */
+function applyBoost(kind, mult, durationSec){
+  const now = Date.now();
+  if(kind === 'money'){
+    const curMult = state.buffs.moneyMult || 2;
+    const curUntil = state.buffs.money || 0;
+    state.buffs.moneyMult = Math.max(curMult, mult);
+    state.buffs.money = Math.max(curUntil, now) + durationSec * 1000;
+  } else if(kind === 'luck'){
+    const curMult = state.buffs.luckMult || 2;
+    const curUntil = state.buffs.luck || 0;
+    state.buffs.luckMult = Math.max(curMult, mult);
+    state.buffs.luck = Math.max(curUntil, now) + durationSec * 1000;
+  }
+  save();
+  if(typeof renderBuffs === 'function') renderBuffs();
+}
+
+/* 🎲 Итоговый приз по весам */
+function rollRoulettePrize(){
+  const total = ROULETTE_PRIZES.reduce((s, p) => s + p.weight, 0);
+  let r = Math.random() * total;
+  for(const p of ROULETTE_PRIZES){
+    r -= p.weight;
+    if(r < 0) return p;
+  }
+  return ROULETTE_PRIZES[0];
+}
+
+/* 🎨 Рендер одной карточки ленты */
+function rouletteItemHTML(prize){
+  const rClass = { common:'rCommon', uncommon:'rUncommon', rare:'rRare', epic:'rEpic', legendary:'rLegendary', jackpot:'rJackpot' }[prize.rarity] || 'rCommon';
+  return '<div class="rouletteItem ' + rClass + '"><div class="rIcon">' + prize.icon + '</div><div class="rName">' + prize.name + '</div></div>';
+}
+
+/* 📅 Ежедневный сброс бесплатного спина */
+function resetRouletteIfNeeded(){
+  const today = todayKey();
+  /* 🛡 Если lastReset не строка (0 / undefined / число) — первый запуск, ставим дату без сброса */
+  if(typeof state.rouletteLastFreeReset !== 'string' || state.rouletteLastFreeReset === ''){
+    state.rouletteLastFreeReset = today;
+    /* Даём 1 спин только если у игрока вообще ничего нет */
+    if(typeof state.rouletteFreeSpins !== 'number' || state.rouletteFreeSpins < 0){
+      state.rouletteFreeSpins = 1;
+    }
+    save();
+    return;
+  }
+  /* Сброс только если реально сменился день */
+  if(state.rouletteLastFreeReset !== today){
+    state.rouletteFreeSpins = 1;
+    state.rouletteLastFreeReset = today;
+    save();
+  }
+}
+
+/* 🎰 Открыть рулетку (вкладка) */
+function openRoulette(){
+  resetRouletteIfNeeded();
+  /* 📊 Обновляем счётчики СРАЗУ */
+  updateRouletteUI();
+  const lenta = $('rouletteLenta');
+  if(lenta){
+    let html = '';
+    for(let i = 0; i < 20; i++){
+      html += rouletteItemHTML(ROULETTE_PRIZES[Math.floor(Math.random() * ROULETTE_PRIZES.length)]);
+    }
+    lenta.innerHTML = html;
+    lenta.classList.add('no-transition');
+    lenta.style.transform = 'translateX(0)';
+    setTimeout(() => lenta.classList.remove('no-transition'), 50);
+  }
+  updateRouletteUI();
+  /* Привязываем кнопки */
+  const spinBtn = $('rouletteSpinBtn');
+  if(spinBtn && !spinBtn.dataset.bound){
+    spinBtn.onclick = spinRoulette;
+    spinBtn.dataset.bound = '1';
+  }
+  /* 🎲 Привязываем кнопку шансов */
+  const chancesBtn = $('rouletteChancesBtn');
+  if(chancesBtn && !chancesBtn.dataset.bound){
+    chancesBtn.dataset.bound = '1';
+    chancesBtn.onclick = showRouletteChances;
+  }
+  /* Привязываем qty-кнопки */
+  document.querySelectorAll('.rouletteQtyBtn').forEach(btn => {
+    if(btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.onclick = () => {
+      const v = btn.dataset.roulqty;
+      state.rouletteQty = (v === 'max') ? 'max' : parseInt(v);
+      save();
+      document.querySelectorAll('.rouletteQtyBtn').forEach(b => b.classList.toggle('active', b.dataset.roulqty === v));
+    };
+    if(String(state.rouletteQty) === String(btn.dataset.roulqty)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+}
+
+/* 🔄 Обновить счётчики в модалке */
+function updateRouletteUI(){
+  const freeEl = $('rouletteFree');
+  const ticketsEl = $('rouletteTickets');
+  if(freeEl) freeEl.textContent = state.rouletteFreeSpins || 0;
+  if(ticketsEl) ticketsEl.textContent = (state.rouletteTickets || 0).toLocaleString('ru-RU');
+}
+
+/* 🎰 Крутить */
+let _rouletteSpinning = false;
+
+function spinRoulette(){
+  if(_rouletteSpinning) return;
+  resetRouletteIfNeeded();
+
+  /* 📊 Сколько спинов делаем */
+  let qty;
+  const freeLeft = state.rouletteFreeSpins || 0;
+  const tickLeft = state.rouletteTickets || 0;
+  const totalAvail = freeLeft + tickLeft;
+
+  if(state.rouletteQty === 'max'){
+    /* 🛡 Лимит 50 прокрутов за раз, чтобы случайно не нажать МАКС с 999999 */
+    qty = Math.min(totalAvail, 50);
+  } else {
+    qty = Math.min(parseInt(state.rouletteQty) || 1, totalAvail, 50);
+  }
+
+  if(qty <= 0) return notify('❌', 'Нет спинов', 'Жди ежедневку или лови билеты', '#dc2626');
+
+  /* Списываем ресурс */
+  let remaining = qty;
+  const useFromFree = Math.min(freeLeft, remaining);
+  state.rouletteFreeSpins -= useFromFree;
+  remaining -= useFromFree;
+  if(remaining > 0){
+    state.rouletteTickets -= remaining;
+  }
+
+  _rouletteSpinning = true;
+  window._rouletteSpinning = true;
+  window._rouletteSkipAll = false;
+  const spinBtn = $('rouletteSpinBtn');
+  if(spinBtn){ spinBtn.disabled = true; spinBtn.textContent = '🎁 Крутится...'; }
+  /* ⏩ Показываем кнопку скипа */
+  const skipBtn = $('rouletteSkipBtn');
+  if(skipBtn){
+    skipBtn.style.display = 'block';
+    skipBtn.onclick = () => {
+      window._rouletteSkipAll = true;
+      skipBtn.disabled = true;
+      skipBtn.textContent = '⏩ Пропускаем...';
+      /* 🔊 Убиваем звук */
+      if(window._rouletteSoundTimer){ clearTimeout(window._rouletteSoundTimer); window._rouletteSoundTimer = null; }
+      /* 🏃 Мгновенно завершаем текущую анимацию */
+      if(window._rouletteRaf){
+        cancelAnimationFrame(window._rouletteRaf);
+        window._rouletteRaf = null;
+      }
+      const lenta = $('rouletteLenta');
+      if(lenta && window._rouletteLastTarget !== undefined){
+        lenta.style.transform = 'translateX(' + window._rouletteLastTarget + 'px)';
+      }
+      /* Принудительно вызываем onDone текущей анимации */
+      if(window._rouletteCurrentDone){
+        const _cb = window._rouletteCurrentDone;
+        window._rouletteCurrentDone = null;
+        _cb();
+      }
+    };
+  }
+  /* 🚫 Блокируем nav */
+  const _nav = document.querySelector('nav');
+  if(_nav){ _nav.style.pointerEvents = 'none'; _nav.style.opacity = '0.35'; }
+
+  /* 🔊 Инициализируем аудио-контекст если ещё не (для звука тика) */
+  if(typeof initAudio === 'function') initAudio();
+
+  /* 🔇 Заглушаем музыку */
+  if(typeof stopMusic === 'function') stopMusic();
+
+  /* 🎬 Прокручиваем несколько раз подряд */
+  let spun = 0;
+  const allPrizes = [];
+  /* 📊 Показываем счётчик */
+  const progEl = $('rouletteProgress');
+  if(progEl && qty > 1){
+    progEl.style.display = 'block';
+    $('rouletteCur').textContent = '0';
+    $('rouletteTotal').textContent = qty;
+  }
+const spinNext = () => {
+    if(spun >= qty){
+      /* ✅ Готово — показываем результаты */
+      if(typeof startMusic === 'function' && state.musicOn) setTimeout(startMusic, 1500);
+      updateRouletteUI();
+      renderHeader();
+      save();
+      if(allPrizes.length > 1) showRouletteMultiResult(allPrizes);
+      checkAchievements();
+      /* ✅ ГАРАНТИРОВАННЫЙ сброс состояния */
+      _rouletteSpinning = false;
+      window._rouletteSpinning = false;
+      window._rouletteSkipAll = false;
+      const _sb = $('rouletteSpinBtn');
+      if(_sb){ _sb.disabled = false; _sb.textContent = '🎁 КРУТИТЬ'; }
+      const _skb = $('rouletteSkipBtn');
+      if(_skb){ _skb.style.display = 'none'; _skb.disabled = false; _skb.textContent = '⏩ Пропустить всё'; }
+      const _nav2 = document.querySelector('nav');
+      if(_nav2){ _nav2.style.pointerEvents = ''; _nav2.style.opacity = ''; }
+      const _prog = $('rouletteProgress');
+      if(_prog) _prog.style.display = 'none';
+      return;
+    }    const prize = rollRoulettePrize();
+    allPrizes.push(prize);
+    const _isSilent = qty > 1;
+    animateRouletteSpin(prize, () => {
+      giveRoulettePrize(prize, _isSilent);
+      spun++;
+      /* 📊 Обновляем счётчик */
+      if(progEl && qty > 1) $('rouletteCur').textContent = spun;
+      /* 🎁 Мини-карточка — быстрая при скипе */
+      if(window._rouletteSkipAll){
+        /* ⏩ При скипе — показываем 150 мс */
+        showRouletteMiniResult(prize, prize._resultHtml || '', spun, qty, () => {
+          setTimeout(spinNext, 50);
+        }, 150);
+      } else {
+        showRouletteMiniResult(prize, prize._resultHtml || '', spun, qty, () => {
+          setTimeout(spinNext, 200);
+        });
+      }
+    });
+  };
+  spinNext();
+}
+
+/* 🎬 Анимация одного прокрута (20 секунд, easeOutQuint) */
+function animateRouletteSpin(prize, onDone){
+  const lenta = $('rouletteLenta');
+  if(!lenta){ if(onDone) onDone(); return; }
+
+  /* Строим ленту: 140 случайных + победитель на позиции 110 */
+  const WINNER_IDX = 110;
+  let html = '';
+  for(let i = 0; i < 140; i++){
+    if(i === WINNER_IDX) html += rouletteItemHTML(prize);
+    else html += rouletteItemHTML(ROULETTE_PRIZES[Math.floor(Math.random() * ROULETTE_PRIZES.length)]);
+  }
+  lenta.innerHTML = html;
+
+  const ITEM_W = 108;
+  const wrap = document.querySelector('.rouletteWrap');
+  const wrapW = wrap ? wrap.offsetWidth : 400;
+  const itemCenter = WINNER_IDX * ITEM_W + 54;
+  const offset = (Math.random() - 0.5) * 80;
+  const targetX = wrapW / 2 - itemCenter + offset;
+
+  /* ⏱ Первый прокрут — 20 сек (интрига), последующие — 2 сек (быстро) */
+  const isSkip = !!window._rouletteSkipAll;
+  const isFirstSpin = !window._rouletteFirstDone;
+  const DURATION = isSkip ? 300 : (isFirstSpin ? 20000 : 2000);
+  window._rouletteFirstDone = true;
+  /* 💾 В window ДО всего, чтобы step всегда видел */
+  window._rouletteDuration = DURATION;
+  window._rouletteStartTime = performance.now();
+  /* 🔊 Запускаем звук только если не скип */
+  if(!isSkip) playRouletteSpinSound(DURATION);
+  /* easeOutQuad — равномерное замедление на всём протяжении */
+  const easeOutQuad = t => 1 - (1 - t) * (1 - t);
+
+  /* 💾 Запоминаем target для скипа */
+  window._rouletteLastTarget = targetX;
+  /* 💾 Запоминаем onDone для скипа (ОДНО объявление _called) */
+  let _called = false;
+  const _safeDone = () => {
+    if(_called) return;
+    _called = true;
+    window._rouletteRaf = null;
+    window._rouletteCurrentDone = null;
+    if(onDone) onDone();
+  };
+  window._rouletteCurrentDone = _safeDone;
+
+  function step(now){
+    const t = Math.min(1, (now - window._rouletteStartTime) / window._rouletteDuration);
+    const eased = easeOutQuad(t);
+    const x = eased * targetX;
+    lenta.style.transform = 'translateX(' + x + 'px)';
+    if(t < 1){
+      window._rouletteRaf = requestAnimationFrame(step);
+    } else {
+      _safeDone();
+    }
+  }
+  window._rouletteRaf = requestAnimationFrame(step);
+  /* 🛡 Fallback: если RAF не сработал (свёрнутая вкладка) — завершаем по таймауту */
+  setTimeout(_safeDone, window._rouletteDuration + 2000);
+}
+
+/* 🔊 Звук прокрута — плавное замедление под easeOutQuad */
+function playRouletteSpinSound(totalMs){
+  if(!audioCtx || !state.soundOn) return;
+  if(window._audioMuted) return;
+  /* 🛑 Убиваем старый таймер если был */
+  if(window._rouletteSoundTimer){
+    clearTimeout(window._rouletteSoundTimer);
+    window._rouletteSoundTimer = null;
+  }
+  const startTime = performance.now();
+  window._rouletteSoundStart = startTime;
+
+  const playOneTick = () => {
+    try{
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 800 + Math.random() * 400;
+      g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      osc.connect(g).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }catch(e){}
+  };
+
+  const scheduleTick = () => {
+    const _sst = window._rouletteSoundStart || startTime;
+    const elapsed = performance.now() - _sst;
+    if(elapsed >= totalMs){ window._rouletteSoundTimer = null; return; }
+    playOneTick();
+    /* Производная easeOutQuad: 2 * (1-t) — падает плавно */
+    const t = elapsed / totalMs;
+    const speed = 1 - t; /* 1 → 0 */
+    const interval = 40 + (1 - speed) * 700; /* 40мс → 740мс */
+    window._rouletteSoundTimer = setTimeout(scheduleTick, interval);
+  };
+  scheduleTick();
+}
+
+/* 🎁 Список результатов если >1 прокрут */
+function showRouletteMultiResult(prizes){
+  const counts = {};
+  prizes.forEach(p => {
+    if(!counts[p.id]) counts[p.id] = { prize: p, count: 0 };
+    counts[p.id].count++;
+  });
+  let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button><h2>🎁 Результаты (' + prizes.length + ')</h2>';
+  html += '<div style="max-height:60vh;overflow-y:auto">';
+  Object.values(counts).forEach(({prize, count}) => {
+    const colorMap = { common:'#9ca3af', uncommon:'#10b981', rare:'#3b82f6', epic:'#a855f7', legendary:'#f59e0b', jackpot:'#ffd93d' };
+    const color = colorMap[prize.rarity] || '#fff';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;border-left:4px solid ' + color + '"><div style="display:flex;gap:10px;align-items:center"><span style="font-size:32px">' + prize.icon + '</span><div><div style="font-size:13px;font-weight:700;color:' + color + '">' + prize.name + '</div></div></div><b style="color:' + color + ';font-size:16px">×' + count + '</b></div>';
+  });
+  html += '</div>';
+  html += '<button class="btnClose" onclick="closeModal(\'helpModal\')" style="margin-top:10px">Забрать</button>';
+  $('helpContent').innerHTML = html;
+  openModal('helpModal');
+}
+
+/* 🎲 Показать шансы выпадения */
+function showRouletteChances(){
+  const total = ROULETTE_PRIZES.reduce((s, p) => s + p.weight, 0);
+  /* Группируем по редкости */
+  const groups = { common: [], uncommon: [], rare: [], epic: [], legendary: [], jackpot: [] };
+  ROULETTE_PRIZES.forEach(p => {
+    const pct = (p.weight / total * 100);
+    if(!groups[p.rarity]) groups[p.rarity] = [];
+    groups[p.rarity].push({ prize: p, pct });
+  });
+  const rarityInfo = {
+    common:    { name: 'Обычные',     color: '#9ca3af', icon: '⚪' },
+    uncommon:  { name: 'Необычные',   color: '#10b981', icon: '🟢' },
+    rare:      { name: 'Редкие',      color: '#3b82f6', icon: '🔵' },
+    epic:      { name: 'Эпические',   color: '#a855f7', icon: '🟣' },
+    legendary: { name: 'Легендарные', color: '#f59e0b', icon: '🟡' },
+    jackpot:   { name: 'ДЖЕКПОТ',     color: '#ffd93d', icon: '💎' }
+  };
+  let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button><h2>🎲 Шансы выпадения</h2>';
+  html += '<div style="font-size:11px;opacity:.6;text-align:center;margin-bottom:12px">Всего призов: ' + ROULETTE_PRIZES.length + '</div>';
+  html += '<div style="max-height:60vh;overflow-y:auto">';
+  ['jackpot', 'legendary', 'epic', 'rare', 'uncommon', 'common'].forEach(rar => {
+    const list = groups[rar];
+    if(!list || !list.length) return;
+    const info = rarityInfo[rar];
+    const groupTotal = list.reduce((s, x) => s + x.pct, 0);
+    html += '<div style="margin-bottom:14px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:' + info.color + ';margin-bottom:6px;padding:6px 10px;background:' + info.color + '22;border-radius:8px">';
+    html += '<span>' + info.icon + ' ' + info.name + '</span>';
+    html += '<span>' + groupTotal.toFixed(2) + '%</span>';
+    html += '</div>';
+    list.sort((a, b) => b.pct - a.pct);
+    list.forEach(({ prize, pct }) => {
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:12px;border-bottom:1px solid var(--border)">';
+      html += '<span>' + prize.icon + ' ' + prize.name + '</span>';
+      html += '<b style="color:' + info.color + '">' + pct.toFixed(2) + '%</b>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<button class="btnClose" onclick="closeModal(\'helpModal\')" style="margin-top:12px">Закрыть</button>';
+  $('helpContent').innerHTML = html;
+  openModal('helpModal');
+}
+
+/* 🎁 Мини-карточка с призом после каждого прокрута */
+function showRouletteMiniResult(prize, resultHtml, cur, total, onClose, duration){
+  const colorMap = { common:'#9ca3af', uncommon:'#10b981', rare:'#3b82f6', epic:'#a855f7', legendary:'#f59e0b', jackpot:'#ffd93d' };
+  const color = colorMap[prize.rarity] || '#fff';
+  const div = document.createElement('div');
+  div.className = 'rouletteMiniResult';
+  div.style.borderColor = color;
+  div.innerHTML =
+    '<div class="mIcon" style="color:' + color + '">' + prize.icon + '</div>' +
+    '<div class="mName" style="color:' + color + '">' + prize.name + '</div>' +
+    '<div class="mValue">' + resultHtml + '</div>' +
+    (total > 1 ? '<div class="mStep">Прокрут ' + cur + ' / ' + total + '</div>' : '');
+  document.body.appendChild(div);
+  /* 🎨 Вспышка только для редких+ */
+  if(['rare','epic','legendary','jackpot'].includes(prize.rarity)){
+    playRare(); flashRare();
+  } else {
+    playResource();
+  }
+  const _dur = duration || 1400;
+  setTimeout(() => {
+    div.classList.add('out');
+    setTimeout(() => {
+      div.remove();
+      if(onClose) onClose();
+    }, 200);
+  }, _dur);
+}
+
+
+/* 🎁 Выдать приз */
+function giveRoulettePrize(prize, silentMode){
+  let resultHtml = '';
+  const t = prize.type;
+  if(t === 'coins'){
+    state.coins += prize.value; state.coinsEarned += prize.value;
+    resultHtml = '+' + prize.value.toLocaleString('ru-RU') + ' 🪙';
+  } else if(t === 'gold'){
+    state.gold += prize.value; state.goldEarned += prize.value;
+    resultHtml = '+' + prize.value + ' 🥇';
+  } else if(t === 'essence'){
+    state.essence += prize.value; state.essEarned += prize.value;
+    resultHtml = '+' + prize.value + ' 🧪';
+  } else if(t === 'mana'){
+    state.mana += prize.value; state.manaEarned += prize.value;
+    resultHtml = '+' + prize.value + ' ✨';
+  } else if(t === 'raidticket'){
+    const _tid = prize.ticketType || 'case';
+    addRaidTicket(_tid, prize.value);
+    const _tInfo = TICKET_TYPES[_tid];
+    resultHtml = '+' + prize.value + ' 🎟 ' + (_tInfo ? _tInfo.name : 'билет');
+  } else if(t === 'roulTicket'){
+    state.rouletteTickets = (state.rouletteTickets || 0) + prize.value;
+    resultHtml = '+' + prize.value + ' 🎰 билетов колеса';
+  } else if(t === 'potion'){
+    /* 🧪 Зелье падает в инвентарь */
+    addPotion(prize.potionId, 1);
+    const _p = POTIONS[prize.potionId];
+    resultHtml = '📦 В инвентарь: ' + (_p ? _p.name : 'зелье');
+  } else if(t === 'card'){
+    const order = ['Обычная','Необычная','Редкая','Супер редкая','Эпическая','Легендарная','Алмазная','Мифическая','Секретная','Эксклюзивная'];
+    const minIdx = order.indexOf(prize.minRarity || 'Редкая');
+    const pool = order.slice(minIdx, minIdx + 3);
+    const rar = pool[Math.floor(Math.random() * pool.length)];
+    const card = makeCardOfRarity(rar);
+    if(state.collection.length < state.invMax){
+      state.collection.push(card);
+      registerCardStats(card);
+      if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
+      resultHtml = card.name + ' (' + card.rarity + ')';
+    } else {
+      state.coins += 50000; state.coinsEarned += 50000;
+      resultHtml = 'Инвентарь полон → +50 000 🪙';
+    }
+  } else if(t === 'jackpot'){
+    state.coins += 1000000; state.coinsEarned += 1000000;
+    state.gold += 1000; state.goldEarned += 1000;
+    /* 💎 Бонус джекпота: 10 зелий ×5 монет на 5 мин */
+    addPotion('money5_5', 5);
+    addPotion('luck10_5', 5);
+    resultHtml = '+1 000 000 🪙 +1000 🥇 + 🧪 10 зелий';
+  } else {
+    resultHtml = 'Ничего...';
+  }
+  save(); renderHeader();
+  if(typeof renderBuffs === 'function') renderBuffs();
+  prize._resultHtml = resultHtml;
+
+  const colorMap = {
+    common: '#9ca3af',
+    uncommon: '#10b981',
+    rare: '#3b82f6',
+    epic: '#a855f7',
+    legendary: '#f59e0b',
+    jackpot: '#ffd93d'
+  };
+  const color = colorMap[prize.rarity] || '#fff';
+  const resultDiv = document.createElement('div');
+  resultDiv.className = 'rouletteResult';
+  resultDiv.innerHTML = '<div class="rouletteResultBox">' +
+    '<div class="rouletteResultIcon" style="color:' + color + '">' + prize.icon + '</div>' +
+    '<div class="rouletteResultName" style="color:' + color + '">' + prize.name + '</div>' +
+    '<div style="font-size:14px;color:#fff;margin-top:8px;opacity:.8">' + resultHtml + '</div>' +
+    '</div>';
+  document.body.appendChild(resultDiv);
+
+  if(!silentMode){
+    playRare(); flashRare();
+    if(prize.rarity === 'jackpot'){ playAchievement(); }
+    setTimeout(() => { resultDiv.style.opacity = '0'; resultDiv.style.transition = 'opacity .3s'; }, 2200);
+    setTimeout(() => { resultDiv.remove(); }, 2600);
+  } else {
+    resultDiv.remove();
+    if(prize.rarity === 'jackpot'){ playAchievement(); }
+    else if(prize.rarity === 'legendary' || prize.rarity === 'epic'){ playRare(); }
+  }
+  checkAchievements();
 }
 
 /* ============================================================
@@ -13078,7 +14647,9 @@ function tryPromo(input){
   const promo = state.activePromos.find(p => p.code === code && !p.used);
   if(!promo) return null;
   promo.used = true;
+  promo.usedAt = Date.now();
   if(!state.usedPromoCodes.includes(code)) state.usedPromoCodes.push(code);
+  if(state.usedPromoCodes.length > 100) state.usedPromoCodes = state.usedPromoCodes.slice(-100);
   ensureDailyStats();
   state.coins += promo.reward.coins; state.coinsEarned += promo.reward.coins; state.dailyStats.coins += promo.reward.coins;
   state.gold += promo.reward.gold; state.goldEarned += promo.reward.gold;
@@ -13090,11 +14661,15 @@ function tryPromo(input){
 function initPromos(){
   if(!Array.isArray(state.activePromos)) state.activePromos = [];
   if(!Array.isArray(state.usedPromoCodes)) state.usedPromoCodes = [];
-  if(!state.activePromos.length){
+  const _dayAgo = Date.now() - 24 * 3600 * 1000;
+  state.activePromos = state.activePromos.filter(p => !p.used || (p.usedAt && p.usedAt > _dayAgo));
+  const _activeCount = state.activePromos.filter(p => !p.used).length;
+  if(_activeCount === 0){
     const count = 1 + Math.floor(Math.random()*3);
     for(let i=0;i<count;i++){
       state.activePromos.push({
         code: generatePromoCode(),
+        createdAt: Date.now(),
         reward: {
           coins: 25000 + Math.floor(Math.random()*75000),  /* 25K - 100K */
           gold: 20 + Math.floor(Math.random()*60),         /* 20 - 80 */
@@ -13213,32 +14788,7 @@ if($('cropCancel')) $('cropCancel').addEventListener('click', ()=>closeModal('cr
 /* ============================================================
    ФАЙЛ-ИНПУТЫ
    ============================================================ */
-if($('avatarFile')) $('avatarFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{
-    openCropper(ev.target.result, {vw:260, vh:260, outW:200, outH:200, title:'Аватарка'}, (out)=>{
-      state.avatar = out;
-      state.avatarType = 'image';
-      state.avatarEmoji = '';
-      save(); renderProfile(); renderHeader();
-    });
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-});
-if($('bgFile')) $('bgFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{
-    openCropper(ev.target.result, {vw:300, vh:180, outW:900, outH:540, title:'Фон'}, (out)=>{
-      state.bg = out;
-      save(); applyBackground(); renderProfile();
-    });
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-});
+/* Загрузки аватарок, фона и музыки удалены для экономии БД */
 if($('musicFile')) $('musicFile').addEventListener('change', async (e)=>{
   const file = e.target.files[0]; if(!file) return;
   if(file.size > 50*1024*1024){ alert('Файл больше 50 МБ.'); return; }
@@ -13321,10 +14871,17 @@ function openHelp(){
   html += '<div class="legendRow"><div class="ic">🟠</div><div class="txt"><b>Ультра</b><small>x10 (×15 при Кошачьем рефлексе)</small></div></div>';
   html += '<div style="font-size:12px;opacity:.85;padding:6px 0"><b>Доход с клика</b> = 5 × (1 + %дохода с колоды) × бонусы дня/событий.</div>';
 
-  html += '<div class="sectionTitle">⚡ Бусты</div>';
+  html += '<div class="sectionTitle">⚡ Бусты (за золото в магазине)</div>';
   html += '<div class="legendRow"><div class="ic">💰</div><div class="txt"><b>×2 монеты</b><small>60 сек · 🥇 30</small></div></div>';
   html += '<div class="legendRow"><div class="ic">⚡</div><div class="txt"><b>−50% КД</b><small>60 сек · 🥇 30</small></div></div>';
-  html += '<div class="legendRow"><div class="ic">🍀</div><div class="txt"><b>×2 шансы</b><small>60 сек · 🥇 60</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🍀</div><div class="txt"><b>×2 удача карт</b><small>60 сек · 🥇 60</small></div></div>';
+
+  html += '<div class="sectionTitle">🧪 Зелья (с колеса наград)</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.5;padding:6px 0">Зелья копятся в <b>🎒 Инвентарь → 🧪 Зелья</b>. Используешь вручную. Множитель берётся максимальный, длительность суммируется.</div>';
+  html += '<div class="legendRow"><div class="ic">💰</div><div class="txt"><b>Лак монет</b><small>×2 / ×3 / ×5 · 1-5 мин · с кликов, рыбы и т.д.</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🍀</div><div class="txt"><b>Лак карт</b><small>×2 / ×3 / ×5 / ×10 · 1-5 мин · апгрейд редкости в пакетах</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🧬</div><div class="txt"><b>Лак мутаций</b><small>×2 / ×3 · 5 мин · шанс наложить мутацию на рыбу</small></div></div>';
+  html += '<div class="legendRow"><div class="ic">🎟</div><div class="txt"><b>Лак билетов</b><small>×2 / ×3 · 5 мин · выше шанс Озера / Глубины / Бездны в кейсе</small></div></div>';
 
   html += '<div class="sectionTitle">🤖 Боты-автокликеры</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">10 уровней. Работают только при открытой вкладке «Клик». Клик = твой обычный клик.</div>';
@@ -13496,6 +15053,9 @@ function openHelp(){
   html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Отдельные события с <b>06:00 до 23:00 МСК</b>. Плашка <b>⚔️</b> в шапке → активный рейд. Тап по плашке — расписание дня.</div>';
   html += '<div style="font-size:12px;line-height:1.6;background:var(--bg2);border-radius:10px;padding:10px;margin:8px 0"><b>🎯 10 рейдов в сутки</b>, окно 60 минут каждый:<br>👁 Бездна ×1 · 🐡 Глубина ×1 · 🐸 Озеро ×2 · 🐍 Река ×3 · 🐟 Пруд ×3</div>';
 
+  html += '<div class="sectionTitle">🎟 Билеты рейда (свои рейды вне расписания)</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Падают с <b>Колеса наград</b> (и с сезонных событий в будущем). Кейс открывается рулеткой → выпадает случайный билет глубины. Билет активирует <b>своё окно 20 минут</b> — заходи и выходи свободно. Победа = билет отработан. Сдача = билет сгорел. Зайти на глубину, где идёт рейд по расписанию, нельзя — и если рейд по расписанию стартует в ближайшие 20 минут, тоже нельзя (билет сгорит).</div>';
+
   html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin:10px 0;border-left:3px solid #5eb1c9"><div style="font-size:13px;font-weight:700;color:#5eb1c9;margin-bottom:6px">🐟 ТОЛСТЫЙ СОМ · Пруд</div><div style="font-size:11px;opacity:.85;line-height:1.6">🎣 Удочка: любая<br>🎯 4 стадии, тапы по боссу (пауза &gt;3 сек = срыв)<br>⚡ Способности: рывок, прыжок, регенерация<br>💰 Награда: <b>500К – 1М</b></div></div>';
 
   html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin:10px 0;border-left:3px solid #3b82c9"><div style="font-size:13px;font-weight:700;color:#3b82c9;margin-bottom:6px">🐍 РЕЧНАЯ ЗМЕЯ · Река</div><div style="font-size:11px;opacity:.85;line-height:1.6">🎣 Удочка: 🎋 бамбук+<br>🎯 4 стадии + стражи между ними<br>🛡 4 типа стражей: обычный · нормальный · сложный · бешеный<br>⚡ Способности Змеи: яд (×2 вниз), скольжение, волна<br>💰 Награда: <b>1.5М – 3М</b></div></div>';
@@ -13614,13 +15174,78 @@ function openHelp(){
    ОБУЧАЛКА v10 (box-shadow, работает)
    ============================================================ */
 const TUT_STEPS = [
-  {id:'welcome', icon:'👋', title:'Привет, кошатник!', text:'Сейчас проведу тебя по игре. Следи за подсветкой и жми куда показываю.', mode:'center', manual:'Погнали 🚀', onEnter:()=>switchTab('click')},
-  {id:'click', icon:'👆', title:'Кликай по кнопке', text:'Нажми на неё <b>5 раз</b> — получишь монеты 🪙', target:'#staticBtn', arrow:'up', goal:5, metric:()=>state.totalClicks, onEnter:()=>switchTab('click')},
-  {id:'shop', icon:'🛒', title:'Открой Магазин', text:'Нажми на <b>🛒</b> внизу.', target:'nav button[data-tab="shop"]', arrow:'down', waitFor:()=>$('tab-shop').classList.contains('active')},
-  {id:'pack', icon:'📦', title:'Купи пакет', text:'«Классический» за 100 монет — случайная карта!', target:'[data-pack="classic"]', arrow:'up', goal:1, metric:()=>state.totalPacksOpened, onEnter:()=>switchTab('shop')},
-  {id:'collection', icon:'📚', title:'Твоя коллекция', text:'Все выбитые карты тут.', target:'nav button[data-tab="collection"]', arrow:'down', waitFor:()=>$('tab-collection').classList.contains('active')},
-  {id:'equip', icon:'🎴', title:'Экипируй карту', text:'Тапни по карте → выбери слот в любой колоде.', target:'.cardGrid .card', arrow:'up', goal:1, metric:()=>state.decks.reduce((s,d)=>s+d.cards.filter(Boolean).length,0), onEnter:()=>switchTab('collection')},
-  {id:'done', icon:'🎉', title:'Ты готов!', text:'Теперь играй и собирай коллекцию. Держи награду!', mode:'center', manual:'Забрать 1000 🪙 + 5 🥇', reward:{coins:1000, gold:5}}
+  {
+    id:'welcome',
+    icon:'👋',
+    title:'Привет!',
+    text:'Это <b>Котокарты</b> — игра, где ты собираешь карты с котами, ловишь рыбу и сражаешься с боссами. Покажу основы за 5 шагов.',
+    mode:'center',
+    manual:'Начать'
+  },
+  {
+    id:'click',
+    icon:'👆',
+    title:'Твой первый клик',
+    text:'Нажимай на <b>розовую кнопку</b> в центре — за каждый клик получаешь монеты. Жми <b>3 раза</b>!',
+    target:'#staticBtn',
+    arrow:'up',
+    goal:3,
+    metric:()=>state.totalClicks,
+    onEnter:()=>switchTab('click')
+  },
+  {
+    id:'shop',
+    icon:'🛒',
+    title:'Магазин',
+    text:'У тебя есть монеты! Иди в <b>🛒 Магазин</b> внизу экрана.',
+    target:'nav button[data-tab="shop"]',
+    arrow:'down',
+    waitFor:()=>$('tab-shop').classList.contains('active')
+  },
+  {
+    id:'pack',
+    icon:'📦',
+    title:'Первый пакет',
+    text:'<b>Классический пакет — бесплатный</b>. Купи его и получи свою первую карту!',
+    target:'[data-pack="classic"]',
+    arrow:'up',
+    goal:1,
+    metric:()=>state.totalPacksOpened,
+    onEnter:()=>switchTab('shop')
+  },
+  {
+    id:'collection',
+    icon:'📚',
+    title:'Твоя коллекция',
+    text:'Все выбитые карты хранятся в разделе <b>📚 Карты</b>.',
+    target:'nav button[data-tab="collection"]',
+    arrow:'down',
+    waitFor:()=>$('tab-collection').classList.contains('active'),
+    onEnter:()=>setTimeout(()=>{
+      const btn = document.querySelector('nav button[data-tab="collection"]');
+      if(btn && !$('tab-collection').classList.contains('active')) btn.click();
+    }, 300)
+  },
+  {
+    id:'equip',
+    icon:'🎴',
+    title:'Поставь карту в колоду',
+    text:'Тапни по карте — откроется меню. Выбери <b>любой слот</b> в колоде. Карты в колоде дают бонус к кликам!',
+    target:'.cardGrid .card',
+    arrow:'up',
+    goal:1,
+    metric:()=>state.decks.reduce((s,d)=>s+d.cards.filter(Boolean).length,0),
+    onEnter:()=>switchTab('collection')
+  },
+  {
+    id:'done',
+    icon:'🎉',
+    title:'Готово!',
+    text:'Ты знаешь основы. Дальше — <b>рыба</b>, <b>крафт</b>, <b>биржа</b> и <b>боссы</b>. Держи награду и вперёд!',
+    mode:'center',
+    manual:'Забрать 1000 🪙 + 5 🥇',
+    reward:{coins:1000, gold:5}
+  }
 ];
 
 let tutEls = null;
@@ -13637,14 +15262,10 @@ function isTutClickStep(){
 function ensureTutEls(){
   if(tutEls && document.body.contains(tutEls.tip)) return tutEls;
 
-  const overlay = document.createElement('div');
-  overlay.id = 'tutOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;background:rgba(10,6,18,.78)';
-  document.body.appendChild(overlay);
-
+  /* 🔇 НЕ затемняем весь экран — просто пульсирующее кольцо вокруг цели */
   const ring = document.createElement('div');
   ring.id = 'tutRing';
-  ring.style.cssText = 'position:fixed;z-index:9991;pointer-events:none;display:none;border:3px solid #ffd93d;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,6,18,.78), 0 0 30px #ffd93d99;transition:left .25s ease, top .25s ease, width .25s ease, height .25s ease;animation:tutPulse 1.4s ease-in-out infinite';
+  ring.style.cssText = 'position:fixed;z-index:9991;pointer-events:none;display:none;border:3px solid #ffd93d;border-radius:14px;transition:left .25s ease, top .25s ease, width .25s ease, height .25s ease;animation:tutPulse 1.2s ease-in-out infinite';
   document.body.appendChild(ring);
 
   const arrow = document.createElement('div');
@@ -13659,18 +15280,17 @@ function ensureTutEls(){
   document.body.appendChild(tip);
 
   const st = document.createElement('style');
-  st.textContent = '@keyframes tutPulse{0%,100%{box-shadow:0 0 0 9999px rgba(10,6,18,.78), 0 0 30px #ffd93d99}50%{box-shadow:0 0 0 9999px rgba(10,6,18,.78), 0 0 55px #ffd93dff}}@keyframes tutBounceD{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}@keyframes tutBounceU{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
+  st.textContent = '@keyframes tutPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,217,61,.4), 0 0 30px #ffd93d99;transform:scale(1)}50%{box-shadow:0 0 0 8px rgba(255,217,61,.15), 0 0 55px #ffd93dff;transform:scale(1.03)}}@keyframes tutBounceD{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}@keyframes tutBounceU{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes tutFadeCenter{from{opacity:0}to{opacity:1}}';
   document.head.appendChild(st);
 
-  tutEls = {overlay, ring, arrow, tip};
+  tutEls = {ring, arrow, tip};
   return tutEls;
 }
 function hideTutOverlay(){
   if(!tutEls) return;
-  tutEls.overlay.style.display = 'none';
-  tutEls.ring.style.display = 'none';
-  tutEls.arrow.style.display = 'none';
-  tutEls.tip.style.display = 'none';
+  if(tutEls.ring) tutEls.ring.style.display = 'none';
+  if(tutEls.arrow) tutEls.arrow.style.display = 'none';
+  if(tutEls.tip) tutEls.tip.style.display = 'none';
 }
 function renderTutBanner(){
   const step = currentTutStep();
@@ -13684,48 +15304,56 @@ function renderTutBanner(){
     const c = state.tutorial.clicks || {};
     const base = (c.base != null) ? c.base : step.metric();
     const done = Math.min(step.goal, Math.max(0, step.metric() - base));
-    progTxt = '<div style="font-size:12px;font-weight:700;color:#ffd93d;text-align:center;margin-top:6px">' + done + ' / ' + step.goal + '</div>';
+    progTxt = '<div style="font-size:13px;font-weight:700;color:#ffd93d;text-align:center;margin-top:8px">📊 ' + done + ' / ' + step.goal + '</div>';
   }
 
   const btnHTML = step.manual
-    ? '<button id="tutNextBtn" style="width:100%;margin-top:10px;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#a855f7,#6b21a8);color:#fff;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;min-height:44px">' + step.manual + '</button>'
+    ? '<button id="tutNextBtn" style="width:100%;margin-top:12px;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#a855f7,#6b21a8);color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:46px">' + step.manual + '</button>'
     : '';
 
   els.tip.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:10px;opacity:.6;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Обучение · ' + cur + ' / ' + total + '</div>' +
-        '<div style="font-size:15px;font-weight:700;color:#ffd93d;margin-top:3px">' + step.icon + ' ' + step.title + '</div>' +
+        '<div style="font-size:10px;opacity:.6;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Шаг ' + cur + ' из ' + total + '</div>' +
+        '<div style="font-size:16px;font-weight:700;color:#ffd93d;margin-top:4px">' + step.icon + ' ' + step.title + '</div>' +
       '</div>' +
       '<button id="tutSkipBtn" style="background:#2d2444;border:none;color:#aaa;min-width:32px;height:32px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:0;flex-shrink:0">✕</button>' +
     '</div>' +
-    '<div style="font-size:12.5px;line-height:1.5;opacity:.92">' + step.text + '</div>' +
+    '<div style="font-size:13px;line-height:1.55;opacity:.95">' + step.text + '</div>' +
     progTxt +
-    '<div style="height:5px;background:#15101f;border-radius:3px;overflow:hidden;margin-top:10px">' +
+    '<div style="height:5px;background:#15101f;border-radius:3px;overflow:hidden;margin-top:12px">' +
       '<div style="height:100%;width:' + Math.round(cur/total*100) + '%;background:linear-gradient(90deg,#a855f7,#ffd93d);transition:width .4s"></div>' +
     '</div>' +
     btnHTML +
-    '<button id="tutSkipFullBtn" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:none;background:#2d2444;color:#aaa;font-family:inherit;font-size:11px;cursor:pointer;font-weight:700">Пропустить обучение</button>';
+    '<button id="tutSkipFullBtn" style="width:100%;margin-top:10px;padding:9px;border-radius:8px;border:none;background:#2d2444;color:#aaa;font-family:inherit;font-size:11px;cursor:pointer;font-weight:700">Пропустить обучение</button>';
 
   els.tip.style.display = 'block';
   document.getElementById('tutSkipBtn').onclick = skipTut;
   document.getElementById('tutSkipFullBtn').onclick = skipTut;
   const next = document.getElementById('tutNextBtn'); if(next) next.onclick = finishTutStep;
 
+  /* 🎯 РЕЖИМ «ЦЕНТР» — для welcome и done */
   if(step.mode === 'center'){
-    els.overlay.style.display = 'block';
     els.ring.style.display = 'none';
     els.arrow.style.display = 'none';
-    els.tip.style.bottom = '50%';
-    els.tip.style.transform = 'translateX(-50%) translateY(50%)';
+    els.tip.style.top = '50%';
+    els.tip.style.bottom = 'auto';
+    els.tip.style.transform = 'translateX(-50%) translateY(-50%)';
     return;
   }
 
-  const target = document.querySelector(step.target);
+  /* 🎯 Особый случай: шаг «Поставь карту» — подсвечиваем именно новую карту */
+  let target;
+  if(step.id === 'equip' && state.newCards && state.newCards.length > 0){
+    target = document.querySelector('.cardGrid .card[data-id="' + state.newCards[0] + '"]');
+  }
   if(!target){
-    els.overlay.style.display = 'block';
+    target = document.querySelector(step.target);
+  }
+  if(!target){
     els.ring.style.display = 'none';
     els.arrow.style.display = 'none';
+    els.tip.style.top = 'auto';
     els.tip.style.bottom = '88px';
     els.tip.style.transform = 'translateX(-50%)';
     return;
@@ -13733,22 +15361,26 @@ function renderTutBanner(){
 
   const r = target.getBoundingClientRect();
   const pad = 6;
-  els.overlay.style.display = 'none';
   els.ring.style.display = 'block';
   els.ring.style.left = (r.left - pad) + 'px';
   els.ring.style.top = (r.top - pad) + 'px';
   els.ring.style.width = r.width + 'px';
   els.ring.style.height = r.height + 'px';
+
+  els.tip.style.top = 'auto';
   els.tip.style.bottom = '88px';
   els.tip.style.transform = 'translateX(-50%)';
+
   els.arrow.style.display = 'block';
   const cx = r.left + r.width/2;
-  if(step.arrow === 'up' || r.top > window.innerHeight/2){
+  if(r.top > window.innerHeight / 2){
+    /* Цель в верхней части — стрелка сверху */
     els.arrow.textContent = '⬇️';
     els.arrow.style.animation = 'tutBounceD 1s ease-in-out infinite';
     els.arrow.style.left = (cx - 21) + 'px';
     els.arrow.style.top = Math.max(8, r.top - 52) + 'px';
   } else {
+    /* Цель в нижней части — стрелка снизу */
     els.arrow.textContent = '⬆️';
     els.arrow.style.animation = 'tutBounceU 1s ease-in-out infinite';
     els.arrow.style.left = (cx - 21) + 'px';
@@ -13808,10 +15440,18 @@ function finishTutStep(){
   const step = currentTutStep();
   if(!step) return;
   if(step.reward){
-    if(step.reward.coins){ state.coins += step.reward.coins; state.coinsEarned += step.reward.coins; }
-    if(step.reward.gold){ state.gold += step.reward.gold; state.goldEarned += step.reward.gold; }
-    renderHeader();
-    playResource(); playAchievement();
+    /* 🛡 Награда за обучение — только 1 раз за всю жизнь */
+    if(!state.tutorialRewardClaimed){
+      state.tutorialRewardClaimed = true;
+      if(step.reward.coins){ state.coins += step.reward.coins; state.coinsEarned += step.reward.coins; }
+      if(step.reward.gold){ state.gold += step.reward.gold; state.goldEarned += step.reward.gold; }
+      renderHeader();
+      playResource(); playAchievement();
+      notify('🎁', 'Награда за обучение!', '+' + step.reward.coins + ' 🪙 + ' + step.reward.gold + ' 🥇', '#10b981');
+    } else {
+      /* Повторное прохождение — без награды */
+      save();
+    }
   }
   advanceTutorial();
 }
@@ -13838,10 +15478,8 @@ if($('soundToggle')) $('soundToggle').onclick = ()=>{
 };
 if($('musicToggle')) $('musicToggle').onclick = ()=>{
   state.musicOn = !state.musicOn;
-  if(state.musicOn){
-    if(state.customMusicOn && customAudio){ initAudio(); startCustomMusic(); }
-    else { initAudio(); startMusic(); }
-  } else { stopMusic(); stopCustomMusic(); }
+  if(state.musicOn){ initAudio(); startMusic(); }
+  else { stopMusic(); }
   save(); renderHeader();
 };
 if($('helpBtn')) $('helpBtn').onclick = openHelp;
@@ -13952,7 +15590,24 @@ function startGame(){
   renderPhaseIndicator();
 
   setInterval(()=>{ state.playTime = (state.playTime||0) + 1; }, 1000);
-  setInterval(save, 30000);
+  /* 💾 Автосохранение каждые 15 секунд (было 30) */
+  setInterval(() => save(true), 15000);
+  /* 💾 Сохранение при сворачивании вкладки (мобильные + alt-tab) */
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) save(true);
+  });
+  /* 💾 Сохранение при закрытии вкладки (основное!) */
+  window.addEventListener('beforeunload', () => {
+    save(true);
+  });
+  /* 💾 Сохранение при выгрузке страницы (мобильные — надёжнее beforeunload) */
+  window.addEventListener('pagehide', () => {
+    save(true);
+  });
+  /* 💾 Сохранение при потере фокуса окна */
+  window.addEventListener('blur', () => {
+    save(true);
+  });
 
   renderHeader();
   renderNav();
@@ -13976,6 +15631,12 @@ function startGame(){
 
   checkUnlocks();
   initCustomMusic();
+
+  /* 🎉 Восстанавливаем визуал активного мега-события */
+  if(state.events && state.events.active){
+    const _cfg = EVENT_TYPES[state.events.active.type];
+    if(_cfg && _cfg.visual) applyEventVisual(_cfg);
+  }
 
   if(isNotifSupported() && Notification.permission === 'default'){
     const tryAsk = async ()=>{
@@ -14025,6 +15686,13 @@ function startGame(){
     setTimeout(renderTutBanner, 800);
     setTimeout(startTutTicker, 800);
   }
+
+  /* 🛡 Восстанавливаем необработанный улов после перезагрузки */
+  if(state.pendingCatch && state.pendingCatch.caught && state.pendingCatch.caught.length){
+    setTimeout(() => {
+      if(typeof openCatchModal === 'function') openCatchModal();
+    }, 800);
+  }
 }
 
 /* ============================================================
@@ -14062,6 +15730,51 @@ document.addEventListener('keydown', (e)=>{
 window.closeModal = closeModal;
 window.openModal = openModal;
 window.restartTut = restartTut;
+
+/* 🖼 Предзагружаем картинки боссов */
+window._bossImgCache = {};
+BOSSES.forEach(b => {
+  if(b.img){
+    const im = new Image();
+    im.src = b.img;
+    window._bossImgCache[b.id] = im;
+  }
+});
+/* 💎 Предзагружаем картинки кристаллов */
+window._crystalImgCache = {};
+['crystal_hold','crystal_tap','crystal_lowhp','crystal_mixed'].forEach(name => {
+  const im = new Image();
+  im.src = 'assets/crystals/' + name + '.png';
+  window._crystalImgCache[name] = im;
+});
+/* 💎 Хелпер отрисовки кристалла */
+function drawCrystal(ctx, cr){
+  let key;
+  /* 🎨 По HP: 3 = базовый, 2 = базовый (оранжевое свечение), 1 = красный */
+  if(cr.hp <= 1 && cr.maxHp > 1){
+    key = 'crystal_lowhp';
+  } else if(cr.mode === 'mixed'){
+    key = 'crystal_mixed';
+  } else if(cr.mode === 'hold'){
+    key = 'crystal_hold';
+  } else {
+    key = 'crystal_tap';
+  }
+  const im = window._crystalImgCache[key];
+  if(im && im.complete){
+    const r = cr.radius * 2;
+    ctx.drawImage(im, cr.x - cr.radius, cr.y - cr.radius, r, r);
+    return true;
+  }
+  return false;
+}
+
+/* 💎 Цвет свечения по HP */
+function getCrystalGlowColor(cr){
+  if(cr.hp <= 1 && cr.maxHp > 1) return '#dc2626';  /* Красный — добивай */
+  if(cr.hp === 2 && cr.maxHp >= 3) return '#f59e0b'; /* Оранжевый — предупреждение */
+  return cr.mode === 'hold' ? '#7c3aed' : '#a855f7'; /* Обычный фиолет */
+}
 
 if(state.nick){
   $('nickSetup').style.display = 'none';
