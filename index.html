@@ -2924,7 +2924,7 @@ function defaultState(){
       role: ['money','science','miner','fisher','pro'][i]
     })),
     activeDeckIdx: 0,
-    soundOn:true, musicOn:true, currentTrack:0,
+    soundOn:true, musicOn:true, currentTrack:0, musicMode:'new',
     theme:'dark', autoTheme:true, sawLightTheme:false, reduceMotion:false,
     buffs:{money:0, cd:0, luck:0, mutLuck:0, ticketLuck:0, moneyMult:2, luckMult:2, mutLuckMult:2, ticketLuckMult:2},
     avatar:'', avatarType:'', avatarEmoji:'', playTime:0,
@@ -7132,16 +7132,8 @@ function restoreFishingAfterRaid(){
 function endRaidLose(reason){
   /* 🔓 САМОЕ ПЕРВОЕ — снять блок с nav (до раннего return!) */
   const _navF = document.querySelector('nav');
-  if(typeof MusicEngine !== 'undefined') MusicEngine.setContext('fishing', 1);
   if(_navF){ _navF.style.pointerEvents = ''; _navF.style.opacity = ''; }
-  /* 🛡 Помечаем босса как «попытка была» — только для рейдов ПО РАСПИСАНИЮ (не билетных) */
-  if(state.raid && state.raid.bossId){
-    const _isTicketRaid = state.ticketRaid && state.ticketRaid.bossId === state.raid.bossId;
-    if(!_isTicketRaid){
-      if(!state.raidCaught) state.raidCaught = {};
-      state.raidCaught[state.raid.bossId] = true;
-    }
-  }
+  if(typeof MusicEngine !== 'undefined') MusicEngine.setContext('fishing', 1);
   const _gubF = document.getElementById('raidGiveUpBtn');
   if(_gubF) _gubF.remove();
   const _hudF = document.getElementById('raidHud');
@@ -7694,6 +7686,8 @@ if(!state.achievements || typeof state.achievements !== 'object') state.achievem
     if(typeof state.rouletteLastFreeReset !== 'number') state.rouletteLastFreeReset = 0;
     if(typeof state.rouletteTickets !== 'number') state.rouletteTickets = 0;
     if(typeof state.rouletteQty !== 'number' && state.rouletteQty !== 'max') state.rouletteQty = 1;
+    /* 🎵 Режим музыки: 'new' (MusicEngine) или 'classic' (пищалка) */
+    if(state.musicMode !== 'classic' && state.musicMode !== 'new') state.musicMode = 'new';
     if(typeof state.raidTickets === 'number' || !state.raidTickets || typeof state.raidTickets !== 'object'){
       state.raidTickets = { case: 0, pond: 0, river: 0, lake: 0, deep: 0, abyss: 0 };
     }
@@ -8589,18 +8583,89 @@ const MusicEngine = (function(){
   };
 })();
 
-/* ---------- Совместимость со старым кодом ---------- */
+/* ============================================================
+   🎵 УПРАВЛЕНИЕ МУЗЫКОЙ (2 режима)
+   ============================================================ */
 function startMusic(){
-  if (!audioCtx) return;
-  MusicEngine.init(audioCtx);
-  MusicEngine.start();
+  if(!audioCtx) return;
+  if(!state.musicOn) return;
+
+  if(state.musicMode === 'classic'){
+    /* 🎼 Классика — пищалка на TRACKS */
+    if(musicTimer) clearTimeout(musicTimer);
+    noteIdx = 0;
+    playMusicNote();
+  } else {
+    /* 🎵 Новая — MusicEngine */
+    MusicEngine.init(audioCtx);
+    MusicEngine.start();
+  }
 }
-function stopMusic(){ MusicEngine.stop(); }
+function stopMusic(){
+  /* Останавливаем оба режима */
+  if(musicTimer){ clearTimeout(musicTimer); musicTimer = null; }
+  MusicEngine.stop();
+}
 function nextTrack(){
-  /* Заглушка — трек теперь выбирается контекстом */
-  showToast('🎵 Трек выбирается автоматически');
+  if(state.musicMode === 'classic'){
+    state.currentTrack = ((state.currentTrack||0) + 1) % TRACKS.length;
+    stopMusic();
+    if(audioCtx && state.musicOn) startMusic();
+    save();
+    showToast('🎵 ' + TRACKS[state.currentTrack].name);
+  } else {
+    showToast('🎵 Стиль выбирается автоматически');
+  }
 }
-function playMusicNote(){ /* Заглушка */ }
+function setMusicMode(mode){
+  if(mode !== 'classic' && mode !== 'new') return;
+  if(state.musicMode === mode) return;
+  stopMusic();
+  state.musicMode = mode;
+  save();
+  if(state.musicOn){
+    setTimeout(() => startMusic(), 400);
+  }
+  renderProfile();
+  renderHeader();
+  notify('🎵', 'Режим музыки', mode === 'classic' ? 'Классическая (6 треков)' : 'Новая (5 контекстов)', '#a855f7');
+}
+/* ============================================================
+   🎵 КЛАССИЧЕСКАЯ МУЗЫКА (старая пищалка на 6 треках)
+   ============================================================ */
+function playMusicNote(){
+  if(!audioCtx || !state.musicOn || state.musicMode !== 'classic'){
+    musicTimer = null;
+    return;
+  }
+  if(window._audioMuted) return;
+  const track = TRACKS[state.currentTrack || 0];
+  const [m, b, dur] = track.notes[noteIdx];
+  if(m > 0){
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = m;
+    g.gain.setValueAtTime(0, audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur*0.95);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  }
+  if(b > 0){
+    const osc2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+    osc2.type = 'sine'; osc2.frequency.value = b;
+    g2.gain.setValueAtTime(0, audioCtx.currentTime);
+    g2.gain.linearRampToValueAtTime(0.07, audioCtx.currentTime + 0.03);
+    g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur*0.9);
+    osc2.connect(g2).connect(audioCtx.destination);
+    osc2.start(); osc2.stop(audioCtx.currentTime + dur);
+  }
+  noteIdx++;
+  if(noteIdx >= track.notes.length){
+    noteIdx = 0;
+    state.currentTrack = ((state.currentTrack||0) + 1) % TRACKS.length;
+  }
+  musicTimer = setTimeout(playMusicNote, dur*1000);
+}
 /* ============================================================
    🔇 АВТО-ГЛУШЕНИЕ ЗВУКА ПРИ УХОДЕ С ВКЛАДКИ
    (требование Pikabu, VK, Яндекс.Игр)
@@ -14285,7 +14350,9 @@ function switchTab(tabId){
     if(typeof renderMachine === 'function') renderMachine();
   }
   if(tabId === 'click'){ renderSlots(); renderBuffs(); applyBackground(); }
-  /* 🎵 Смена музыкального контекста */
+  /* 🎵 Смена музыкального контекста (только для новой музыки) */
+  if(state.musicMode === 'classic') { /* классика не зависит от вкладок */ }
+  else {
   const _musicCtx = {
     click: ['clicker', 2],
     shop: ['lobby', 1],
@@ -14300,6 +14367,7 @@ function switchTab(tabId){
   };
   const [_mName, _mInt] = _musicCtx[tabId] || ['lobby', 1];
   if(typeof MusicEngine !== 'undefined') MusicEngine.setContext(_mName, _mInt);
+  }
 
   const main = document.querySelector('main');
   if(main) main.scrollTop = 0;
@@ -14321,9 +14389,15 @@ function startCooldown(){
 }
 function firstInteract(){
   initAudio();
-  /* 🎵 Музыку запускаем ВСЕГДА если настройка включена и она ещё не играет */
-  if(state.musicOn && !state.customMusicOn && typeof MusicEngine !== 'undefined' && !MusicEngine.isPlaying()){
-    startMusic();
+  /* 🎵 Музыку запускаем если настройка включена */
+  if(state.musicOn && !state.customMusicOn){
+    if(state.musicMode === 'classic'){
+      /* Классика — если ещё не играет */
+      if(!musicTimer) startMusic();
+    } else {
+      /* Новая — если ещё не играет */
+      if(typeof MusicEngine !== 'undefined' && !MusicEngine.isPlaying()) startMusic();
+    }
   } else if(state.musicOn && state.customMusicOn && customAudio){
     startCustomMusic();
   }
@@ -14454,7 +14528,15 @@ function renderProfile(){
         '<div><b style="font-size:13px">Звуки игры</b><div style="font-size:10px;opacity:.6;margin-top:2px">Клики, рыба, рейды, победы</div></div>' +
         '<input type="checkbox" id="soundOnToggle" ' + (state.soundOn ? 'checked' : '') + ' style="width:auto;accent-color:var(--acc);transform:scale(1.3)">' +
       '</div>' +
-      '<button class="profileBtn btnGray" id="nextTrackBtn" style="margin-top:12px">⏭ Следующий трек</button>' +
+      '<div style="padding:10px 0;border-top:1px solid var(--border);margin-top:10px">' +
+        '<div style="font-size:11px;opacity:.7;margin-bottom:8px">Стиль музыки:</div>' +
+        '<div style="display:flex;gap:6px">' +
+          '<button class="musicModeBtn" data-mode="new" style="flex:1;padding:10px;border-radius:8px;border:2px solid ' + (state.musicMode==='new'?'var(--acc)':'var(--border)') + ';background:' + (state.musicMode==='new'?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🎵 Новая</button>' +
+          '<button class="musicModeBtn" data-mode="classic" style="flex:1;padding:10px;border-radius:8px;border:2px solid ' + (state.musicMode==='classic'?'var(--acc)':'var(--border)') + ';background:' + (state.musicMode==='classic'?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🎼 Классика</button>' +
+        '</div>' +
+        '<div style="font-size:10px;opacity:.55;margin-top:6px">🎵 Новая — 5 контекстов, качает. 🎼 Классика — 6 простых треков.</div>' +
+      '</div>' +
+      '<button class="profileBtn btnGray" id="nextTrackBtn" style="margin-top:12px">⏭ ' + (state.musicMode === 'classic' ? 'Следующий трек' : 'Сменить тему') + '</button>' +
     '</div>' +
 
 
@@ -14612,6 +14694,14 @@ const nameClick = $('profileNameClick');
     alert('Ник изменён');
   };
   if($('nextTrackBtn')) $('nextTrackBtn').onclick = ()=>{ initAudio(); nextTrack(); renderProfile(); };
+
+  /* 🎵 Переключатель стиля музыки */
+  document.querySelectorAll('.musicModeBtn').forEach(btn => {
+    btn.onclick = () => {
+      initAudio();
+      setMusicMode(btn.dataset.mode);
+    };
+  });
 
   /* 🎵 Тумблер музыки */
   const _mToggle = $('musicOnToggle');
@@ -17711,7 +17801,8 @@ if($('soundToggle')) $('soundToggle').onclick = ()=>{
 };
 if($('musicToggle')) $('musicToggle').onclick = ()=>{
   state.musicOn = !state.musicOn;
-  if(state.musicOn){ initAudio(); startMusic(); }
+  initAudio();
+  if(state.musicOn){ startMusic(); }
   else { stopMusic(); }
   save(); renderHeader();
 };
