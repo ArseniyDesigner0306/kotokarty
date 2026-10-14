@@ -1000,7 +1000,8 @@ body.reduce-motion .card.vis-cosmic,body.reduce-motion .card.vis-chaos{animation
 /* ============ МОБИЛЬНАЯ АДАПТАЦИЯ ============ */
 /* ============ УВЕДОМЛЕНИЯ (стек справа) ============ */
 #notifStack{position:fixed;top:60px;right:14px;z-index:280;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:300px;width:calc(100% - 28px)}
-.notifToast{background:linear-gradient(135deg,#1e1730,#2d2444);border:1px solid var(--border2);border-left:4px solid var(--acc);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 20px #000a;animation:notifIn .35s ease-out;pointer-events:none}
+.notifToast{background:linear-gradient(135deg,#1e1730,#2d2444);border:1px solid var(--border2);border-left:4px solid var(--acc);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 20px #000a;animation:notifIn .35s ease-out;pointer-events:auto;cursor:pointer;transition:opacity .2s}
+.notifToast:active{opacity:0.5}
 .notifToast .nIcon{font-size:22px;flex-shrink:0}
 .notifToast .nBody{flex:1;min-width:0}
 .notifToast .nTitle{font-size:12px;font-weight:700;color:var(--gold);margin-bottom:2px}
@@ -1009,7 +1010,12 @@ body.reduce-motion .card.vis-cosmic,body.reduce-motion .card.vis-chaos{animation
 @keyframes notifIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes notifOut{to{transform:translateX(120%);opacity:0}}
 @media(max-width:480px){
-  #notifStack{top:52px;right:8px;max-width:280px;width:calc(100% - 16px)}
+  #notifStack{top:52px;right:6px;max-width:220px;width:auto;gap:5px}
+  .notifToast{padding:6px 10px;border-radius:8px;border-left-width:3px;gap:6px;opacity:0.85}
+  .notifToast .nIcon{font-size:16px;width:18px}
+  .notifToast .nTitle{font-size:10.5px;margin-bottom:0}
+  .notifToast .nText{display:none}
+  .notifToast.out{opacity:0}
 }
 @media(max-width:480px){
   header{padding:6px 8px;font-size:11px;gap:4px}
@@ -1301,11 +1307,19 @@ body.is-night #fishingArea{
     </div>
 
     <div style="font-size:11px;opacity:.6;text-align:center;margin-top:10px;line-height:1.5">
+      🔮 Кристаллы:<br>
+      • Обычные мутации (часто)<br>
+      • Редкие (средне)<br>
+      • Эпические / легендарные (редко)<br>
+      • 🎁 Кристалл-кейсы<br>
+      <br>
       🎰 Билеты колеса:<br>
-      • Ежедневного бонуса (+3)<br>
-      • Заданий (15%)<br>
-      • Кликов (0.1%)<br>
-      • Рыбалки (2%)<br>
+      • 🎁 Захода в игру (+1)<br>
+      • Ежедневного бонуса (+10)<br>
+      • 🔥 Серии ежедневок (+5 за день streak)<br>
+      • Заданий (25%)<br>
+      • Кликов (0.15%)<br>
+      • Рыбалки (3%)<br>
       <br>
       🎟 Билеты рейда:<br>
       • Колесо наград<br>
@@ -1512,13 +1526,13 @@ const PRICE_CAP = 10;
 
 /* Награды */
 const DAILY_REWARDS = [
-  {coins:500, gold:0, ess:0, mana:0, emoji:'🪙'},
-  {coins:1000, gold:1, ess:0, mana:0, emoji:'🥇'},
-  {coins:1500, gold:0, ess:2, mana:0, emoji:'🧪'},
-  {coins:2000, gold:2, ess:0, mana:0, emoji:'🥇'},
-  {coins:2500, gold:0, ess:0, mana:1, emoji:'✨'},
-  {coins:3000, gold:3, ess:2, mana:0, emoji:'🎁'},
-  {coins:5000, gold:5, ess:3, mana:1, emoji:'🏆'}
+  {coins:500,  gold:0, ess:0, mana:0, tickets:10, emoji:'🪙'},
+  {coins:1000, gold:1, ess:0, mana:0, tickets:12, emoji:'🥇'},
+  {coins:1500, gold:0, ess:2, mana:0, tickets:14, emoji:'🧪'},
+  {coins:2000, gold:2, ess:0, mana:0, tickets:16, emoji:'🥇'},
+  {coins:2500, gold:0, ess:0, mana:1, tickets:18, emoji:'✨'},
+  {coins:3000, gold:3, ess:2, mana:0, tickets:22, emoji:'🎁'},
+  {coins:5000, gold:5, ess:3, mana:1, tickets:30, emoji:'🏆'}
 ];
 
 /* Мини-игра «Накорми кота» (вырежем в Части 6) */
@@ -2975,6 +2989,7 @@ function defaultState(){
     tutorialRewardClaimed:false,
     rouletteFreeSpins:1,
     rouletteLastFreeReset:0,
+    lastFreeTicketDay:'',
     mutLuckMult:2,
     ticketLuckMult:2,
     rouletteTickets:0,
@@ -2993,6 +3008,7 @@ function defaultState(){
     events: {dayKey:'', schedule:[], active:null, raidSchedule:[], activeRaid:null},
     eventSounds: true,
     crystals: {},
+    crystalsEmpty: 0,
     eventsSeen: [],
     totalQuestsClaimed: 0,
     version: VERSION
@@ -5615,7 +5631,36 @@ raid.finalGuards.forEach(g => {
 function handleRaidClick(e){
   const raid = state.raid;
   if(!raid || !raid.active) return;
+  const _now = Date.now();
 
+  /* 🛡 АНТИ-АВТОКЛИКЕР уровень 1: кулдаун 100мс (10 CPS) */
+  if(!raid._lastTapTime) raid._lastTapTime = 0;
+  if(_now - raid._lastTapTime < 100) return;
+
+  /* 🛡 АНТИ-АВТОКЛИКЕР уровень 2: детект ритмичности */
+  const _interval = _now - raid._lastTapTime;
+  if(!raid._tapIntervals) raid._tapIntervals = [];
+  raid._tapIntervals.push(_interval);
+  if(raid._tapIntervals.length > 5) raid._tapIntervals.shift();
+
+  /* Когда накопилось 5 интервалов — считаем дисперсию */
+  if(raid._tapIntervals.length === 5){
+    const _avg = raid._tapIntervals.reduce((s,v) => s+v, 0) / 5;
+    const _variance = raid._tapIntervals.reduce((s,v) => s + (v-_avg)*(v-_avg), 0) / 5;
+    const _stdDev = Math.sqrt(_variance);
+    /* Если разброс < 15мс и интервал < 250мс — это бот */
+    if(_stdDev < 15 && _avg < 250){
+      /* 🚨 Не бан, но урон не идёт. Показываем только раз в 3 сек */
+      if(!raid._botWarnedAt || _now - raid._botWarnedAt > 3000){
+        raid._botWarnedAt = _now;
+        floatTextAt('🤖 Бот?', e.clientX || 200, e.clientY || 200, '#dc2626');
+        if(typeof notify === 'function') notify('🤖', 'Слишком ровно!', 'Играй руками', '#dc2626');
+      }
+      return;
+    }
+  }
+
+  raid._lastTapTime = _now;
   const canvas = $('fishingCanvas');
   const rect = canvas.getBoundingClientRect();
   const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
@@ -6484,7 +6529,8 @@ if(raid.finalGuards.every(x => x.caught)){
 
   const dx = raid.bossX - x, dy = raid.bossY - y;
   const dist = Math.sqrt(dx*dx + dy*dy);
-  if(dist > raid.radius + 25) return;
+  /* 🛡 Уменьшили хитбокс с +25 до +10 — нужно тыкать точнее */
+  if(dist > raid.radius + 10) return;
 
   if(raid.phase === 'swim'){
     raid.phase = 'fight';
@@ -6503,6 +6549,16 @@ if(raid.finalGuards.every(x => x.caught)){
     const _dmgTable = (_bossDmg && _bossDmg.dmgPerTap) || [1.0, 1.3, 1.8, 2.4, 3.2];
     const dmgPerTap = _dmgTable[rodIdx] || _dmgTable[0];
     raid.progress = Math.min(100, raid.progress + dmgPerTap);
+    /* 🌀 Босс микро-дёргается при каждом тапе — автокликеру сложнее попасть */
+    if(raid.progress < 100){
+      const _canvas = $('fishingCanvas');
+      if(_canvas){
+        const _jump = 8 + Math.random() * 12;
+        const _ang = Math.random() * Math.PI * 2;
+        raid.bossX = Math.max(40, Math.min(_canvas.width - 40, raid.bossX + Math.cos(_ang) * _jump));
+        raid.bossY = Math.max(40, Math.min(_canvas.height - 40, raid.bossY + Math.sin(_ang) * _jump));
+      }
+    }
     raid.lastTapTime = Date.now();
     raid.taps++;
     playFishReel();
@@ -7400,6 +7456,8 @@ function getCrystalsCount(){
       total += 1;
     }
   }
+  /* 🕳 Пустые кристаллы — 1 стак = 1 слот */
+  if(state.crystalsEmpty > 0) total += 1;
   return total;
 }
 /* 🎒 Реальный размер инвентаря (без карт в панели жертв и крафта) */
@@ -7684,6 +7742,7 @@ if(!state.achievements || typeof state.achievements !== 'object') state.achievem
     if(typeof state.tutorialRewardClaimed !== 'boolean') state.tutorialRewardClaimed = false;
     if(typeof state.rouletteFreeSpins !== 'number') state.rouletteFreeSpins = 1;
     if(typeof state.rouletteLastFreeReset !== 'number') state.rouletteLastFreeReset = 0;
+    if(typeof state.lastFreeTicketDay !== 'string') state.lastFreeTicketDay = '';
     if(typeof state.rouletteTickets !== 'number') state.rouletteTickets = 0;
     if(typeof state.rouletteQty !== 'number' && state.rouletteQty !== 'max') state.rouletteQty = 1;
     /* 🎵 Режим музыки: 'new' (MusicEngine) или 'classic' (пищалка) */
@@ -7718,6 +7777,7 @@ if(!state.achievements || typeof state.achievements !== 'object') state.achievem
     if(!state.potions || typeof state.potions !== 'object') state.potions = {};
     /* 🔮 Кристаллы */
     if(!state.crystals || typeof state.crystals !== 'object') state.crystals = {};
+    if(typeof state.crystalsEmpty !== 'number') state.crystalsEmpty = 0;
     if(typeof state.potionsInvMax !== 'number') state.potionsInvMax = 50;
     if(typeof state.raidTicketsInvMax !== 'number') state.raidTicketsInvMax = 100;
     if(typeof state.crystalsInvMax !== 'number') state.crystalsInvMax = 50;
@@ -8974,10 +9034,13 @@ function notify(icon, title, text, color){
   stack.appendChild(el);
   /* Максимум 5 тостов одновременно */
   while(stack.children.length > 5){ stack.removeChild(stack.firstChild); }
+  /* 📱 На мобилке исчезают быстрее (2 сек вместо 3.5) */
+  const _isMobile = (typeof isTouch !== 'undefined' && isTouch) || window.innerWidth < 600;
+  const _lifetime = _isMobile ? 2000 : 3500;
   setTimeout(()=>{
     el.classList.add('out');
     setTimeout(()=>el.remove(), 300);
-  }, 3500);
+  }, _lifetime);
 }
 
 /* ============================================================
@@ -9420,8 +9483,26 @@ function openEventScheduleModal(){
 /* ============================================================
    ГЛАВНЫЙ ЦИКЛ (тик 1 сек)
    ============================================================ */
+/* 🎰 Ежедневный бесплатный билет колеса */
+function checkDailyFreeTicket(){
+  const today = todayKey();
+  if(state.lastFreeTicketDay === today) return;
+  state.lastFreeTicketDay = today;
+  state.rouletteTickets = (state.rouletteTickets || 0) + 1;
+  save();
+  renderHeader();
+  /* Уведомление с задержкой — чтобы не мешать загрузке */
+  setTimeout(() => {
+    notify('🎰', 'Ежедневный билет!', '+1 билет колеса за заход', '#ffd93d');
+    playResource();
+  }, 1500);
+}
+
 function startGameTick(){
   setInterval(()=>{
+    /* 🎰 Ежедневный бесплатный билет за заход */
+    checkDailyFreeTicket();
+
     renderBuffs();
     renderPhaseIndicator();
     checkPhaseChange();
@@ -11722,8 +11803,8 @@ function handleFishingClick(e){
           state.essence += essReward; state.essEarned += essReward;
           floatTextAt('+' + essReward + '🧪', clientX, clientY + 90, '#10b981');
         }
-        /* 🎟 2% шанс билета рулетки с рыбы */
-        if(Math.random() < 0.02){
+        /* 🎟 3% шанс билета рулетки с рыбы */
+        if(Math.random() < 0.03){
           state.rouletteTickets = (state.rouletteTickets || 0) + 1;
           floatTextAt('🎰 +1 билет!', clientX, clientY - 60, '#ffd93d');
           notify('🎰', 'Билет рулетки!', 'С рыбы выпал билет', '#ffd93d');
@@ -13811,11 +13892,16 @@ function checkMinigameNotifs(){ /* мини-игра вырезана в Час�
    ============================================================ */
 function generateQuests(){
   const cats = ['easy','normal','medium','hard','insane'];
+  /* 🎰 Билеты по категориям (гарантированные) */
+  const _ticketsByCat = {easy:0, normal:0, medium:2, hard:4, insane:8};
   return cats.map(cat => {
     const t = pick(QUEST_TEMPLATES[cat]);
+    const _reward = Object.assign({}, t.reward);
+    /* 🎰 Добавляем билеты по категории */
+    if(_ticketsByCat[cat] > 0) _reward.tickets = _ticketsByCat[cat];
     return {
       type: t.type, target: t.target, title: t.title, icon: t.icon,
-      rarity: t.rarity || null, reward: Object.assign({}, t.reward),
+      rarity: t.rarity || null, reward: _reward,
       claimed: false, cat: cat
     };
   });
@@ -13927,7 +14013,12 @@ function renderQuests(){
     if(q.reward.gold) rp.push('🥇 ' + q.reward.gold);
     if(q.reward.essence) rp.push('🧪 ' + q.reward.essence);
     if(q.reward.mana) rp.push('✨ ' + q.reward.mana);
+    if(q.reward.tickets) rp.push('🎰 ' + q.reward.tickets);
     rp.push('⭐ ' + xp + ' XP');
+    /* 🎰 Показываем шанс билета колеса */
+    const _isMobile = (typeof isTouch !== 'undefined' && isTouch) || window.innerWidth < 600;
+    /* На мобилке скрываем билеты (мало места) */
+    if(!_isMobile) rp.push('<span style="color:#ffd93d">🎰 25% шанс</span>');
     let btn = '';
     if(q.claimed) btn = '<div style="text-align:center;padding:10px;font-size:12px;color:var(--green);font-weight:700;opacity:.7">✓ Получено</div>';
     else if(done) btn = '<button class="questClaimBtn" data-idx="' + idx + '" style="width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--green),#065f46);color:#fff;font-weight:700;font-family:inherit;cursor:pointer;margin-top:10px;font-size:13px;min-height:44px">✨ Забрать</button>';
@@ -13961,12 +14052,23 @@ function claimQuestReward(idx){
   if(r.gold){ state.gold += r.gold; state.goldEarned += r.gold; }
   if(r.essence){ state.essence += r.essence; state.essEarned += r.essence; }
   if(r.mana){ state.mana += r.mana; state.manaEarned += r.mana; }
+  /* 🎰 Гарантированные билеты колеса */
+  if(r.tickets){
+    state.rouletteTickets = (state.rouletteTickets || 0) + r.tickets;
+    setTimeout(() => notify('🎰', '+' + r.tickets + ' билетов!', 'Награда за задание', '#ffd93d'), 400);
+  }
   const xp = getQuestXP(q, idx);
   q.claimed = true;
-  /* 🎰 15% шанс билета рулетки за задание */
-  if(Math.random() < 0.15){
+  /* 🎰 25% шанс билета рулетки за задание */
+  if(Math.random() < 0.25){
     state.rouletteTickets = (state.rouletteTickets || 0) + 1;
-    notify('🎁', 'Билет колеса!', '+1 билет за задание', '#ffd93d');
+    /* 🎰 Показываем всплывашкой прямо в интерфейсе */
+    setTimeout(() => {
+      if(typeof floatTextAt === 'function'){
+        floatTextAt('🎰 +1 билет!', window.innerWidth / 2, window.innerHeight / 2 - 100, '#ffd93d');
+      }
+      notify('🎰', 'Билет колеса!', '+1 билет за задание', '#ffd93d');
+    }, 300);
   }
   state.totalQuestsClaimed = (state.totalQuestsClaimed || 0) + 1;
   addXP(xp);
@@ -14034,11 +14136,28 @@ function openDailyModal(){
     const done = i < (streak % 7 === 0 && streak > 0 ? 7 : streak % 7);
     const isToday = canClaim && i === currentDay;
     const cls = done ? 'done' : (isToday ? 'today' : '');
-    daysHTML += '<div class="dailyDay ' + cls + '"><div class="num">' + (i+1) + '</div><div class="em">' + r.emoji + '</div></div>';
+    /* 🎰 Показываем билеты под эмодзи */
+    daysHTML += '<div class="dailyDay ' + cls + '">' +
+      '<div class="num">' + (i+1) + '</div>' +
+      '<div class="em">' + r.emoji + '</div>' +
+      (r.tickets ? '<div style="font-size:8px;color:#ffd93d;font-weight:700;line-height:1">🎰' + r.tickets + '</div>' : '') +
+    '</div>';
   }
   const todayReward = DAILY_REWARDS[currentDay];
-  const rewardText = '🪙 ' + todayReward.coins + (todayReward.gold?' · 🥇 ' + todayReward.gold:'') + (todayReward.ess?' · 🧪 ' + todayReward.ess:'') + (todayReward.mana?' · ✨ ' + todayReward.mana:'');
-  $('dailyContent').innerHTML = '<button class="modalX" onclick="closeModal(\'dailyModal\')">✕</button><h2>🎁 Ежедневный бонус</h2><div style="text-align:center;font-size:12px;opacity:.7;margin-bottom:8px">Серия: <b style="color:var(--gold)">' + streak + '</b></div><div class="dailyRewards">' + daysHTML + '</div>' + (canClaim ? '<div style="text-align:center;margin:14px 0;font-size:14px;font-weight:700">День ' + (currentDay+1) + '<br><span style="color:var(--gold);font-size:16px">' + rewardText + '</span></div><button class="btnPink" id="claimDailyBtn" style="font-size:16px;padding:14px;min-height:52px">Забрать!</button>' : '<div style="text-align:center;margin:14px 0;font-size:13px;opacity:.8">Приходи завтра!</div>');
+  const rewardText = '🪙 ' + todayReward.coins
+    + (todayReward.gold?' · 🥇 ' + todayReward.gold:'')
+    + (todayReward.ess?' · 🧪 ' + todayReward.ess:'')
+    + (todayReward.mana?' · ✨ ' + todayReward.mana:'')
+    + (todayReward.tickets?' · 🎰 ' + todayReward.tickets:'');
+  /* 🎰 Плашка с билетами дня */
+  const _ticketsPreview = todayReward.tickets || 10;
+  const _ticketsBanner = '<div style="background:linear-gradient(135deg,#2d1b4e,#1a1428);border:2px solid var(--gold);border-radius:10px;padding:10px;margin:10px 0;text-align:center">' +
+    '<div style="font-size:11px;opacity:.7;margin-bottom:4px">Сегодня в награду</div>' +
+    '<div style="font-size:20px;font-weight:900;color:var(--gold)">🎰 ' + _ticketsPreview + ' билетов колеса</div>' +
+    '<div style="font-size:10px;opacity:.6;margin-top:4px">Растут каждый день: до 🎰30 в 7-й день</div>' +
+  '</div>';
+
+  $('dailyContent').innerHTML = '<button class="modalX" onclick="closeModal(\'dailyModal\')">✕</button><h2>🎁 Ежедневный бонус</h2><div style="text-align:center;font-size:12px;opacity:.7;margin-bottom:8px">Серия: <b style="color:var(--gold)">' + streak + '</b></div><div class="dailyRewards">' + daysHTML + '</div>' + _ticketsBanner + (canClaim ? '<div style="text-align:center;margin:14px 0;font-size:14px;font-weight:700">День ' + (currentDay+1) + '<br><span style="color:var(--gold);font-size:16px">' + rewardText + '</span></div><button class="btnPink" id="claimDailyBtn" style="font-size:16px;padding:14px;min-height:52px">Забрать!</button>' : '<div style="text-align:center;margin:14px 0;font-size:13px;opacity:.8">Приходи завтра!</div>');
   openModal('dailyModal');
   if(canClaim){
     const btn = $('claimDailyBtn');
@@ -14054,13 +14173,26 @@ function openDailyModal(){
       state.dailyStreak = (state.dailyStreak || 0) + 1;
       state.dailyLast = todayKey();
       state.questStats.dailyClaimed = (state.questStats.dailyClaimed||0) + 1;
-      /* 🎰 +3 билета рулетки за ежедневку */
-      state.rouletteTickets = (state.rouletteTickets || 0) + 3;
+      /* 🎰 Билеты колеса — из награды дня */
+      const _ticketsReward = r.tickets || 10;
+      state.rouletteTickets = (state.rouletteTickets || 0) + _ticketsReward;
+      /* 🔥 Бонус за серию: +5 за каждый день streak (макс 35) */
+      const _streakBonus = Math.min(35, (state.dailyStreak || 0) * 5);
+      if(_streakBonus > 0){
+        state.rouletteTickets += _streakBonus;
+        setTimeout(() => notify('🔥', 'Серия ' + state.dailyStreak + '!', '+' + _streakBonus + ' билетов за streak', '#f59e0b'), 800);
+      }
       const xp = 30 + currentDay*20;
       addXP(xp);
       playDaily(); playAchievement(); save(); renderHeader(); checkAchievements();
       closeModal('dailyModal');
-      notify('🎁', 'Ежедневный бонус!', '+' + r.coins + '🪙' + (r.gold?' +' + r.gold + '🥇':'') + (r.ess?' +' + r.ess + '🧪':'') + (r.mana?' +' + r.mana + '✨':''), '#f59e0b');
+      notify('🎁', 'Ежедневный бонус!',
+        '+' + r.coins + '🪙'
+        + (r.gold?' +' + r.gold + '🥇':'')
+        + (r.ess?' +' + r.ess + '🧪':'')
+        + (r.mana?' +' + r.mana + '✨':'')
+        + ' +' + (r.tickets || 10) + '🎰',
+        '#f59e0b');
     };
   }
 }
@@ -14437,8 +14569,8 @@ function doClick(mult, e){
   if(Math.random() < GOLD_CH*goldBonus){ state.gold += 1; state.goldEarned += 1; gains.push({t:'🥇 +1',c:'#ffd93d'}); }
   if(Math.random() < ESS_CH*essBonus){ state.essence += 0.5; state.essEarned += 0.5; gains.push({t:'🧪 +0.5',c:'#10b981'}); }
   if(Math.random() < MANA_CH*manaBonus){ state.mana += 1; state.manaEarned += 1; gains.push({t:'✨ +1',c:'#a855f7'}); }
-  /* 🎟 Редкий дроп билета рулетки с клика (0.1%) */
-  if(Math.random() < 0.001){
+  /* 🎟 Редкий дроп билета рулетки с клика (0.15%) */
+  if(Math.random() < 0.0015){
     state.rouletteTickets = (state.rouletteTickets || 0) + 1;
     gains.push({t:'🎰 +1 билет',c:'#ffd93d'});
     notify('🎁', 'Билет колеса!', 'С клика выпал билет', '#ffd93d');
@@ -14511,7 +14643,7 @@ function renderProfile(){
 
     '<div class="profileCard"><h3>🔗 Рефералы</h3><div class="refBox"><div style="font-size:11px;opacity:.7;margin-bottom:4px">Твой код (поделись с другом):</div><div class="refCode" id="refCodeEl" title="Нажми чтобы скопировать">' + state.referrals.code + '</div><div class="refStats"><div class="refStat"><b>' + (state.referrals.count||0) + '</b><small>друзей</small></div><div class="refStat"><b>' + (state.referrals.invitedBy?'✓':'—') + '</b><small>приглашён</small></div></div>' + (state.referrals.invitedBy ? '<div style="font-size:11px;opacity:.7;margin-top:8px">Пригласил: <b>' + state.referrals.invitedBy + '</b></div>' : '<input class="profileInput" id="refInput" maxlength="20" placeholder="Введи код друга KOT..."><button class="profileBtn btnGreen" id="refApply">🎁 Применить код (+' + REF_BONUS_NEW.coins + '🪙)</button>') + '</div></div>' +
 
-    '<div class="profileCard"><h3>🎟 Промокод</h3><div class="hint" style="margin-bottom:8px">В топе ищи «🎁 ПРОМОКОД: XXXXXX»</div><input class="profileInput" id="promoInput" maxlength="20" placeholder="Введи код" style="text-transform:uppercase"><button class="profileBtn btnGold" id="promoBtn">✨ Активировать</button><div style="font-size:11px;opacity:.6;margin-top:6px">Активных: <b>' + unusedPromos + '</b> · Использовано: <b>' + state.usedPromoCodes.length + '</b></div></div>' +
+    '<div class="profileCard"><h3>🎟 Промокод</h3><div class="hint" style="margin-bottom:8px">В топе ищи «🎁 ПРОМОКОД: XXXXXX»</div><input class="profileInput" id="promoInput" maxlength="20" placeholder="Введи код" style="text-transform:uppercase"><button class="profileBtn btnGold" id="promoBtn">✨ Активировать</button><div style="font-size:11px;opacity:.6;margin-top:6px">Активных: <b>' + unusedPromos + '</b> · Использовано: <b>' + state.usedPromoCodes.length + '</b></div><div style="font-size:10px;opacity:.65;margin-top:8px;background:var(--bg2);border-radius:6px;padding:6px 8px">🎁 <b>Шанс бонусов:</b> 🎰 билеты колеса, 🎟 билеты рейда, 🔮 кристаллы, 🎁 кейсы, 🧪 зелья</div></div>' +
 
     '<div class="profileCard"><h3>🎨 Тема</h3><div style="font-size:11px;opacity:.7;margin-bottom:8px">Авто: днём — светлая, ночью — тёмная</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="themeModeBtn" data-mode="auto" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + (state.autoTheme?'var(--acc)':'var(--border)') + ';background:' + (state.autoTheme?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🔄 Авто</button><button class="themeModeBtn" data-mode="dark" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🌙 Тёмная</button><button class="themeModeBtn" data-mode="light" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">☀️ Светлая</button></div></div>' +
 
@@ -14638,10 +14770,26 @@ const nameClick = $('profileNameClick');
     if(r.essence) rewardHtml += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--border)"><span>🧪 Эссенция</span><b style="color:var(--green)">+' + r.essence + '</b></div>';
     if(r.mana) rewardHtml += '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px"><span>✨ Мана</span><b style="color:var(--purple)">+' + r.mana + '</b></div>';
     rewardHtml += '</div>';
+
+    /* 🎁 БОНУСНЫЕ НАГРАДЫ */
+    if(r.bonuses && r.bonuses.length){
+      rewardHtml += '<div style="text-align:center;font-size:14px;font-weight:700;color:#ffd93d;margin:14px 0 8px;text-shadow:0 0 10px #ffd93d">🎉 БОНУСЫ!</div>';
+      rewardHtml += '<div style="background:linear-gradient(135deg,#1a0f2e,#2d1b4e);border:2px dashed #ffd93d;border-radius:12px;padding:12px;margin-bottom:16px">';
+      r.bonuses.forEach(b => {
+        rewardHtml += '<div style="display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13px">' +
+          '<span style="font-size:22px">' + b.icon + '</span>' +
+          '<b style="color:' + (b.color || '#ffd93d') + '">' + b.text + '</b>' +
+        '</div>';
+      });
+      rewardHtml += '</div>';
+    }
+
     rewardHtml += '<button id="promoRewardOk" style="width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(135deg,#ffd700,#f59e0b);color:#15101f;font-weight:700;font-family:inherit;font-size:15px;cursor:pointer;min-height:48px">✨ Забрать</button>';
     $('helpContent').innerHTML = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button><h2>🎁 Промокод</h2>' + rewardHtml;
     openModal('helpModal');
     $('promoRewardOk').onclick = ()=>{ closeModal('helpModal'); flashRare(); };
+    playRare(); flashRare();
+    if(r.bonuses && r.bonuses.length) playAchievement();
     playRare(); flashRare();
   };
   $('promoInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('promoBtn').click(); });
@@ -14796,12 +14944,12 @@ const MACHINE_TIME_BY_TIER = {
 const MACHINE_SUCCESS_CHANCE = 0.5;  /* 🎲 Орёл или решка */
 /* 💰 Цена ускорения: base + (минут осталось × perMin) */
 const MACHINE_SPEEDUP_PRICE = {
-  0:         {base: 5,    perMin: 1},    /* Обычная */
-  1:         {base: 15,   perMin: 2},    /* Редкая */
-  2:         {base: 40,   perMin: 5},    /* Эпическая */
-  3:         {base: 100,  perMin: 10},   /* Легендарная */
-  special:   {base: 300,  perMin: 25},   /* ✨ Особая */
-  exclusive: {base: 1000, perMin: 60}    /* 👑 Эксклюзив */
+  0:         {base: 3,   perMin: 0.5},  /* Обычная */
+  1:         {base: 8,   perMin: 1},    /* Редкая */
+  2:         {base: 20,  perMin: 2.5},  /* Эпическая */
+  3:         {base: 50,  perMin: 5},    /* Легендарная */
+  special:   {base: 150, perMin: 12},   /* ✨ Особая */
+  exclusive: {base: 500, perMin: 30}    /* 👑 Эксклюзив */
 };
 
 /* ============================================================
@@ -14923,7 +15071,7 @@ function addCrystal(mutId, count){
   count = count || 1;
 
   /* 🎁 Кейс всегда новый слот */
-  const key = mutId;
+  const key = mutId === 'case' ? CRYSTAL_CASE_KEY : mutId;
 
   /* 🔍 Проверка на переполнение */
   if(getCrystalsCount() >= state.crystalsInvMax){
@@ -15001,12 +15149,12 @@ function applyCrystalToCard(cardId, mutId){
 
   const m = MUT_BY_ID[mutId];
 
-  /* 🗑 Тратим кристалл */
+  /* 🗑 Списываем мутационный кристалл */
   removeCrystal(mutId, 1);
 
   /* 🎲 Проверяем успех */
   if(Math.random() < applyChance){
-    /* ✅ Успех */
+    /* ✅ Успех — мутация на карту, кристалл израсходован */
     card.mutations = card.mutations || [];
     card.mutations.push(mutId);
     if(!state.mutationsSeen.includes(mutId)) state.mutationsSeen.push(mutId);
@@ -15014,9 +15162,10 @@ function applyCrystalToCard(cardId, mutId){
     playRare(); flashRare();
     notify('✅', 'Мутация наложена!', m.icon + ' ' + m.name, '#10b981');
   } else {
-    /* ❌ Провал */
+    /* ❌ Провал — мутация сгорела, пустой кристалл вернулся в инвентарь */
+    state.crystalsEmpty = (state.crystalsEmpty || 0) + 1;
     playFishMiss();
-    notify('💀', 'Провал!', 'Кристалл сгорел, мутация не наложилась', '#dc2626');
+    notify('💨', 'Провал!', m.icon + ' ' + m.name + ' сгорела, пустой кристалл вернулся', '#dc2626');
   }
 
   save();
@@ -15650,6 +15799,9 @@ function useRaidTicket(tid){
   if(!confirm('⚔️ Активировать рейд на ' + boss.name + '?\n\n⏱ 20 минут окно\n🚪 Можно заходить и выходить свободно\n🛡 Награда: 1 раз\n\nГотов?')) return;
   /* Списываем билет */
   state.raidTickets[tid]--;
+  /* 🧹 Сбрасываем «пойман в рейде» для этого босса — билет = новый рейд */
+  if(!state.raidCaught) state.raidCaught = {};
+  delete state.raidCaught[boss.id];
   save();
   /* Создаём event на 20 минут */
   state.ticketRaid = {
@@ -15707,6 +15859,7 @@ function renderCrystals(){
   /* 🎁 Кейсы — отдельно, сверху */
   const cases = entries.filter(([k]) => k === CRYSTAL_CASE_KEY);
   const muts = entries.filter(([k]) => k !== CRYSTAL_CASE_KEY);
+  const empties = state.crystalsEmpty || 0;
 
   /* 🎁 Рендер кейсов */
   if(cases.length > 0){
@@ -15762,6 +15915,22 @@ function renderCrystals(){
     });
   }
 
+  /* 🕳 Пустые кристаллы */
+  if(empties > 0){
+    html += '<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 6px">🕳 Пустые кристаллы</div>';
+    html += '<div style="background:linear-gradient(135deg,#6b728022,var(--bg2));border:2px solid #6b7280;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;gap:12px;align-items:center">' +
+      '<div style="width:70px;height:80px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center">' +
+        '<img src="' + CRYSTAL_BASE_IMG + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:grayscale(1) drop-shadow(0 0 10px #6b7280);opacity:0.7">' +
+        '<div style="position:relative;z-index:2;font-size:24px;opacity:.6">🕳</div>' +
+      '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:14px;font-weight:700;color:#9ca3af">Пустой кристалл <span style="opacity:.7;font-size:11px">×' + empties + '</span></div>' +
+        '<div style="font-size:11px;opacity:.7;margin-top:3px">Остался после провала наложения. Можно продать</div>' +
+      '</div>' +
+      '<button class="emptyCrystalSellBtn" style="padding:8px 12px;border-radius:8px;border:none;background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">💰 Продать</button>' +
+    '</div>';
+  }
+
   grid.innerHTML = html;
 
   /* 🎯 Обработчики */
@@ -15774,6 +15943,8 @@ function renderCrystals(){
   grid.querySelectorAll('.crystalSellBtn').forEach(btn => {
     btn.onclick = () => openCrystalSellModal(btn.dataset.key);
   });
+  const _emptySell = grid.querySelector('.emptyCrystalSellBtn');
+  if(_emptySell) _emptySell.onclick = () => openEmptyCrystalSellModal();
 }
 
 /* 🎴 Режим выбора карты для наложения кристалла */
@@ -15859,6 +16030,9 @@ function openCrystalConfirmModal(cardId, mutId){
 }
 /* 💰 Модалка продажи кристалла */
 function openCrystalSellModal(mutId){
+  if(mutId === 'empty'){
+    return openEmptyCrystalSellModal();
+  }
   if(!state.crystals[mutId] || state.crystals[mutId] <= 0) return;
   const have = state.crystals[mutId];
   const isCase = mutId === CRYSTAL_CASE_KEY;
@@ -15909,6 +16083,66 @@ function openCrystalSellModal(mutId){
     const v = Math.max(1, Math.min(have, parseInt(inp.value) || 1));
     closeModal('helpModal');
     sellCrystal(mutId, v);
+  };
+}
+/* 💰 Продажа пустых кристаллов */
+function openEmptyCrystalSellModal(){
+  const have = state.crystalsEmpty || 0;
+  if(have <= 0) return notify('❌', 'Нет кристаллов', '', '#dc2626');
+  const essPer = 2;
+  const goldPer = 1;
+
+  let html = '<button class="modalX" onclick="closeModal(\'helpModal\')">✕</button>';
+  html += '<h2 style="text-align:center">💰 Пустые кристаллы</h2>';
+  html += '<div style="text-align:center;font-size:13px;font-weight:700;margin-bottom:10px">У тебя: ' + have + '</div>';
+  html += '<div style="background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:10px;font-size:12px">';
+  html += '<div style="display:flex;justify-content:space-between"><span>За 1 шт:</span><b>🧪 ' + essPer + ' · 🥇 ' + goldPer + '</b></div>';
+  html += '</div>';
+  html += '<input id="emptySellCount" type="number" min="1" max="' + have + '" value="1" style="width:100%;padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--bg);color:var(--txt);font-family:inherit;font-size:16px;font-weight:700;text-align:center;outline:none;margin-bottom:8px;min-height:48px">';
+  html += '<div style="display:flex;gap:4px;margin-bottom:12px">';
+  html += '<button class="emptySellQuick" data-v="1" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">1</button>';
+  html += '<button class="emptySellQuick" data-v="10" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--txt);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">10</button>';
+  html += '<button class="emptySellQuick" data-v="max" style="flex:1;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--panel2);color:var(--gold);font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:36px">ВСЁ</button>';
+  html += '</div>';
+  html += '<div id="emptySellTotal" style="text-align:center;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px"></div>';
+  html += '<button class="btnGreen" id="emptySellConfirm">💰 Продать</button>';
+  html += '<button class="btnClose" onclick="closeModal(\'helpModal\')">Отмена</button>';
+
+  $('helpContent').innerHTML = html;
+  openModal('helpModal');
+
+  const inp = $('emptySellCount');
+  const total = $('emptySellTotal');
+  const update = () => {
+    let v = parseInt(inp.value) || 1;
+    v = Math.max(1, Math.min(have, v));
+    total.innerHTML = 'Получишь: 🧪 ' + (essPer * v) + ' · 🥇 ' + (goldPer * v);
+  };
+  inp.oninput = update;
+  update();
+
+  $('helpContent').querySelectorAll('.emptySellQuick').forEach(b => {
+    b.onclick = () => {
+      const v = b.dataset.v;
+      inp.value = (v === 'max') ? have : Math.min(have, parseInt(v));
+      update();
+    };
+  });
+
+  $('emptySellConfirm').onclick = () => {
+    const v = Math.max(1, Math.min(have, parseInt(inp.value) || 1));
+    if(!confirm('Продать ' + v + ' пустых кристаллов за 🧪 ' + (essPer*v) + ' · 🥇 ' + (goldPer*v) + '?')) return;
+    state.crystalsEmpty -= v;
+    state.essence += essPer * v;
+    state.essEarned += essPer * v;
+    state.gold += goldPer * v;
+    state.goldEarned += goldPer * v;
+    save();
+    renderHeader();
+    closeModal('helpModal');
+    renderCrystals();
+    playResource();
+    notify('💰', 'Продано!', v + ' пустых · +' + (essPer*v) + '🧪 +' + (goldPer*v) + '🥇', '#10b981');
   };
 }
 function renderRaidTickets(){
@@ -16091,6 +16325,30 @@ function renderPotions(){
    🎰 РУЛЕТКА УДАЧИ
    ============================================================ */
 const ROULETTE_PRIZES = [
+  /* 🔮 КРИСТАЛЛЫ МУТАЦИЙ */
+  { id:'crystalFire',     icon:'🔥', name:'Кристалл: Огонь',     rarity:'common',    weight:6,  type:'crystal', mutId:'fire' },
+  { id:'crystalIce',      icon:'❄️', name:'Кристалл: Лёд',       rarity:'common',    weight:6,  type:'crystal', mutId:'ice' },
+  { id:'crystalThunder',  icon:'⚡', name:'Кристалл: Гром',      rarity:'common',    weight:5,  type:'crystal', mutId:'thunder' },
+  { id:'crystalWater',    icon:'💧', name:'Кристалл: Вода',      rarity:'common',    weight:5,  type:'crystal', mutId:'water' },
+  { id:'crystalEarth',    icon:'🪨', name:'Кристалл: Камень',    rarity:'common',    weight:5,  type:'crystal', mutId:'earth' },
+  { id:'crystalWind',     icon:'🌪️', name:'Кристалл: Ветер',     rarity:'common',    weight:5,  type:'crystal', mutId:'wind' },
+  { id:'crystalRadio',    icon:'☢️', name:'Кристалл: Радиация',  rarity:'uncommon',  weight:3,  type:'crystal', mutId:'radio' },
+  { id:'crystalCrystal',  icon:'💎', name:'Кристалл: Алмаз',     rarity:'uncommon',  weight:3,  type:'crystal', mutId:'crystal' },
+  { id:'crystalShadow',   icon:'🌑', name:'Кристалл: Тень',      rarity:'uncommon',  weight:2.5,type:'crystal', mutId:'shadow' },
+  { id:'crystalBlood',    icon:'🩸', name:'Кристалл: Кровь',     rarity:'uncommon',  weight:2,  type:'crystal', mutId:'blood' },
+  { id:'crystalEye',      icon:'👁️', name:'Кристалл: Око',       rarity:'rare',      weight:1.2,type:'crystal', mutId:'eye' },
+  { id:'crystalWing',     icon:'🪽', name:'Кристалл: Крыло',     rarity:'rare',      weight:1.2,type:'crystal', mutId:'wing' },
+  { id:'crystalStar',     icon:'⭐', name:'Кристалл: Звезда',    rarity:'rare',      weight:1,  type:'crystal', mutId:'star' },
+  { id:'crystalDemon',    icon:'😈', name:'Кристалл: Демон',     rarity:'rare',      weight:1,  type:'crystal', mutId:'demon' },
+  { id:'crystalAngel',    icon:'😇', name:'Кристалл: Ангел',     rarity:'epic',      weight:0.5,type:'crystal', mutId:'angel' },
+  { id:'crystalCrown',    icon:'👑', name:'Кристалл: Корона',    rarity:'epic',      weight:0.4,type:'crystal', mutId:'crown' },
+  { id:'crystalDragon',   icon:'🐉', name:'Кристалл: Дракон',    rarity:'epic',      weight:0.35,type:'crystal',mutId:'dragon' },
+  { id:'crystalTime',     icon:'⏳', name:'Кристалл: Время',     rarity:'legendary', weight:0.2,type:'crystal', mutId:'time' },
+  { id:'crystalCosmic',   icon:'🌌', name:'Кристалл: Космос',    rarity:'legendary', weight:0.15,type:'crystal',mutId:'cosmic' },
+  { id:'crystalChaos',    icon:'🌀', name:'Кристалл: Хаос',      rarity:'legendary', weight:0.12,type:'crystal',mutId:'chaos' },
+  { id:'crystalRainbow',  icon:'🌈', name:'Кристалл: Радуга',    rarity:'legendary', weight:0.08,type:'crystal',mutId:'rainbow' },
+  { id:'crystalCase',     icon:'🎁', name:'Кристалл-кейс',       rarity:'uncommon',  weight:4,  type:'crystalCase' },
+
   /* 🎟 БИЛЕТЫ РЕЙДА */
   { id:'ticketCase1',  icon:'🎟', name:'Билет-кейс',     rarity:'common',    weight:5,   type:'raidticket', ticketType:'case',  value:1 },
   { id:'ticketPond1',  icon:'🎟', name:'Билет: Пруд',    rarity:'uncommon',  weight:2,   type:'raidticket', ticketType:'pond',  value:1 },
@@ -16600,6 +16858,23 @@ function giveRoulettePrize(prize, silentMode){
     addRaidTicket(_tid, prize.value);
     const _tInfo = TICKET_TYPES[_tid];
     resultHtml = '+' + prize.value + ' 🎟 ' + (_tInfo ? _tInfo.name : 'билет');
+  } else if(t === 'crystal'){
+    /* 🔮 Кристалл-носитель мутации */
+    const _added = addCrystal(prize.mutId, 1);
+    const _m = MUT_BY_ID[prize.mutId];
+    if(_added){
+      resultHtml = '🔮 ' + (_m ? _m.icon + ' ' + _m.name : 'кристалл');
+    } else {
+      resultHtml = '📦 Инвентарь полон → продано';
+    }
+  } else if(t === 'crystalCase'){
+    /* 🎁 Кристалл-кейс */
+    const _added = addCrystal('case', 1);
+    if(_added){
+      resultHtml = '🎁 Кристалл-кейс';
+    } else {
+      resultHtml = '📦 Инвентарь полон → продано';
+    }
   } else if(t === 'roulTicket'){
     state.rouletteTickets = (state.rouletteTickets || 0) + prize.value;
     resultHtml = '+' + prize.value + ' 🎰 билетов колеса';
@@ -16792,12 +17067,60 @@ function tryPromo(input){
   if(!state.usedPromoCodes.includes(code)) state.usedPromoCodes.push(code);
   if(state.usedPromoCodes.length > 100) state.usedPromoCodes = state.usedPromoCodes.slice(-100);
   ensureDailyStats();
+  /* 💰 Базовая награда */
   state.coins += promo.reward.coins; state.coinsEarned += promo.reward.coins; state.dailyStats.coins += promo.reward.coins;
   state.gold += promo.reward.gold; state.goldEarned += promo.reward.gold;
   state.essence += promo.reward.essence; state.essEarned += promo.reward.essence;
   state.mana += promo.reward.mana; state.manaEarned += promo.reward.mana;
-  addXP(50); save();
-  return promo.reward;
+
+  /* 🎁 БОНУСНЫЕ НАГРАДЫ (шансы) */
+  const _bonuses = [];
+  const _roll = (chance) => Math.random() < chance;
+
+  /* 🎰 Билеты колеса — 40% шанс +5-15 */
+  if(_roll(0.40)){
+    const _n = 5 + Math.floor(Math.random() * 11);
+    state.rouletteTickets = (state.rouletteTickets || 0) + _n;
+    _bonuses.push({icon:'🎰', text:'+' + _n + ' билетов колеса', color:'#ffd93d'});
+  }
+  /* 🎟 Билет рейда (случайный) — 25% шанс +1-2 */
+  if(_roll(0.25)){
+    const _types = ['pond','river','lake','deep','abyss'];
+    const _tid = _types[Math.floor(Math.random() * _types.length)];
+    const _n = 1 + Math.floor(Math.random() * 2);
+    for(let i = 0; i < _n; i++) addRaidTicket(_tid, 1);
+    const _tInfo = TICKET_TYPES[_tid];
+    _bonuses.push({icon:'🎟', text:'+' + _n + '× ' + (_tInfo ? _tInfo.name : _tid), color:_tInfo ? _tInfo.color : '#a855f7'});
+  }
+  /* 🎁 Кристалл-кейс — 15% шанс +1 */
+  if(_roll(0.15)){
+    addCrystal('case', 1);
+    _bonuses.push({icon:'🎁', text:'+1 Кристалл-кейс', color:'#ec4899'});
+  }
+  /* 🔮 Кристалл мутации — 30% шанс +1-2 */
+  if(_roll(0.30)){
+    const _muts = MUTATIONS.filter(m => m.tier <= 2);
+    const _n = 1 + Math.floor(Math.random() * 2);
+    for(let i = 0; i < _n; i++){
+      const _m = _muts[Math.floor(Math.random() * _muts.length)];
+      addCrystal(_m.id, 1);
+    }
+    _bonuses.push({icon:'🔮', text:'+' + _n + '× Кристалл мутации', color:'#a855f7'});
+  }
+  /* 🧪 Зелье — 20% шанс +1-2 */
+  if(_roll(0.20)){
+    const _potIds = Object.keys(POTIONS);
+    const _pid = _potIds[Math.floor(Math.random() * _potIds.length)];
+    const _n = 1 + Math.floor(Math.random() * 2);
+    addPotion(_pid, _n);
+    const _p = POTIONS[_pid];
+    _bonuses.push({icon:_p.icon, text:'+' + _n + '× ' + _p.name, color:_p.color});
+  }
+
+  addXP(50);
+  save();
+  /* 💾 Возвращаем объект с базовыми + бонусами */
+  return Object.assign({}, promo.reward, {bonuses: _bonuses});
 }
 function initPromos(){
   if(!Array.isArray(state.activePromos)) state.activePromos = [];
@@ -17410,7 +17733,9 @@ function openHelp(){
   html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Код в 👤 Профиль. За ввод кода друга: <b>+5 000 🪙 · +5 🥇 · +3 🧪</b>.</div>';
 
   html += '<div class="sectionTitle">🎟 Промокоды</div>';
-  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Ищи «🎁 ПРОМОКОД: XXXXXX» в 🏆 Топе. Награды: <b>25-100К 🪙 · 20-80 🥇 · 15-40 🧪 · 3-10 ✨</b>.</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0">Ищи «🎁 ПРОМОКОД: XXXXXX» в 🏆 Топе.</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0"><b>Базовая награда:</b> 25-100К 🪙 · 20-80 🥇 · 15-40 🧪 · 3-10 ✨</div>';
+  html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0;background:var(--bg2);border-radius:8px;padding:10px;border-left:3px solid var(--gold)"><b>🎁 Бонусные шансы:</b><br>🎰 +5-15 билетов колеса — <b>40%</b><br>🎟 +1-2 билета рейда — <b>25%</b><br>🔮 +1-2 кристалла — <b>30%</b><br>🎁 +1 кристалл-кейс — <b>15%</b><br>🧪 +1-2 зелья — <b>20%</b></div>';
 
   html += '<div class="sectionTitle">🏷 Титулы</div>';
   html += '<div style="font-size:12px;opacity:.85;line-height:1.6;padding:6px 0"><b>' + TITLES.length + ' титулов</b> в 7 категориях. Активно до 3. Влияют на вид в Топе.</div>';
