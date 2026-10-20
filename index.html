@@ -5633,30 +5633,31 @@ function handleRaidClick(e){
   if(!raid || !raid.active) return;
   const _now = Date.now();
 
-  /* 🛡 АНТИ-АВТОКЛИКЕР уровень 1: кулдаун 100мс (10 CPS) */
+  /* 🛡 1. Базовый кулдаун (было 100, стало 110мс) */
   if(!raid._lastTapTime) raid._lastTapTime = 0;
-  if(_now - raid._lastTapTime < 100) return;
+  if(_now - raid._lastTapTime < 110) return;
 
-  /* 🛡 АНТИ-АВТОКЛИКЕР уровень 2: детект ритмичности */
-  const _interval = _now - raid._lastTapTime;
-  if(!raid._tapIntervals) raid._tapIntervals = [];
-  raid._tapIntervals.push(_interval);
-  if(raid._tapIntervals.length > 5) raid._tapIntervals.shift();
+  /* 🛡 2. Детект автокликера по истории тапов */
+  if(!raid._tapHistory) raid._tapHistory = [];
+  raid._tapHistory.push(_now);
+  if(raid._tapHistory.length > 10) raid._tapHistory.shift();
 
-  /* Когда накопилось 5 интервалов — считаем дисперсию */
-  if(raid._tapIntervals.length === 5){
-    const _avg = raid._tapIntervals.reduce((s,v) => s+v, 0) / 5;
-    const _variance = raid._tapIntervals.reduce((s,v) => s + (v-_avg)*(v-_avg), 0) / 5;
-    const _stdDev = Math.sqrt(_variance);
-    /* Если разброс < 15мс и интервал < 250мс — это бот */
-    if(_stdDev < 15 && _avg < 250){
-      /* 🚨 Не бан, но урон не идёт. Показываем только раз в 3 сек */
+  if(raid._tapHistory.length >= 6){
+    const _ints = [];
+    for(let i = 1; i < raid._tapHistory.length; i++){
+      _ints.push(raid._tapHistory[i] - raid._tapHistory[i-1]);
+    }
+    const _mean = _ints.reduce((a,b)=>a+b,0) / _ints.length;
+    const _stdDev = Math.sqrt(_ints.reduce((a,b)=>a+(b-_mean)**2,0) / _ints.length);
+
+    /* 🚨 Если средний интервал < 220мс и разброс < 12мс — это бот */
+    if(_mean < 220 && _stdDev < 12){
       if(!raid._botWarnedAt || _now - raid._botWarnedAt > 3000){
         raid._botWarnedAt = _now;
         floatTextAt('🤖 Бот?', e.clientX || 200, e.clientY || 200, '#dc2626');
         if(typeof notify === 'function') notify('🤖', 'Слишком ровно!', 'Играй руками', '#dc2626');
       }
-      return;
+      return; /* Урон не проходит */
     }
   }
 
@@ -5786,7 +5787,8 @@ function handleRaidClick(e){
       const mt = raid.mashTarget;
       const ddx = mt.x - x, ddy = mt.y - y;
       const dd = Math.sqrt(ddx*ddx + ddy*ddy);
-      if(dd < mt.radius + 20){
+      /* 🎯 Увеличенный хитбокс (было +20, стало +40) */
+      if(dd < mt.radius + 40){
         mt.taps++;
         playFishReel();
         floatTextAt(mt.taps + '/' + mt.tapsNeeded, clientX, clientY, '#10b981');
@@ -6021,7 +6023,8 @@ function handleRaidClick(e){
         const mt = raid.mashTarget;
         const ddx = mt.x - x, ddy = mt.y - y;
         const dd = Math.sqrt(ddx*ddx + ddy*ddy);
-        if(dd < mt.radius + 20){
+              /* 🎯 Увеличенный хитбокс (было +20, стало +40) */
+      if(dd < mt.radius + 40){
           mt.taps++;
           playFishReel();
           floatTextAt(mt.taps + '/' + mt.tapsNeeded, clientX, clientY, '#10b981');
@@ -6682,13 +6685,16 @@ function startMashTarget(crystalId){
     crystalId,
     x: w * 0.5,
     y: h * 0.5,
-    vx: (Math.random() < 0.5 ? -1 : 1) * (300 + Math.random() * 150),
-    vy: (Math.random() < 0.5 ? -1 : 1) * (300 + Math.random() * 150),
-    radius: 36,
+    /* 🐢 Скорость снижена в 2-3 раза (было 300-450, стало 100-180) */
+    vx: (Math.random() < 0.5 ? -1 : 1) * (100 + Math.random() * 80),
+    vy: (Math.random() < 0.5 ? -1 : 1) * (100 + Math.random() * 80),
+    /* 🎯 Радиус увеличен (было 36, стало 52) */
+    radius: 52,
     taps: 0,
+    /* 🎯 Возвращаем 15 тапов, но даём чуть больше времени (7 сек вместо 6) */
     tapsNeeded: 15,
     startTime: Date.now(),
-    duration: 6000
+    duration: 7000
   };
   playFishBite();
   notify('🎯', 'ТАПАЙ ПО КРУЖКУ!', '15 раз за 6 сек!', '#ffd93d');
