@@ -1091,14 +1091,39 @@ body.is-night #fishingArea{
 </head>
 <body>
 
-<!-- ============ НАСТРОЙКА НИКА ============ -->
-<div id="nickSetup">
-  <h1>🐱 Котокарты</h1>
-  <p style="margin-bottom:20px;opacity:.8">Как тебя зовут?</p>
-  <input id="nickInput" maxlength="20" placeholder="Твой ник" autocomplete="off">
-  <button id="nickBtn">Погнали!</button>
-  <p style="margin-top:20px;font-size:11px;opacity:.6;max-width:280px">Присоединяясь, ты принимаешь правила игры. Внутриигровая биржа — не азартная механика, а экономика.</p>
+<!-- ============ ЭКРАН ЗАГРУЗКИ ============ -->
+<div id="loadingScreen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold);font-family:system-ui;">
+  <div style="font-size:64px;animation:pop 1s ease-in-out infinite alternate;">🐱</div>
+  <div style="margin-top:16px;font-size:20px;font-weight:700;letter-spacing:1px">КОТОКАРТЫ</div>
+  <div style="margin-top:8px;font-size:12px;opacity:0.6">Загрузка аккаунта...</div>
 </div>
+
+<!-- ============ НАСТРОЙКА НИКА ============ -->
+<div id="nickSetup" style="padding:20px; overflow-y:auto; display:none; flex-direction:column; justify-content:center; align-items:center;">
+  <h1>🐱 Котокарты</h1>
+  
+  <div style="display:flex; gap:10px; margin-bottom:20px;">
+    <button id="tabLogin" style="padding:10px 20px; border-radius:8px; border:none; background:var(--acc); color:#fff; font-family:inherit; font-weight:bold; cursor:pointer;">Вход</button>
+    <button id="tabRegister" style="padding:10px 20px; border-radius:8px; border:2px solid var(--border); background:var(--panel); color:var(--txt); font-family:inherit; font-weight:bold; cursor:pointer;">Регистрация</button>
+  </div>
+
+  <input id="nickInput" maxlength="20" placeholder="Никнейм" autocomplete="off" style="padding:14px 16px; border-radius:10px; border:2px solid var(--border); background:var(--panel); color:var(--txt); font-size:16px; width:100%; max-width:280px; margin-bottom:10px; font-family:inherit; text-align:center; outline:none;">
+  
+  <input id="passInput" type="password" maxlength="30" placeholder="Пароль (мин. 6 символов)" autocomplete="off" style="padding:14px 16px; border-radius:10px; border:2px solid var(--border); background:var(--panel); color:var(--txt); font-size:16px; width:100%; max-width:280px; margin-bottom:10px; font-family:inherit; text-align:center; outline:none;">
+  
+  <input id="passConfirmInput" type="password" maxlength="30" placeholder="Повтори пароль" autocomplete="off" style="padding:14px 16px; border-radius:10px; border:2px solid var(--border); background:var(--panel); color:var(--txt); font-size:16px; width:100%; max-width:280px; margin-bottom:14px; font-family:inherit; text-align:center; outline:none; display:none;">
+  
+  <button id="nickBtn" style="padding:14px 32px; border-radius:10px; border:none; background:linear-gradient(135deg,var(--acc),var(--acc2)); color:#fff; font-weight:700; font-size:15px; cursor:pointer; font-family:inherit; min-height:48px; width:100%; max-width:280px; margin-bottom:10px;">Войти</button>
+
+  <div id="authError" style="color:#dc2626; font-size:12px; font-weight:bold; text-align:center; min-height:20px; margin-bottom:10px;"></div>
+  
+  <p style="margin-top:10px; font-size:11px; opacity:.6; max-width:280px; text-align:center; color:#f59e0b; background:rgba(245,158,11,0.1); padding:10px; border-radius:8px; border:1px solid rgba(245,158,11,0.3);">
+    ⚠️ <b>ОБЯЗАТЕЛЬНО ЗАПОМНИ ПАРОЛЬ!</b><br>
+    Восстановить его невозможно. Если забудешь — прогресс будет потерян.
+  </p>
+</div>
+
+<!-- ============ АДМИН-ПАНЕЛЬ УДАЛЕНА (ТЕПЕРЬ ОТДЕЛЬНАЯ ВКЛАДКА) ============ -->
 
 <!-- ============ ШАПКА ============ -->
 <header>
@@ -1329,10 +1354,18 @@ body.is-night #fishingArea{
 
   <!-- ====== ТОП ====== -->
   <div class="tab" id="tab-top">
-    <div class="topTabs">
-      <button data-top="points" class="active">⭐ Очки</button>
-      <button data-top="lvl">🏆 Уровень</button>
-      <button data-top="coins">🪙 Монеты</button>
+    <div class="topTabs" style="display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px;">
+      <button data-top="totalDecksPoints" class="active" style="flex-shrink:0; min-width:110px;">🎴 Очки Колод</button>
+      <button data-top="maxFishWeight" style="flex-shrink:0; min-width:110px;">🐟 Жирная рыба</button>
+      <button data-top="maxBossWeight" style="flex-shrink:0; min-width:110px;">🔱 Жирный босс</button>
+      <button data-top="maxFishPrice" style="flex-shrink:0; min-width:110px;">💰 Дорогая рыба</button>
+      <button data-top="maxBossPrice" style="flex-shrink:0; min-width:110px;">💎 Дорогой босс</button>
+      <button data-top="playTime" style="flex-shrink:0; min-width:110px;">⏱ Время в игре</button>
+      <button data-top="coins" style="flex-shrink:0; min-width:110px;">🪙 Монеты</button>
+      <button data-top="gold" style="flex-shrink:0; min-width:110px;">🥇 Золото</button>
+      <button data-top="totalClicks" style="flex-shrink:0; min-width:110px;">👆 Клики</button>
+      <button data-top="raidWins" style="flex-shrink:0; min-width:110px;">⚔️ Рейды</button>
+      <button data-top="achievementsCount" style="flex-shrink:0; min-width:110px;">🏅 Ачивки</button>
     </div>
     <div id="topList"></div>
   </div>
@@ -1342,6 +1375,228 @@ body.is-night #fishingArea{
 
   <!-- ====== ПРОФИЛЬ ====== -->
   <div class="tab" id="tab-profile"><div id="profileContent"></div></div>
+
+  <!-- ====== 👑 АДМИН-ВКЛАДКА ====== -->
+  <div class="tab" id="tab-admin">
+    <div style="background:linear-gradient(135deg,#1a0f2e,#2d1b4e);border-radius:14px;padding:14px;margin-bottom:14px;border:2px solid #ffd93d;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">👑</div>
+      <div style="font-size:16px;font-weight:900;color:#ffd93d">БОЖЕСТВЕННАЯ ПАНЕЛЬ</div>
+      <div style="font-size:11px;opacity:.7;margin-top:4px">Управление миром Котокарт</div>
+    </div>
+
+    <div style="display:flex;gap:4px;margin-bottom:14px">
+      <button class="adminTabBtn active" data-tab="self" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:#ffd93d;color:#000;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">👤 Себе</button>
+      <button class="adminTabBtn" data-tab="players" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🎁 Игрокам</button>
+      <button class="adminTabBtn" data-tab="events" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🌍 Ивенты</button>
+      <button class="adminTabBtn" data-tab="shop" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🛒 Магазин</button>
+    </div>
+
+    <!-- ВКЛАДКА 1: СЕБЕ -->
+    <div id="adminTab-self" style="display:block">
+      <div class="profileCard">
+        <h3>⚡ Быстрые читы (Локально)</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">
+          <button class="profileBtn btnGreen" style="margin:0;padding:10px;font-size:11px" onclick="adminLocal('coins', 1000000)">🪙 +1М Монет</button>
+          <button class="profileBtn btnGreen" style="margin:0;padding:10px;font-size:11px" onclick="adminLocal('gold', 1000)">🥇 +1000 Золота</button>
+          <button class="profileBtn btnGreen" style="margin:0;padding:10px;font-size:11px" onclick="adminLocal('essence', 1000)">🧪 +1000 Эссенции</button>
+          <button class="profileBtn btnGreen" style="margin:0;padding:10px;font-size:11px" onclick="adminLocal('mana', 1000)">✨ +1000 Маны</button>
+        </div>
+        <button class="profileBtn btnPurple" style="margin-top:8px;font-size:12px" onclick="adminLocal('lvl', 500)">🚀 Установить 500 уровень</button>
+        <button class="profileBtn btnGold" style="margin-top:8px;font-size:12px" onclick="adminLocal('allcards', 1)">🎴 Выдать ВСЕ карты игры (по 1 шт)</button>
+        <button class="profileBtn btnPurple" style="margin-top:8px;font-size:12px" onclick="adminLocal('reset_craft', 0)">⏱ Сбросить время крафта</button>
+        <button class="profileBtn btnPurple" style="margin-top:8px;font-size:12px" onclick="adminLocal('reset_machine', 0)">⏱ Сбросить время машины</button>
+      </div>
+
+      <div class="profileCard">
+        <h3>✏️ Ввести точное количество</h3>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <select id="adminSelfType" style="flex:1;padding:10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);color:#fff;font-family:inherit">
+            <option value="coins">🪙 Монеты</option>
+            <option value="gold">🥇 Золото</option>
+            <option value="essence">🧪 Эссенция</option>
+            <option value="mana">✨ Мана</option>
+          </select>
+          <input type="number" id="adminSelfAmount" value="1000000" style="flex:1;padding:10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);color:#fff;font-family:inherit">
+          <button class="profileBtn btnGreen" style="width:auto;margin:0;padding:0 16px;font-size:16px" onclick="adminLocal(document.getElementById('adminSelfType').value, parseInt(document.getElementById('adminSelfAmount').value))">💸</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 2: ИГРОКАМ -->
+    <div id="adminTab-players" style="display:none">
+      <div class="profileCard">
+        <h3>🔍 Поиск игрока</h3>
+        <div style="font-size:11px;opacity:.7;margin-bottom:8px">Введи точный ник в облаке (включая анонимов).</div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="adminSearchNick" placeholder="Ник..." style="flex:1;padding:10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);color:#fff;font-family:inherit">
+          <button class="profileBtn btnGold" id="adminFindBtn" style="width:auto;margin:0;padding:0 16px" onclick="adminFindPlayer()">Найти</button>
+        </div>
+      </div>
+
+      <div id="adminPlayerResult" style="display:none">
+        <div class="profileCard" style="border:2px solid #ffd93d">
+          <h3 id="adminTargetName" style="color:#ffd93d">Ник</h3>
+          <div style="font-size:11px;opacity:.8;margin-bottom:12px" id="adminTargetStats">Статы...</div>
+          
+          <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;margin-bottom:6px">💰 Выдать ресурсы</div>
+            <div style="display:grid;gap:4px">
+              <div style="display:flex;gap:4px">
+                <select id="adminGiveType" onchange="window.adminUpdateGiveItemList()" style="flex:1;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff">
+                  <option value="coins">🪙 Монеты</option>
+                  <option value="gold">🥇 Золото</option>
+                  <option value="essence">🧪 Эссенция</option>
+                  <option value="mana">✨ Мана</option>
+                  <option value="ticket">🎟 Билет рейда</option>
+                  <option value="crystal">🔮 Кристалл мутации</option>
+                  <option value="potion">🧪 Зелье</option>
+                </select>
+                <input type="number" id="adminGiveAmount" value="1000000" style="flex:1;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff">
+                <button class="profileBtn btnGreen" style="width:auto;margin:0;padding:0 12px" onclick="adminGivePlayer()">💸</button>
+              </div>
+              <select id="adminGiveItemId" style="display:none;width:100%;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff"></select>
+            </div>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px">
+            <div style="font-size:11px;font-weight:700;margin-bottom:6px">🎴 Выдать карту</div>
+            <div style="display:flex;gap:4px">
+              <select id="adminGiveCardSelect" style="flex:1;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff;max-width:75%">
+                <!-- Заполняется через JS -->
+              </select>
+              <button class="profileBtn btnPurple" style="width:auto;margin:0;padding:0 12px" onclick="adminGivePlayerCard()">🎴</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА: ИВЕНТЫ -->
+    <div id="adminTab-events" style="display:none">
+      <div class="profileCard">
+        <h3>🌍 Наложение событий (Overlay)</h3>
+        <div style="font-size:11px;opacity:.7;margin-bottom:10px">Эти события работают ПОВЕРХ обычного расписания. Обычные события не отключаются.</div>
+        
+        <select id="adminEventSelect" style="width:100%;padding:10px;border-radius:8px;margin-bottom:10px;background:var(--bg2);border:1px solid var(--border);color:#fff;font-family:inherit;font-size:12px">
+          <option value="">— Выключить наложения —</option>
+          <!-- Заполняется через JS -->
+        </select>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <div>
+            <div style="font-size:10px;opacity:.7;margin-bottom:2px">Через сколько мин?</div>
+            <input type="number" id="adminEventStartMin" value="0" min="0" max="1440" style="width:100%;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff;text-align:center">
+          </div>
+          <div>
+            <div style="font-size:10px;opacity:.7;margin-bottom:2px">Длительность (мин)</div>
+            <input type="number" id="adminEventDuration" value="10" min="1" max="60" style="width:100%;padding:8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:#fff;text-align:center">
+          </div>
+        </div>
+        
+        <button class="profileBtn btnGold" onclick="adminScheduleEvent()">🚀 Запланировать наложение</button>
+      </div>
+
+      <div class="profileCard">
+        <h3>⏳ Активные наложения</h3>
+        <div id="adminActiveOverlays" style="font-size:12px; background:var(--bg2); padding:8px; border-radius:8px; border:1px solid var(--border)">Нет активных наложений</div>
+        <button class="profileBtn btnRed" style="margin-top:10px;" onclick="adminClearOverlays()">🗑 Очистить все наложения</button>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 4: МАГАЗИН -->
+    <div id="adminTab-shop" style="display:none">
+      
+      <!-- Окно редактирования предмета (скрыто по умолчанию) -->
+      <div id="adminEditItemModal" style="display:none; background:linear-gradient(135deg,#2d1b4e,#1e1730); padding:14px; border-radius:12px; border:2px solid var(--acc); margin-bottom:14px;">
+        <h3 style="color:var(--gold); margin-bottom:10px;">✏️ Редактирование: <span id="editItemName"></span></h3>
+        <div style="display:grid; gap:8px;">
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">💰 Текущая цена (сколько игрок заплатит)</div>
+            <input id="editItemPrice" type="number" style="width:100%; padding:10px; border-radius:6px; background:var(--bg2); color:#fff; border:1px solid var(--border);">
+          </div>
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">🏷️ Старая цена (для зачеркивания, 0 = нет скидки)</div>
+            <input id="editItemOrigPrice" type="number" style="width:100%; padding:10px; border-radius:6px; background:var(--bg2); color:#fff; border:1px solid var(--border);">
+          </div>
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">📦 Количество в наличии (-1 = бесконечно)</div>
+            <input id="editItemQty" type="number" style="width:100%; padding:10px; border-radius:6px; background:var(--bg2); color:#fff; border:1px solid var(--border);">
+          </div>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <button class="profileBtn btnGreen" style="margin:0;" onclick="adminSaveEditedItem()">💾 Сохранить</button>
+            <button class="profileBtn btnGray" style="margin:0;" onclick="document.getElementById('adminEditItemModal').style.display='none'">Отмена</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="profileCard">
+        <h3>🛒 Управление магазином</h3>
+        <button class="profileBtn btnGold" onclick="adminRefreshShop()" style="margin-bottom:8px">🔄 Сгенерировать стандартный сток</button>
+        <button class="profileBtn btnRed" onclick="adminClearShop()">🗑 Очистить магазин</button>
+      </div>
+
+      <div class="profileCard">
+        <h3>📦 Текущий сток (Редактирование)</h3>
+        <div id="adminCurrentStockList" style="max-height:300px;overflow-y:auto;background:var(--bg2);border-radius:8px;padding:8px;border:1px solid var(--border)"></div>
+      </div>
+
+      <div class="profileCard">
+        <h3>➕ Добавить предмет в сток</h3>
+        <div style="display:grid;gap:10px">
+          
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">1. Что добавляем?</div>
+            <select id="adminShopType" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)" onchange="adminUpdateShopForm()">
+              <option value="card">🎴 Карта</option>
+              <option value="ticket">🎟 Билет рейда</option>
+              <option value="crystal">🔮 Кристалл</option>
+              <option value="potion">🧪 Зелье</option>
+            </select>
+          </div>
+
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">2. Выбери конкретный предмет</div>
+            <select id="adminShopItemId" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)"></select>
+          </div>
+          
+          <div id="adminShopCardFields" style="display:grid;grid-template-columns:1fr;gap:8px">
+            <div>
+              <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">3. Количество звезд (0-25)</div>
+              <input id="adminShopStars" type="number" placeholder="0" value="0" min="0" max="25" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)">
+            </div>
+            <div>
+              <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">4. Мутации (нажимай на кнопки, чтобы выбрать)</div>
+              <div id="adminMutsContainer" style="display:flex; flex-wrap:wrap; gap:4px; max-height:120px; overflow-y:auto; background:var(--bg2); padding:6px; border-radius:6px; border:1px solid var(--border);"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">5. Цена (сколько заплатит игрок)</div>
+            <input id="adminShopPrice" type="number" placeholder="1000" value="1000" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)">
+          </div>
+
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">6. Старая цена (0, если без скидки)</div>
+            <input id="adminShopOrigPrice" type="number" placeholder="0" value="" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)">
+          </div>
+
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">7. Количество в магазине (-1 = бесконечно)</div>
+            <input id="adminShopQty" type="number" placeholder="1" value="1" min="-1" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)">
+          </div>
+          
+          <div>
+            <div style="font-size:11px; opacity:0.8; margin-bottom:2px;">8. Валюта (за что покупать)</div>
+            <select id="adminShopCurrency" style="width:100%; padding:10px;border-radius:6px;background:var(--bg2);color:#fff;border:1px solid var(--border)">
+              <option value="gold">🥇 Золото</option>
+              <option value="coins">🪙 Монеты</option>
+            </select>
+          </div>
+
+          <button class="profileBtn btnPurple" style="margin-top:6px" onclick="adminAddShopItem()">➕ Добавить в магазин</button>
+        </div>
+      </div>
+    </div>
 
 </main>
 
@@ -1357,6 +1612,7 @@ body.is-night #fishingArea{
   <button data-tab="roulette"><span class="navIcon">🎁</span>Колесо</button>
   <button data-tab="top"><span class="navIcon">🏆</span>Топ</button>
   <button data-tab="profile"><span class="navIcon">👤</span>Профиль</button>
+  <button data-tab="admin" id="navAdminBtn" style="display:none; color:#ffd93d; background:linear-gradient(180deg,transparent,rgba(255,217,61,0.1))"><span class="navIcon">👑</span>Админ</button>
 </nav>
 
 <!-- ============ МОДАЛКИ ============ -->
@@ -1429,7 +1685,7 @@ const BOURSE_UPDATE_MS = 15*60*1000;
 const BOURSE_SPREAD = 0.12;
 const BOURSE_CEIL = 1500;
 const BOURSE_FLOOR = 150;
-const BOURSE_HISTORY_MAX = 160;
+const BOURSE_HISTORY_MAX = 60;
 const DAILY_SHOP_HOURS = [7, 12, 16, 20, 23];
 /* ============================================================
    🎉 СОБЫТИЯ ДНЯ
@@ -2926,7 +3182,7 @@ const TRACKS = [
    ============================================================ */
 function defaultState(){
   return {
-    nick:'', coins:0, gold:0, essence:0, mana:0, exp:0, essenceMutsTotal:0,
+    nick:'', loginNick:'', lastNickChange:0, coins:0, gold:0, essence:0, mana:0, exp:0, essenceMutsTotal:0,
     lvl:1, xp:0, xpTotal:0, showLvl:true,
     collection:[], equippedIds:[], invMax:50, slotsMax:1,
     decks: [0,1,2,3,4].map(i => ({
@@ -2962,7 +3218,7 @@ function defaultState(){
   raidWins:0, bourseDeals:0, starsUpgraded:0, slotsOpened:0,
   craftReadyAdded:0, sacrificedCards:0, casesOpened:0, potionsUsed:0,
   rouletteSpins:0, dailyClaimed:0},
-    dailyShop:null, dailyShopCycle:'',
+    dailyShop:null, dailyShopCycle:'', dailyShopBought: [],
     bourse:{rate:BOURSE_BASE, lastChange:0, history:[]},
     titles:{unlocked:[], active:[]},
     energy:MAX_ENERGY_BASE, lastEnergyTick: Date.now(),
@@ -3005,7 +3261,7 @@ function defaultState(){
     worldStartTime: Date.now(),
     pendingRefFromUrl: null,
     bots: {level: 0, lastClick: 0},
-    events: {dayKey:'', schedule:[], active:null, raidSchedule:[], activeRaid:null},
+    events: {dayKey:'', schedule:[], active:null, raidSchedule:[], activeRaid:null, adminOverride:false},
     eventSounds: true,
     crystals: {},
     crystalsEmpty: 0,
@@ -3015,6 +3271,43 @@ function defaultState(){
   };
 }
 let state = defaultState();
+window.state = state;
+window.defaultState = defaultState;
+window.save = save;
+window.makeCardOfRarity = makeCardOfRarity; // 👑 Экспорт для админки
+window.applyCloudState = function(newState){
+  // 🛡️ Сохраняем локальные данные
+  const _localHistory = state.balanceHistory || [];
+  const _localBourseHistory = (state.bourse && state.bourse.history) ? state.bourse.history : [];
+  
+  Object.keys(state).forEach(k => { if(!(k in newState)) delete state[k]; });
+  Object.assign(state, newState);
+  
+  // 🛡️ ЧИНИМ КРАШ ТИКА: если расписание не пришло из облака — создаем пустые массивы
+  if (!state.events) state.events = {};
+  if (!Array.isArray(state.events.schedule)) state.events.schedule = [];
+  if (!Array.isArray(state.events.raidSchedule)) state.events.raidSchedule = [];
+  
+  if(!state.balanceHistory || state.balanceHistory.length === 0) state.balanceHistory = _localHistory;
+  
+  // 🛡️ Восстанавливаем историю биржи
+  if(!state.bourse) state.bourse = {rate: BOURSE_BASE, lastChange: 0, history: []};
+  if(!state.bourse.history || state.bourse.history.length === 0) {
+    state.bourse.history = _localBourseHistory;
+  }
+  
+  window.state = state; 
+  
+  // 🔄 Обновляем интерфейс, если мы в игре
+  if(typeof renderHeader === 'function') renderHeader();
+  if(typeof renderCollection === 'function') renderCollection();
+  if(typeof renderBourse === 'function') renderBourse();
+  if(typeof renderQuests === 'function') renderQuests();
+  if(typeof renderCrystals === 'function') renderCrystals();
+  if(typeof renderRaidTickets === 'function') renderRaidTickets();
+  if(typeof renderPotions === 'function') renderPotions();
+  if(typeof currentTab !== 'undefined' && currentTab === 'profile' && typeof renderProfile === 'function') renderProfile();
+}; // <--- ВОТ ЭТА СКРОБКА БЫЛА ПОТЕРЯНА
 let resetting = false;
 let interacted = false;
 
@@ -3057,7 +3350,7 @@ function fmtWeight(kg){
   return kg.toFixed(3) + ' кг';
 }
 function cardPoints(card){
-  const stars = card.stars || 0;
+  const stars = Math.min(card.stars || 0, 25); // 🛡️ Максимум 25 звезд
   const basePoints = RARITY[card.rarity].points;
   /* 🧬 Мутации дают проценты */
   const mutPercent = (card.mutations||[]).reduce((s,id) => s + (MUT_BY_ID[id]?.percent||0), 0);
@@ -3082,8 +3375,18 @@ function cardPoints(card){
   return Math.round(basePoints * multiplier * (1 + starPct));
 }
 
-function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-function daysSince(ds){ if(!ds) return 999; const l=new Date(ds+' 00:00:00'); const n=new Date(); return Math.floor((n-l)/86400000); }
+function todayKey(){ 
+  const d = new Date(); 
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); 
+}
+function daysSince(ds){ 
+  if(!ds) return 999; 
+  const [y, m, d] = ds.split('-').map(Number); 
+  const l = new Date(Date.UTC(y, m-1, d)); 
+  const n = new Date(); 
+  const nU = new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); 
+  return Math.floor((nU - l) / 86400000); 
+}
 function getRod(){ return RODS_BY_ID[state.currentRod] || RODS[0]; }
 
 /* ============================================================
@@ -3555,7 +3858,7 @@ function startFinalRaid(boss){
   const h = (canvas && canvas.height) || 300;
   state.raid = {
     active: true, bossId: boss.id,
-    startedAt: Date.now(), endTime: Date.now() + 15*60*1000,
+    startedAt: Date.now(), endTime: Date.now() + 20*60*1000,
     phase: 'swim', stage: 1, progress: 0,
     bossX: w/2, bossY: h/2, vx: 1.2, vy: 1.2,
     lastTapTime: Date.now(), taps: 0, radius: 65, tugTimer: 1500,
@@ -5633,33 +5936,9 @@ function handleRaidClick(e){
   if(!raid || !raid.active) return;
   const _now = Date.now();
 
-  /* 🛡 1. Базовый кулдаун (было 100, стало 110мс) */
+  /* 🛡 Базовый кулдаун (80мс = макс ~12 тапов в секунду) */
   if(!raid._lastTapTime) raid._lastTapTime = 0;
-  if(_now - raid._lastTapTime < 110) return;
-
-  /* 🛡 2. Детект автокликера по истории тапов */
-  if(!raid._tapHistory) raid._tapHistory = [];
-  raid._tapHistory.push(_now);
-  if(raid._tapHistory.length > 10) raid._tapHistory.shift();
-
-  if(raid._tapHistory.length >= 6){
-    const _ints = [];
-    for(let i = 1; i < raid._tapHistory.length; i++){
-      _ints.push(raid._tapHistory[i] - raid._tapHistory[i-1]);
-    }
-    const _mean = _ints.reduce((a,b)=>a+b,0) / _ints.length;
-    const _stdDev = Math.sqrt(_ints.reduce((a,b)=>a+(b-_mean)**2,0) / _ints.length);
-
-    /* 🚨 Если средний интервал < 220мс и разброс < 12мс — это бот */
-    if(_mean < 220 && _stdDev < 12){
-      if(!raid._botWarnedAt || _now - raid._botWarnedAt > 3000){
-        raid._botWarnedAt = _now;
-        floatTextAt('🤖 Бот?', e.clientX || 200, e.clientY || 200, '#dc2626');
-        if(typeof notify === 'function') notify('🤖', 'Слишком ровно!', 'Играй руками', '#dc2626');
-      }
-      return; /* Урон не проходит */
-    }
-  }
+  if(_now - raid._lastTapTime < 80) return;
 
   raid._lastTapTime = _now;
   const canvas = $('fishingCanvas');
@@ -6550,7 +6829,7 @@ if(raid.finalGuards.every(x => x.caught)){
     const rodIdx = ['stick','bamboo','spinning','carbon','legendary'].indexOf(state.currentRod);
     const _bossDmg = BOSS_BY_ID[raid.bossId];
     const _dmgTable = (_bossDmg && _bossDmg.dmgPerTap) || [1.0, 1.3, 1.8, 2.4, 3.2];
-    const dmgPerTap = _dmgTable[rodIdx] || _dmgTable[0];
+    const dmgPerTap = (_dmgTable[rodIdx] || _dmgTable[0]) * 1.3; // 🛡️ +30% урона для комфорта
     raid.progress = Math.min(100, raid.progress + dmgPerTap);
     /* 🌀 Босс микро-дёргается при каждом тапе — автокликеру сложнее попасть */
     if(raid.progress < 100){
@@ -7419,7 +7698,9 @@ function fmtQuestTimeLeftMsk(target){
 function getUpgradeLvl(id){ return state.upgrades[id] || 0; }
 function getUpgradeVal(id){
   const u = UPGRADES_BY_ID[id];
-  return u ? u.getVal(getUpgradeLvl(id)) : 0;
+  if(!u) return 0;
+  const lvl = Math.min(getUpgradeLvl(id), u.maxLvl); // 🛡️ Читер не сможет вкачать 9999 уровень
+  return u.getVal(lvl);
 }
 function getMaxEnergy(){ return getUpgradeVal('energy_cap'); }
 function getFishCD(){ return getUpgradeVal('fish_cd'); }
@@ -7445,37 +7726,21 @@ function getPotionsCount(){
 }
 function getRaidTicketsCount(){
   if(!state.raidTickets || typeof state.raidTickets !== 'object') return 0;
-  /* 🎟 Каждый билет = 1 слот (не щадим) */
   return Object.values(state.raidTickets).reduce((s, n) => s + (n || 0), 0);
 }
 function getCrystalsCount(){
   if(!state.crystals) return 0;
   let total = 0;
   for(const key in state.crystals){
-    const count = state.crystals[key] || 0;
-    if(count <= 0) continue;
-    if(key === 'case'){
-      /* 🎁 Кейсы НЕ стакаются — каждый = 1 слот */
-      total += count;
-    } else {
-      /* 🔮 Мутационные — стакаются, весь стак = 1 слот */
-      total += 1;
-    }
+    total += (state.crystals[key] || 0);
   }
-  /* 🕳 Пустые кристаллы — 1 стак = 1 слот */
-  if(state.crystalsEmpty > 0) total += 1;
+  total += (state.crystalsEmpty || 0);
   return total;
 }
 /* 🎒 Реальный размер инвентаря (без карт в панели жертв и крафта) */
 function getRealInvCount(){
-  const sac = new Set(state.sacrificePanel || []);
-  const crf = new Set(state.craftReadyPanel || []);
-  let n = 0;
-  for(let i = 0; i < state.collection.length; i++){
-    const id = state.collection[i].id;
-    if(!sac.has(id) && !crf.has(id)) n++;
-  }
-  return n;
+  // Карты в панели крафта физически лежат в collection, поэтому мы просто возвращаем длину
+  return state.collection.length;
 }
 function getEnergyRegenSec(){
   const base = getUpgradeVal('energy_speed') || ENERGY_REGEN_SEC;
@@ -7570,6 +7835,67 @@ function showToast(msg){
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 1200);
 }
+// 🏆 СБОРЩИК СТАТИСТИКИ ДЛЯ ТОПА
+function getMyStatsForLeaderboard() {
+  // 1. Сумма очков всех колод
+  let totalDecksPoints = 0;
+  state.decks.forEach(d => {
+    if(d.unlocked) {
+      d.cards.forEach(id => {
+        if(id) {
+          const c = state.collection.find(x => x.id === id);
+          if(c) totalDecksPoints += cardPoints(c);
+        }
+      });
+    }
+  });
+
+  // 2. Самая жирная рыба
+  let maxFishWeight = 0, maxFishName = '—';
+  Object.entries(state.fishStats.fishRecords || {}).forEach(([id, rec]) => {
+    if(rec.weight > maxFishWeight) {
+      maxFishWeight = rec.weight;
+      const f = FISH_BY_ID[id];
+      maxFishName = f ? f.emoji + ' ' + f.name : 'Рыба';
+    }
+  });
+
+  // 3. Самая дорогая рыба (из инвентаря)
+  let maxFishPrice = 0;
+  (state.fishInventory || []).forEach(f => {
+    if(!f.isBoss) {
+      const p = calcFishPrice(f);
+      if(p > maxFishPrice) maxFishPrice = p;
+    }
+  });
+
+  // 4. Самый жирный и дорогой босс
+  let maxBossWeight = 0, maxBossName = '—', maxBossPrice = 0;
+  (state.fishInventory || []).forEach(f => {
+    if(f.isBoss) {
+      if(f.weight > maxBossWeight) {
+        maxBossWeight = f.weight;
+        maxBossName = f.name;
+      }
+      const p = getFishCurrentPrice(f);
+      if(p > maxBossPrice) maxBossPrice = p;
+    }
+  });
+
+  return {
+    totalDecksPoints,
+    maxFishWeight,
+    maxFishName,
+    maxFishPrice,
+    maxBossWeight,
+    maxBossName,
+    maxBossPrice,
+    playTime: state.playTime || 0,
+    totalClicks: state.totalClicks || 0,
+    raidWins: state.questStats.raidWins || 0,
+    achievementsCount: Object.keys(state.achievements).length // 🏅 Считаем ачивки
+  };
+}
 function save(silent){
   if(resetting) return;
   /* 🚀 Троттлинг: только для НЕ-silent вызовов. silent всегда срабатывает */
@@ -7579,6 +7905,8 @@ function save(silent){
     silent = true;
   }
   _lastSaveTs = _now;
+  state.lastSaveTs = _now;
+  window._lastLocalSaveTime = _now; // 🛡️ Дублируем в защищенную переменную
   try{
     if(!state || typeof state !== 'object') return;
     if(!Array.isArray(state.collection)) return;
@@ -7587,6 +7915,17 @@ function save(silent){
     if(state.cardCooldowns){
       const _now = Date.now();
       for(const k in state.cardCooldowns){ if(state.cardCooldowns[k] < _now) delete state.cardCooldowns[k]; }
+    }
+    /* 🧹 Чистим мусор мутаций и жертв */
+    if(state.cardMutAttempts){
+      for(const k in state.cardMutAttempts){
+        if(!state.collection.some(c => c.id === k)) delete state.cardMutAttempts[k];
+      }
+    }
+    if(state.sacrificePanelCache && state.sacrificePanel){
+      for(const k in state.sacrificePanelCache){
+        if(!state.sacrificePanel.includes(k)) delete state.sacrificePanelCache[k];
+      }
     }
     
     const now = Date.now();
@@ -7601,7 +7940,16 @@ function save(silent){
       }catch(e){ console.warn('backup rotate failed:', e); }
     }
     
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    // 🚀 Оптимизация ТОЛЬКО для облака (локалка должна помнить расписание)
+    const _saveState = Object.assign({}, state);
+    _saveState.events = Object.assign({}, state.events);
+    _saveState.bourse = Object.assign({}, state.bourse);
+    
+    // 🛡️ Очищаем только активные сессии, чтобы не тащить их в новый вход
+    delete _saveState.fishing; 
+    delete _saveState.raid;
+    
+    localStorage.setItem(SAVE_KEY, JSON.stringify(_saveState));
     /* 🧹 Удаляем старые бэкапы bak2 и bak3 (если остались) */
     try{ localStorage.removeItem(SAVE_KEY + '_bak2'); localStorage.removeItem(SAVE_KEY + '_bak3'); }catch(e){}
     if(!silent) showToast();
@@ -7653,8 +8001,9 @@ function load(){
         console.warn('%c⚠️ Основной сейв повреждён — восстановлен из бэкапа', 'color:#f59e0b;font-weight:700');
       }
     }
-    if(!p){ state = defaultState(); return; }
+    if(!p){ state = defaultState(); window.state = state; return; }
     state = Object.assign(defaultState(), p);
+    window.state = state;
 
     ['collection','equippedIds','newCards','raritySeen','mutationsSeen','combosSeen','namesSeen',     'activePromos','usedPromoCodes','autoSellRarities','craftSlots','balanceHistory','sacrificePanel','craftReadyPanel'].forEach(k=>{
 
@@ -7735,6 +8084,8 @@ if(!state.achievements || typeof state.achievements !== 'object') state.achievem
     if(typeof state.lastBottleTick !== 'number') state.lastBottleTick = Date.now();
     if(typeof state.lastEnergyTick !== 'number' || state.lastEnergyTick <= 0) state.lastEnergyTick = Date.now();
     if(typeof state.essenceMutsTotal !== 'number') state.essenceMutsTotal = 0;
+    if(typeof state.loginNick !== 'string') state.loginNick = state.nick || '';
+    if(typeof state.lastNickChange !== 'number') state.lastNickChange = 0;
     if(!state.fishStats || typeof state.fishStats !== 'object') state.fishStats = {totalCaught:0,raritySeen:[],biggestSize:0,biggestWeight:0,earned:0,fishNamesSeen:[],fishRecords:{}};
     if(!Array.isArray(state.fishStats.raritySeen)) state.fishStats.raritySeen = [];
     if(!Array.isArray(state.fishStats.fishNamesSeen)) state.fishStats.fishNamesSeen = [];
@@ -7964,6 +8315,7 @@ if(!state.achievements || typeof state.achievements !== 'object') state.achievem
       state.upgrades.inv_cap = Math.min(18, Math.floor((state.invMax - 50) / 25));
     }
     state.invMax = Math.min(500, 50 + state.upgrades.inv_cap * 25);
+    window._lastLocalSaveTime = state.lastSaveTs || Date.now();
 }
 
 /* ============================================================
@@ -8912,16 +9264,19 @@ const CYCLE_MS = DAY_MS + NIGHT_MS;
 let _lastPhase = null;
 
 function getWorldPhase(){
-  const start = state.worldStartTime || Date.now();
-  const elapsed = (Date.now() - start) % CYCLE_MS;
-  return elapsed < DAY_MS ? 'day' : 'night';
+  // День с 0 до 10 минуты, Ночь с 10 до 20 минуты каждого 20-минутного цикла
+  return (Math.floor(Date.now() / 600000) % 2 === 0) ? 'day' : 'night';
 }
 function isDay(){ return getWorldPhase() === 'day'; }
 function isNight(){ return getWorldPhase() === 'night'; }
 function getPhaseTimeLeft(){
-  const start = state.worldStartTime || Date.now();
-  const elapsed = (Date.now() - start) % CYCLE_MS;
-  return elapsed < DAY_MS ? (DAY_MS - elapsed) : (CYCLE_MS - elapsed);
+  return 600000 - (Date.now() % 600000);
+}
+function isDay(){ return getWorldPhase() === 'day'; }
+function isNight(){ return getWorldPhase() === 'night'; }
+function getPhaseTimeLeft(){
+  // 🛡️ Привязка к реальному времени, а не ко времени входа
+  return 600000 - (Date.now() % 600000);
 }
 function getPhaseCoinMult(){ return isDay() ? 1.15 : 1; }
 function getPhaseCDMult(){ return isDay() ? 0.85 : 1; }
@@ -9053,6 +9408,7 @@ function notify(icon, title, text, color){
    БАЛАНС — ИСТОРИЯ ДЛЯ ГРАФИКА
    ============================================================ */
 function trackBalance(){
+  if(!Array.isArray(state.balanceHistory)) state.balanceHistory = []; // 🛡️ Защита от undefined
   const now = Date.now();
   const h = state.balanceHistory;
   const last = h[h.length-1];
@@ -9214,14 +9570,19 @@ function generateRaidSchedule(){
   schedule.sort((a, b) => a.startsAt - b.startsAt);
   return schedule;
 }function ensureEvents(){
+  if (window._cloudUserId && state.events && state.events.schedule && state.events.schedule.length > 0) return;
   if(!state.events || typeof state.events !== 'object') state.events = {dayKey:'', schedule:[], active:null, raidSchedule:[], activeRaid:null};
   const today = getEventDayKey();
+  
   if(state.events.dayKey !== today || !Array.isArray(state.events.schedule) || !state.events.schedule.length){
     state.events.dayKey = today;
     state.events.schedule = generateDaySchedule();
     state.events.raidSchedule = generateRaidSchedule();
-    state.events.active = null;
-    state.events.activeRaid = null;
+    
+    if (!state.events.adminOverride) {
+      if (state.events.active && state.events.active.endsAt <= Date.now()) state.events.active = null;
+      if (state.events.activeRaid && state.events.activeRaid.endsAt <= Date.now()) state.events.activeRaid = null;
+    }
     save();
   }
   if(!Array.isArray(state.events.raidSchedule) || !state.events.raidSchedule.length){
@@ -9238,6 +9599,11 @@ function isEventActive(type){
 }
 
 function checkEventSchedule(){
+  // 👑 Если админ запустил событие, локальные рандомные события не работают!
+  if (state.events && state.events.adminOverride) {
+    return; // Firebase сам отключит ивент, когда выйдет время
+  }
+  
   ensureEvents();
   const now = Date.now();
   const mskH = getMskNow().getHours();
@@ -9308,9 +9674,11 @@ function onEventStart(type){
   playEventSound(type);
   if(type === 'bourseup'){
     state.bourse.rate = Math.min(BOURSE_CEIL, Math.round(state.bourse.rate * 2));
+    if(window.updateGlobalBourse) window.updateGlobalBourse(state.bourse.rate);
     save();
   } else if(type === 'boursedown'){
     state.bourse.rate = Math.max(BOURSE_FLOOR, Math.round(state.bourse.rate * 0.5));
+    if(window.updateGlobalBourse) window.updateGlobalBourse(state.bourse.rate);
     save();
   }
   /* 🎨 Применяем визуальный фильтр */
@@ -9379,7 +9747,17 @@ function renderEventBar(){
   /* 🎉 Обычное событие — eventBar */
   const el = $('eventBar');
   if(el){
-    const a = state.events && state.events.active;
+    // 👑 Приоритет у админского наложения!
+    const a = state.events && (state.events.overlay || state.events.active);
+    
+    // 🛡️ Чистим зависшие события (если время вышло, но оно висит)
+    if (a && a.endsAt <= Date.now()) {
+        state.events.active = null;
+        state.events.overlay = null;
+        el.style.display = 'none';
+        return;
+    }
+
     if(!a){
       const schedule = (state.events && state.events.schedule) || [];
       const next = schedule.find(e => !e.done && e.startsAt > Date.now());
@@ -9449,10 +9827,25 @@ function renderEventBar(){
 
 function openEventScheduleModal(){
   ensureEvents();
-  const schedule = state.events.schedule || [];
-  const raidSchedule = state.events.raidSchedule || [];
+  let schedule = [...(state.events.schedule || [])];
+  let raidSchedule = [...(state.events.raidSchedule || [])];
+  
+  // 👑 ДОБАВЛЯЕМ АДМИНСКИЕ НАЛОЖЕНИЯ В РАСПИСАНИЕ
+  if (window._adminOverlays && window._adminOverlays.length > 0) {
+    window._adminOverlays.forEach(ov => {
+      const isRaid = ov.type && ov.type.startsWith('raid');
+      const newEvent = { ...ov, isAdmin: true, done: ov.endsAt < Date.now() };
+      if (isRaid) raidSchedule.push(newEvent);
+      else schedule.push(newEvent);
+    });
+    // Сортируем по времени
+    schedule.sort((a,b) => (a.startsAt || 0) - (b.startsAt || 0));
+    raidSchedule.sort((a,b) => (a.startsAt || 0) - (b.startsAt || 0));
+  }
+
   const now = Date.now();
   const active = state.events.active;
+  const activeOverlay = state.events.overlay;
   const activeRaid = state.events.activeRaid;
   const msk = getMskNow();
   const dateStr = msk.getDate()+'.'+String(msk.getMonth()+1).padStart(2,'0')+'.'+msk.getFullYear();
@@ -9462,13 +9855,27 @@ function openEventScheduleModal(){
     if(!cfg) return '';
     const d = new Date(ev.startsAt);
     const timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    
     let status = '⏳';
     let color = 'var(--txt-dim)';
-    const act = isRaid ? activeRaid : active;
+    let isActive = false;
+
+    // Проверяем, активно ли это событие
+    if (ev.isAdmin) {
+      isActive = activeOverlay && activeOverlay.id === ev.id;
+    } else {
+      const act = isRaid ? activeRaid : active;
+      isActive = act && act.type === ev.type && act.startedAt === ev.startsAt;
+    }
+
     if(ev.endsAt < now){ status = '✅'; }
-    else if(act && act.type === ev.type && act.startedAt === ev.startsAt){ status = '🟢 АКТИВ'; color = cfg.color; }
+    else if(isActive){ status = '🟢 АКТИВ'; color = cfg.color; }
+
+    const adminTag = ev.isAdmin ? '<span style="background:#ffd93d33;color:#ffd93d;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">👑 АДМИН</span>' : '';
     const classTag = cfg.class === 2 ? '<span style="background:#a855f733;color:#a855f7;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">МУТ</span>' : '';
-    return '<div style="padding:6px 8px;background:var(--panel);border-radius:6px;margin-bottom:3px;border-left:3px solid ' + cfg.color + '"><div style="display:flex;justify-content:space-between;align-items:center;gap:4px"><div style="min-width:0;flex:1"><span style="font-size:10px;opacity:.6;margin-right:4px">' + timeStr + '</span><span style="font-size:11px;font-weight:700;color:' + color + '">' + cfg.icon + ' ' + cfg.name.replace('РЕЙД: ','') + '</span>' + classTag + '</div><span style="font-size:9px;color:' + color + ';flex-shrink:0">' + status + '</span></div></div>';
+    const borderColor = ev.isAdmin ? '#ffd93d' : cfg.color;
+
+    return '<div style="padding:6px 8px;background:var(--panel);border-radius:6px;margin-bottom:3px;border-left:3px solid ' + borderColor + '"><div style="display:flex;justify-content:space-between;align-items:center;gap:4px"><div style="min-width:0;flex:1"><span style="font-size:10px;opacity:.6;margin-right:4px">' + timeStr + '</span><span style="font-size:11px;font-weight:700;color:' + color + '">' + cfg.icon + ' ' + cfg.name.replace('РЕЙД: ','') + '</span>' + adminTag + classTag + '</div><span style="font-size:9px;color:' + color + ';flex-shrink:0">' + status + '</span></div></div>';
   };
 
   const evtHtml = schedule.map(e => buildRow(e, false)).join('');
@@ -9503,6 +9910,59 @@ function checkDailyFreeTicket(){
     playResource();
   }, 1500);
 }
+
+// 🌍 ПРОВЕРКА АДМИНСКИХ НАЛОЖЕНИЙ
+window.checkAdminOverlays = function() {
+  if (!state.events) state.events = {};
+  if (!window._adminOverlays || !window._adminOverlays.length) {
+    if (state.events.overlay) {
+      state.events.overlay = null;
+      state.events.adminOverride = false;
+      state.events.active = null;
+      state.events.activeRaid = null;
+      if (typeof clearEventVisual === 'function') clearEventVisual();
+      if (typeof renderEventBar === 'function') renderEventBar();
+      save(true);
+    }
+    return;
+  }
+
+  const now = Date.now();
+  const activeOverlay = window._adminOverlays.find(o => now >= o.startsAt && now < o.endsAt);
+
+  if (activeOverlay) {
+    state.events.adminOverride = true;
+
+    if (!state.events.overlay || state.events.overlay.id !== activeOverlay.id) {
+      state.events.overlay = activeOverlay;
+      const isRaid = activeOverlay.type.startsWith('raid');
+
+      if (isRaid) {
+        state.events.activeRaid = activeOverlay;
+        state.events.active = null;
+        state.raidCaught = {}; 
+        if (typeof window.onRaidStart === 'function') window.onRaidStart(activeOverlay.type);
+      } else {
+        state.events.active = activeOverlay;
+        state.events.activeRaid = null;
+        if (typeof window.onEventStart === 'function') window.onEventStart(activeOverlay.type);
+      }
+
+      save(true);
+      if (typeof renderEventBar === 'function') renderEventBar();
+    }
+  } else {
+    if (state.events.overlay) {
+      state.events.overlay = null;
+      state.events.adminOverride = false;
+      state.events.active = null;
+      state.events.activeRaid = null;
+      if (typeof clearEventVisual === 'function') clearEventVisual();
+      if (typeof renderEventBar === 'function') renderEventBar();
+      save(true);
+    }
+  }
+};
 
 function startGameTick(){
   setInterval(()=>{
@@ -9584,6 +10044,9 @@ function startGameTick(){
     tickMachine();
     trackBalance();
     checkEventSchedule();
+    if (typeof window.checkAdminOverlays === 'function') window.checkAdminOverlays();
+    
+    // 🏆 Топ больше НЕ обновляется автоматически — только вручную или при открытии вкладки
     /* 🎟 Очистка билетного рейда по времени */
     if(state.ticketRaid && state.ticketRaid.endsAt <= Date.now()){
       state.ticketRaid = null;
@@ -10034,8 +10497,7 @@ function claimBatch(cards){
   /* 🛡 Сбрасываем pending ДО closeBatchResult — иначе дюп ×2 */
   window._pendingBatchCards = null;
   let added = 0, sold = 0, soldCoins = 0;
-  const _realInv = getRealInvCount();
-  let _invLeft = state.invMax - _realInv;
+  let _invLeft = state.invMax - state.collection.length;
   cards.forEach(c => {
     if(shouldAutoSell(c)){
       const refund = Math.round(20 + RARITY[c.rarity].points*0.5);
@@ -10453,7 +10915,11 @@ function confirmSacrificeBatch(){
     if(state.sacrificePanel.includes(id)) return;
     const _c = state.collection.find(x => x.id === id);
     if(!_c) return;
-    state.sacrificePanelCache[id] = _c;
+    // 🛡️ Тоже сохраняем только скелет
+    state.sacrificePanelCache[id] = {
+      id: _c.id, name: _c.name, rarity: _c.rarity,
+      stars: _c.stars || 0, mutations: _c.mutations || []
+    };
     state.collection = state.collection.filter(x => x.id !== id);
     state.newCards = (state.newCards||[]).filter(x => x !== id);
     state.equippedIds = (state.equippedIds||[]).filter(x => x !== id);
@@ -12492,30 +12958,28 @@ function getAuctionMult(count){
 
 function closeCatchModal(){
   const pc = state.pendingCatch;
-  const wasRaid = pc && pc.fromRaid;
-  /* 🔱 Автосейв — только для босс-панели если игрок как-то закрыл вручную */
-  if(wasRaid && pc.caught && pc.caught.length){
-    let added = 0;
-    pc.caught.forEach(f => {
-      if(addFishToInventory(f)) added++;
-      else {
-        const refund = Math.round(getFishCurrentPrice(f) * 0.5);
-        state.coins += refund; state.coinsEarned += refund;
-      }
-    });
-    if(added > 0){
-      notify('📦', 'Сохранено', added + ' в инвентарь (защита)', '#a855f7');
-      updateFishInvCount();
-    }
+  if(!pc){
+    closeModal('catchModal');
+    renderFishing();
+    return;
   }
+
+  // 🛡️ Если это обычный улов, при закрытии крестиком просто продаем его как есть
+  if(!pc.fromRaid && pc.caught && pc.caught.length){
+    confirmCatch(); 
+    return;
+  }
+
+  // 🛡️ Если это босс
+  if(pc.fromRaid){
+    raidConfirmCatch();
+    return;
+  }
+
   state.pendingCatch = null;
   save();
   closeModal('catchModal');
-  if(wasRaid){
-    restoreFishingAfterRaid();
-  } else {
-    renderFishing();
-  }
+  renderFishing();
 }
 
 /* ============================================================
@@ -12624,6 +13088,8 @@ function applyMutationToFish(mid){
   if(_success){
     fish.mutations = fish.mutations || [];
     fish.mutations.push(mid);
+state.questStats.mutations = (state.questStats.mutations||0) + 1;
+          if(!state.mutationsSeen.includes(mid)) state.mutationsSeen.push(mid);
     playRare(); flashRare();
     /* 🔱 Пересчёт цены босса И стража с мутацией */
     if(fish.isBoss && !fish.basePrice){
@@ -12733,6 +13199,7 @@ let boursePeriod = '1d';
 })();
 
 function ensureBourse(){
+  if (window._cloudUserId && state.bourse && state.bourse.rate) return;
   if(!state.bourse || typeof state.bourse !== 'object') state.bourse = {rate:BOURSE_BASE, lastChange:0, history:[]};
   if(!Array.isArray(state.bourse.history)) state.bourse.history = [];
   const now = Date.now();
@@ -13205,22 +13672,15 @@ function moveToCraftReady(cardId){
 }
 function returnFromCraftReady(cardId){
   if(!state.craftReadyPanel) return;
-  const _real = getRealInvCount();
-  if(_real >= state.invMax) return alert('⚠️ Инвентарь полон (' + _real + '/' + state.invMax + ')\n\nОсвободи место чтобы вернуть карту.');
   state.craftReadyPanel = state.craftReadyPanel.filter(id => id !== cardId);
   playResource(); save(); renderHeader(); renderCraft();
   notify('↩️', 'Возвращено', 'Карта вернулась в коллекцию', '#10b981');
 }
 function returnAllFromCraftReady(){
   if(!state.craftReadyPanel || !state.craftReadyPanel.length) return;
-  const _real = getRealInvCount();
-  const freeSpace = state.invMax - _real;
-  if(freeSpace <= 0) return alert('⚠️ Инвентарь полон');
-  const toReturn = state.craftReadyPanel.slice(0, freeSpace);
-  const notReturned = state.craftReadyPanel.length - toReturn.length;
-  state.craftReadyPanel = state.craftReadyPanel.filter(id => !toReturn.includes(id));
+  state.craftReadyPanel = [];
   save(); renderHeader(); renderCraft();
-  notify('↩️', 'Возвращено', toReturn.length + ' карт' + (notReturned > 0 ? ' (' + notReturned + ' не влезло)' : ''), '#10b981');
+  notify('↩️', 'Возвращено', 'Все карты сняты с крафта', '#10b981');
 }
 
 function getSacrificeCards(){
@@ -13255,7 +13715,11 @@ function moveToSacrifice(cardId){
   if(!ok) return;
   /* 🛡 Сохраняем объект карты в кэш (иначе она потеряется навсегда!) */
   if(!state.sacrificePanelCache) state.sacrificePanelCache = {};
-  state.sacrificePanelCache[cardId] = card;
+  // 🛡️ Сохраняем только "скелет" карты, чтобы не раздувать облако
+  state.sacrificePanelCache[cardId] = {
+    id: card.id, name: card.name, rarity: card.rarity,
+    stars: card.stars || 0, mutations: card.mutations || []
+  };
   /* 🛡 Убираем карту из коллекции (освобождаем слот инвентаря) */
   state.collection = state.collection.filter(c => c.id !== cardId);
   state.sacrificePanel = state.sacrificePanel.filter(id => id !== cardId);
@@ -13364,6 +13828,7 @@ function startCraft(recipeId){
     state.newCards = state.newCards.filter(x => x !== c.id);
     state.sacrificePanel = (state.sacrificePanel||[]).filter(x => x !== c.id);
     state.craftReadyPanel = (state.craftReadyPanel||[]).filter(x => x !== c.id);
+    if(state.sacrificePanelCache) delete state.sacrificePanelCache[c.id];
   }
   state.craftCounts[recipe.id] = (state.craftCounts[recipe.id] || 0) + 1;
   const hours = rnd(recipe.timeMinH, recipe.timeMaxH);
@@ -13625,8 +14090,9 @@ function makeDailyShopCard(slotIdx){
   const rarity = pick(slot.rarities);
   const pool = CARD_POOL.filter(c => c.rarity === rarity);
   const base = pool.length ? pick(pool) : pick(CARD_POOL);
-  const slots = 6 + Math.floor(rnd(0, 5));
+  const slotsBase = 6 + Math.floor(rnd(0, 5));
   const stars = slot.starsMin + Math.floor(Math.random() * (slot.starsMax - slot.starsMin + 1));
+  const slots = Math.min(20, slotsBase + stars); // 🛡️ Каждая звезда дает +1 слот
   const mutCount = slot.mutMin + Math.floor(Math.random() * (slot.mutMax - slot.mutMin + 1));
   const tier = RARITY[base.rarity].tier;
   const allowed = MUTATIONS.filter(m => m.tier <= Math.min(tier, 3));
@@ -13640,18 +14106,29 @@ function makeDailyShopCard(slotIdx){
   const mutMult = DAILY_SHOP_MUT_MULT[Math.min(mutCount, 3)] || 1;
   let price = Math.round((DAILY_SHOP_BASE[rarity] || 100) * starMult * mutMult);
   if(price > DAILY_SHOP_PRICE_CAP) price = DAILY_SHOP_PRICE_CAP;
+  
+  // 🛡️ Генерируем карту через нормальный генератор (с хорошими статами)
+  const goodCard = makeCardOfRarity(rarity);
+  goodCard.name = base.name; // Название оставляем из магазина
+  goodCard.stars = stars;    // Звезды ставим магазинные
+  goodCard.mutations = mutations; // Мутации магазинные
+  
   return {
-    id: uid(), name: base.name, rarity, slots, stars, mutations,
-    income: pct(-20,40), goldCh: pct(-15,30), essCh: pct(-15,30), manaCh: pct(-15,30),
-    cdMod: +(rnd(-30,50)).toFixed(1), activeVisual: null,
-    price, currency: 'gold', sold: false, createdAt: Date.now()
+    type: 'card',
+    id: uid(), name: goodCard.name, rarity, slots: goodCard.slots, stars: goodCard.stars, mutations: goodCard.mutations,
+    income: goodCard.income, goldCh: goodCard.goldCh, essCh: goodCard.essCh, manaCh: goodCard.manaCh,
+    cdMod: goodCard.cdMod, activeVisual: null,
+    price, originalPrice: price, currency: 'gold', qty: -1, maxQty: -1, soldOut: false, createdAt: Date.now()
   };
 }
 function ensureDailyShop(){
+  if (window._cloudUserId && state.dailyShop && state.dailyShop.items && state.dailyShop.items.length > 0) return;
+  if(!Array.isArray(state.dailyShopBought)) state.dailyShopBought = [];
   const cycle = getMskCycleKey();
-  if(state.dailyShopCycle !== cycle || !state.dailyShop || !Array.isArray(state.dailyShop.items) || !state.dailyShop.items.length){
+  if(state.dailyShopCycle !== cycle || !state.dailyShop || !Array.isArray(state.dailyShop.items)){
     state.dailyShopCycle = cycle;
     state.dailyShop = {items: [0,1,2,3,4,5].map(i => makeDailyShopCard(i))};
+    state.dailyShopBought = []; // Сбрасываем историю покупок при рестоке
     state.lastSeenDailyShop = 0;
     save();
   }
@@ -13660,43 +14137,117 @@ function renderDailyShop(){
   ensureDailyShop();
   const cont = $('dailyShopContainer'); if(!cont) return;
   const resetTime = getNextResetMsk();
-  const items = state.dailyShop.items;
+  
+  // 🛡️ Защита от пустого магазина
+  const items = state.dailyShop && state.dailyShop.items ? state.dailyShop.items : []; 
+  
   let html = '<div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:12px;padding:10px 14px;margin-bottom:10px;border:1px solid var(--border);font-size:11px;display:flex;justify-content:space-between"><span>🔄 Следующий ресток через</span><b style="color:var(--acc)">' + fmtTimeLeftMsk(resetTime) + '</b></div>';
-  html += '<div style="font-size:10px;opacity:.6;margin-bottom:8px;text-align:center">Рестоки в 07:00, 12:00, 16:00, 20:00, 23:00 МСК</div>';
+  
   items.forEach((c, i)=>{
-    const priceStr = '🥇 ' + c.price;
-    const canAfford = state.gold >= c.price;
-    if(c.sold){
-      html += '<div style="background:var(--panel);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--border);opacity:.5"><div style="font-size:13px;font-weight:700">' + c.name + '</div><div style="font-size:11px;opacity:.7;margin-top:4px">' + c.rarity + ' · Куплено ✓</div></div>';
+    if(!c) return;
+    const canAfford = c.currency === 'gold' ? state.gold >= c.price : state.coins >= c.price;
+    const currencyIcon = c.currency === 'gold' ? '🥇' : '🪙';
+    
+    if(c.soldOut || c.qty === 0){
+      html += '<div style="background:var(--panel);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--border);opacity:.5;display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;font-size:36px;filter:grayscale(1);">' + (c.type==='card' ? '🎴' : c.type==='ticket' ? '🎟' : c.type==='crystal' ? '🔮' : '🧪') + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">Распродано ❌</div></div></div>';
       return;
     }
-    const cov = cover(c.name);
-    const img = getCardImage(c.name);
-    const photo = img
-      ? '<img src="' + img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.outerHTML=\'<div style=&quot;font-size:36px&quot;>' + cov.emoji + '</div>\'">'
-      : '<div style="font-size:36px">' + cov.emoji + '</div>';
-    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:12px;align-items:center"><div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + c.name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + c.rarity + ' · ' + c.slots + ' слотов ' + (c.stars>0?'· '+'★'.repeat(c.stars):'') + '</div></div><button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'#6b7280') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.7) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceStr + '</button></div>';
+
+    let photo = '❓';
+    let subtitle = '';
+    let name = c.name;
+
+    if(c.type === 'card'){
+      const cov = cover(c.name);
+      const img = getCardImage(c.name);
+      photo = img ? '<img src="' + img + '" style="width:50px;height:50px;object-fit:cover;border-radius:8px" onerror="this.outerHTML=\'<div style=&quot;font-size:36px&quot;>' + cov.emoji + '</div>\'">' : '<div style="font-size:36px">' + cov.emoji + '</div>';
+      const safeStars = Math.min(Math.max(parseInt(c.stars) || 0, 0), 25);
+      subtitle = c.rarity + ' · ' + (c.slots||6) + ' слотов ' + (safeStars > 0 ? '· ' + '★'.repeat(safeStars) : '');
+    } else if(c.type === 'ticket'){
+      photo = '<div style="font-size:36px">🎟</div>';
+      subtitle = 'Билет рейда';
+    } else if(c.type === 'crystal'){
+      photo = '<div style="font-size:36px">🔮</div>';
+      subtitle = 'Кристалл мутации';
+    } else if(c.type === 'potion'){
+      photo = '<div style="font-size:36px">🧪</div>';
+      subtitle = 'Зелье';
+    }
+
+    const isBought = state.dailyShopBought && state.dailyShopBought.includes(c.id);
+    const isInfinity = c.qty === -1;
+    const qtyText = isInfinity ? '∞' : c.qty;
+    
+    let priceHtml = currencyIcon + ' ' + c.price;
+    if(c.originalPrice && c.originalPrice > c.price){
+      priceHtml = '<span style="text-decoration:line-through;opacity:.5;font-size:10px;margin-right:4px">' + c.originalPrice + '</span>' + priceHtml;
+    }
+    
+    let btnHtml = isBought 
+      ? '<div style="padding:8px 12px;font-size:11px;color:var(--green);font-weight:700;white-space:nowrap">Куплено ✅</div>'
+      : '<button class="dailyShopBuy" data-i="' + i + '" style="padding:8px 12px;border-radius:8px;border:none;background:' + (canAfford?'linear-gradient(135deg,var(--green),#065f46)':'#6b7280') + ';color:#fff;font-weight:700;font-family:inherit;font-size:12px;cursor:' + (canAfford?'pointer':'not-allowed') + ';opacity:' + (canAfford?1:.7) + ';white-space:nowrap;min-height:40px" ' + (canAfford?'':'disabled') + '>' + priceHtml + '</button>';
+
+    html += '<div style="background:var(--panel);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid ' + (isBought ? 'var(--green)' : (c.originalPrice && c.originalPrice > c.price ? '#dc2626' : 'var(--border)')) + ';display:flex;gap:12px;align-items:center;' + (isBought ? 'opacity:0.7;' : '') + '">' +
+      '<div style="flex-shrink:0;padding:4px;border-radius:8px;background:linear-gradient(135deg,var(--panel2),var(--panel))">' + photo + '</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</div><div style="font-size:10px;opacity:.7;margin-top:2px">' + subtitle + '</div>' +
+      '<div style="font-size:10px;color:var(--gold);margin-top:4px">В наличии: ' + qtyText + ' шт.</div></div>' +
+      btnHtml + '</div>';
   });
+  
+  if(items.length === 0) html += '<div class="empty"><div class="em">🛒</div><div class="tx">Магазин пуст</div></div>';
+  
   cont.innerHTML = html;
-  cont.querySelectorAll('.dailyShopBuy').forEach(btn => { btn.onclick = ()=>buyDailyShopCard(+btn.dataset.i); });
-}
-function buyDailyShopCard(idx){
-  const c = state.dailyShop.items[idx]; if(!c || c.sold) return;
-  if(state.collection.length >= state.invMax) return alert('Инвентарь полон!');
-  if(state.gold < c.price) return alert('Не хватает золота');
-  if(!confirm('Купить ' + c.name + '?')) return;
-  state.gold -= c.price;
-  const card = Object.assign({}, c);
-  delete card.price; delete card.currency; delete card.sold;
-  state.collection.push(card);
-  registerCardStats(card);
-  if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
-  c.sold = true;
-  addXP(50); playResource(); playAchievement();
-  save(); renderHeader(); renderDailyShop(); checkAchievements();
-  alert('Куплена: ' + card.name);
+  cont.querySelectorAll('.dailyShopBuy').forEach(btn => { btn.onclick = ()=>buyDailyShopItem(+btn.dataset.i); });
 }
 
+function buyDailyShopItem(idx){
+  const c = state.dailyShop.items[idx]; if(!c || c.soldOut || c.qty === 0) return;
+  
+  if(state.dailyShopBought && state.dailyShopBought.includes(c.id)){
+    return alert('Вы уже купили этот предмет в текущем цикле!');
+  }
+  
+  const isGold = c.currency === 'gold';
+  if(isGold && state.gold < c.price) return alert('Не хватает золота');
+  if(!isGold && state.coins < c.price) return alert('Не хватает монет');
+  
+  // 🛡️ Проверки на переполнение инвентаря
+  if(c.type === 'card' && state.collection.length >= state.invMax) return alert('Инвентарь карт полон!');
+  if(c.type === 'ticket' && getRaidTicketsCount() >= state.raidTicketsInvMax) return alert('Инвентарь билетов полон!');
+  if(c.type === 'crystal' && getCrystalsCount() >= state.crystalsInvMax) return alert('Инвентарь кристаллов полон!');
+  if(c.type === 'potion' && getPotionsCount() >= state.potionsInvMax) return alert('Инвентарь зелий полон!');  
+  if(!confirm('Купить ' + c.name + ' за ' + c.price + '?')) return;
+  
+  if(isGold) state.gold -= c.price; else state.coins -= c.price;
+  
+  if(c.qty > 0){
+    c.qty--;
+    if(c.qty <= 0) c.soldOut = true;
+    if(typeof window.updateGlobalShopQty === 'function') window.updateGlobalShopQty(c.id);
+  }
+  
+  if(!state.dailyShopBought) state.dailyShopBought = [];
+  state.dailyShopBought.push(c.id);
+
+  if(c.type === 'card'){
+    const card = Object.assign({}, c);
+    delete card.price; delete card.currency; delete card.soldOut; delete card.qty; delete card.maxQty; delete card.originalPrice; delete card.type;
+    state.collection.push(card);
+    registerCardStats(card);
+    if(!state.newCards.includes(card.id)) state.newCards.push(card.id);
+  } else if(c.type === 'ticket'){
+    if(typeof addRaidTicket === 'function') addRaidTicket(c.itemId, 1);
+  } else if(c.type === 'crystal'){
+    if(typeof addCrystal === 'function') addCrystal(c.itemId, 1);
+  } else if(c.type === 'potion'){
+    if(typeof addPotion === 'function') addPotion(c.itemId, 1);
+  }
+
+  addXP(50); playResource(); playAchievement();
+  save(); renderHeader(); renderDailyShop(); checkAchievements();
+  if(typeof window._forceCloudSync === 'function') window._forceCloudSync();
+  alert('Куплено: ' + c.name);
+}
 /* ============================================================
    ПРОКАЧКА РЫБАЛКИ
    ============================================================ */
@@ -13736,6 +14287,7 @@ function renderUpgrades(){
     btn.onclick = ()=>{ tryUpgrade(btn.dataset.id); renderUpgrades(); };
   });
 }
+
 
 /* ============================================================
    🤖 БОТЫ-АВТОКЛИКЕРЫ
@@ -14045,7 +14597,13 @@ function rerollQuest(idx){
   let pool = QUEST_TEMPLATES[cat].filter(t => t.type !== q.type || t.target !== q.target);
   if(!pool.length) pool = QUEST_TEMPLATES[cat];
   const t = pick(pool);
-  state.quests[idx] = {type:t.type, target:t.target, title:t.title, icon:t.icon, rarity:t.rarity||null, reward:Object.assign({}, t.reward), claimed:false, cat: cat};
+  
+  // 🎰 Добавляем билеты по категории
+  const _ticketsByCat = {easy:0, normal:0, medium:2, hard:4, insane:8};
+  const _reward = Object.assign({}, t.reward);
+  if(_ticketsByCat[cat] > 0) _reward.tickets = _ticketsByCat[cat];
+  
+  state.quests[idx] = {type:t.type, target:t.target, title:t.title, icon:t.icon, rarity:t.rarity||null, reward:_reward, claimed:false, cat: cat};
   state.coins -= price;
   playResource(); save(); renderHeader(); renderQuests();
 }
@@ -14275,7 +14833,7 @@ function isValidNick(nick){
 /* ============================================================
    ТОП
    ============================================================ */
-let currentTopKind = 'points';
+let currentTopKind = 'totalDecksPoints';
 let topCache = {points:null, lvl:null, coins:null};
 
 function playerTopValue(kind){
@@ -14354,23 +14912,145 @@ function genNPCs(kind){
   topCache[kind] = list;
   return list;
 }
-function renderTop(){
+function escHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let _topCacheByKind = {};
+
+function getTopCache(kind) {
+  if (!_topCacheByKind[kind]) {
+    _topCacheByKind[kind] = { data: null, timestamp: 0, loading: false, lastError: null };
+  }
+  return _topCacheByKind[kind];
+}
+
+async function renderTop(force = false){
   const cont = $('topList'); if(!cont) return;
-  const list = genNPCs(currentTopKind);
-  const icons = {points:'⭐', lvl:'⭐', coins:'🪙'};
-  cont.innerHTML = list.map((r,i)=>{
-    let cls = '';
-    if(r.me) cls = 'me'; else if(r.king) cls = 'king'; else if(r.promo) cls = 'promo';
-    const titlesHtml = (r.titles||[]).map(t => {
-      const c = t.color || '#ffd93d';
-      return '<span style="background:' + c + '33;color:' + c + ';padding:1px 5px;font-size:9px;border-radius:4px;font-weight:700;margin-left:3px">' + t.icon + ' ' + t.name + '</span>';
-    }).join('');
-    let lvlHtml = '';
-    if(state.showLvl && r.lvl) lvlHtml = '<span class="topLvl">⭐ ' + r.lvl + '</span>';
-    /* 🚫 Применяем цензуру ника */
-    const safeNick = censorNick(r.nick);
-    return '<div class="topRow ' + cls + '"><span class="rank">' + (i+1) + '.</span><span class="nick">' + safeNick + lvlHtml + titlesHtml + '</span><span class="score">' + icons[currentTopKind] + ' ' + r.val + '</span></div>';
-  }).join('');
+  const icons = {
+    points:'⭐', lvl:'🏆', coins:'🪙',
+    totalDecksPoints:'🎴', maxFishWeight:'🐟', maxBossWeight:'🔱',
+    maxFishPrice:'💰', maxBossPrice:'💎', playTime:'⏱',
+    totalClicks:'👆', raidWins:'⚔️', achievementsCount:'🏅', gold:'🥇'
+  };
+  const kind = currentTopKind;
+  const cache = getTopCache(kind); // 🛡️ Берем кэш через функцию
+
+  // 1. Свежий кэш (3 мин) — не грузим
+  if (!force && cache.data && (Date.now() - cache.timestamp < 30 * 1000)) {
+    _renderTopList(cache.data, icons, kind);
+    return;
+  }
+
+  // 2. Уже грузится — НЕ дублируем
+  if (cache.loading) return;
+
+  // 3. Показываем кэш или лоадер
+  if (cache.data) {
+    _renderTopList(cache.data, icons, kind);
+  } else {
+    cont.innerHTML = '<div class="empty"><div class="em">☁️</div><div class="tx">Загрузка Топ-50...</div></div>';
+  }
+
+  // 4. Firebase ещё не готов — повторим позже
+  if (!window.fetchLeaderboard) {
+    if (!cache.data) {
+      setTimeout(() => {
+        if (currentTopKind === kind && !cache.data && !cache.loading) renderTop(force);
+      }, 2000);
+    }
+    return;
+  }
+
+  // 5. Грузим
+  cache.loading = true;
+  let realList = null;
+  let errorMsg = null;
+  try {
+    // 🛡️ Если нажали "Обновить" вручную — принудительно сохраняем свой сейв и ждем
+    if (force && window._forceCloudSync) {
+      await window._forceCloudSync();
+    }
+    realList = await window.fetchLeaderboard(kind);
+  } catch(e) {
+    errorMsg = e.message || e.code || 'Ошибка сети';
+    console.error('🔥 Top fetch [' + kind + ']:', e);
+  }
+  cache.loading = false;
+
+  // 6. Пользователь переключил топ, пока мы грузили — игнорируем
+  if (currentTopKind !== kind) return;
+
+  // 7. Результат
+  if (realList && Array.isArray(realList)) {
+    realList = realList.filter(r => !HIDDEN_NICKS.includes(r.nickname));
+    cache.data = realList;
+    cache.timestamp = Date.now();
+    cache.lastError = null;
+    _renderTopList(realList, icons, kind); // ✅ Теперь передаем kind
+  } else {
+    cache.timestamp = Date.now(); // 🛡️ чтобы тик не спамил
+    cache.lastError = errorMsg || 'Не удалось загрузить';
+    if (cache.data) {
+      _renderTopList(cache.data, icons, kind);
+      cont.insertAdjacentHTML('afterbegin',
+        '<div style="text-align:center;font-size:10px;color:#dc2626;padding:5px;">⚠️ ' + cache.lastError + '</div>');
+    } else {
+      cont.innerHTML = '<div class="empty"><div class="em">🏆</div>' +
+        '<div class="tx">Не удалось загрузить</div>' +
+        '<div class="sub">' + cache.lastError + '</div>' +
+        '<button onclick="renderTop(true)" style="margin-top:12px;padding:10px 20px;border-radius:8px;border:none;background:var(--acc);color:#fff;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;min-height:44px">🔄 Попробовать снова</button></div>';
+    }
+  }
+}
+
+// Вспомогательная функция для отрисовки списка
+function _renderTopList(list, icons, kind) {
+    if (!kind) kind = currentTopKind; // 🛡️ Страховка
+    const cont = $('topList'); if(!cont) return;
+    
+    let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <button onclick="renderTop(true)" style="background:var(--panel);border:1px solid var(--border);color:var(--txt);padding:6px 12px;border-radius:8px;font-family:inherit;font-size:11px;cursor:pointer;min-height:32px">🔄 Обновить топ</button>
+    </div>`;
+
+    if (!list || list.length === 0) {
+        html += '<div class="empty"><div class="em">🏆</div><div class="tx">Пока никого нет</div><div class="sub">Стань первым в этом топе!</div></div>';
+    } else {
+        html += list.map((r, i) => {
+          const isMe = (r.id === window._cloudUserId); // 🛡️ Проверяем только по ID
+          const cls = isMe ? 'me' : '';
+          
+          let valStr = '';
+          
+          if (kind === 'maxFishWeight') {
+            valStr = '🐟 ' + fmtWeight(r.maxFishWeight || 0) + ' <span style="font-size:10px;opacity:0.7">(' + (r.maxFishName || '—') + ')</span>';
+          } else if (kind === 'maxBossWeight') {
+            valStr = '🔱 ' + fmtWeight(r.maxBossWeight || 0) + ' <span style="font-size:10px;opacity:0.7">(' + (r.maxBossName || '—') + ')</span>';
+          } else if (kind === 'maxFishPrice') {
+            valStr = '💰 ' + fmtBig(r.maxFishPrice || 0);
+          } else if (kind === 'maxBossPrice') {
+            valStr = '💎 ' + fmtBig(r.maxBossPrice || 0);
+          } else if (kind === 'playTime') {
+            valStr = '⏱ ' + fmtTime(r.playTime || 0);
+          } else if (kind === 'totalClicks') {
+            valStr = '👆 ' + fmtBig(r.totalClicks || 0);
+          } else if (kind === 'raidWins') {
+            valStr = '⚔️ ' + fmtBig(r.raidWins || 0);
+          } else if (kind === 'achievementsCount') {
+            valStr = '🏅 ' + (r.achievementsCount || 0);
+          } else if (kind === 'gold') {
+            valStr = '🥇 ' + fmtBig(r.gold || 0);
+          } else if (kind === 'totalDecksPoints') {
+            valStr = '🎴 ' + fmtBig(r.totalDecksPoints || 0);
+          } else {
+            let val = r.points || 0;
+            if (kind === 'lvl') val = r.lvl || 1;
+            if (kind === 'coins') val = r.coins || 0;
+            // 🛡️ Если иконки нет, ставим кубок. Если значения нет, ставим 0.
+            valStr = (icons[kind] || '🏆') + ' ' + fmtBig(val || 0);
+          }
+
+          return '<div class="topRow ' + cls + '"><span class="rank">' + (i+1) + '.</span><span class="nick">' + escHtml(censorNick(r.nickname)) + '</span><span class="score">' + valStr + '</span></div>';
+        }).join('');
+    }
+    cont.innerHTML = html;
 }
 
 /* ============================================================
@@ -14403,6 +15083,12 @@ function renderHeader(){
   const db = $('dailyBtn'); if(db) db.style.opacity = canClaimDaily() ? '1' : '0.5';
   const badge = $('lvlBadge');
   if(badge) badge.onclick = (e)=>{ e.stopPropagation(); openLevelModal(); };
+  const adminBtn = $('navAdminBtn');
+  if(adminBtn) {
+    // 🛡️ Защита по UID (привязан к аккаунту, ник можно сменить)
+    if(window._cloudUserId === 'gkC2d8RQMmT8OlFY6xVZK3qWqw33') adminBtn.style.display = '';
+    else adminBtn.style.display = 'none';
+  }
   checkUnlocks();
 }
 function applyBackground(){
@@ -14475,10 +15161,19 @@ function switchTab(tabId){
   $$('nav button').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
   if(tabId === 'collection'){ renderCollection(); renderPotions(); renderRaidTickets(); renderCrystals(); }
-  if(tabId === 'top') renderTop();
+  if(tabId === 'top') {
+    if(typeof _topCacheByKind !== 'undefined' && _topCacheByKind[currentTopKind]) {
+      _topCacheByKind[currentTopKind].timestamp = 0; // Сбрасываем только текущую
+    }
+    renderTop(false); 
+    if (window._cloudUserId && window._forceCloudSync) {
+      window._forceCloudSync();
+    }
+  }
   if(tabId === 'roulette') openRoulette();
   if(tabId === 'achievements') renderAchievements();
   if(tabId === 'profile') renderProfile();
+  if(tabId === 'admin') renderAdminTab();
   if(tabId === 'shop'){ renderShop(); bindPackClicks(); renderDailyShop(); renderUpgrades(); }
   if(tabId === 'bourse') renderBourse();
   if(tabId === 'quests') renderQuests();
@@ -14651,6 +15346,7 @@ function renderProfile(){
 
     '<div class="profileCard"><h3>🎟 Промокод</h3><div class="hint" style="margin-bottom:8px">В топе ищи «🎁 ПРОМОКОД: XXXXXX»</div><input class="profileInput" id="promoInput" maxlength="20" placeholder="Введи код" style="text-transform:uppercase"><button class="profileBtn btnGold" id="promoBtn">✨ Активировать</button><div style="font-size:11px;opacity:.6;margin-top:6px">Активных: <b>' + unusedPromos + '</b> · Использовано: <b>' + state.usedPromoCodes.length + '</b></div><div style="font-size:10px;opacity:.65;margin-top:8px;background:var(--bg2);border-radius:6px;padding:6px 8px">🎁 <b>Шанс бонусов:</b> 🎰 билеты колеса, 🎟 билеты рейда, 🔮 кристаллы, 🎁 кейсы, 🧪 зелья</div></div>' +
 
+    (state.nick === 'Арсений Разраб 1343' ? '<div class="profileCard" style="border:2px solid #ffd93d"><h3>👑 Админка</h3><button class="profileBtn btnGold" id="openAdminBtn">Открыть панель управления</button></div>' : '') +
     '<div class="profileCard"><h3>🎨 Тема</h3><div style="font-size:11px;opacity:.7;margin-bottom:8px">Авто: днём — светлая, ночью — тёмная</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="themeModeBtn" data-mode="auto" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + (state.autoTheme?'var(--acc)':'var(--border)') + ';background:' + (state.autoTheme?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🔄 Авто</button><button class="themeModeBtn" data-mode="dark" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme !== 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">🌙 Тёмная</button><button class="themeModeBtn" data-mode="light" style="flex:1;min-width:90px;padding:10px;border-radius:8px;border:2px solid ' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--border)') + ';background:' + ((!state.autoTheme && state.theme === 'light')?'var(--acc)':'var(--panel2)') + ';color:#fff;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;min-height:44px">☀️ Светлая</button></div></div>' +
 
     '<div class="profileCard"><h3>🎨 Аватарка</h3><button class="profileBtn btnGreen" id="pickFromCards">🎴 Выбрать из карт</button>' + ((state.avatarEmoji) ? '<button class="profileBtn btnGray" id="clearAvatar">✖ Убрать</button>' : '') + '</div>' +
@@ -14720,10 +15416,31 @@ function renderProfile(){
       (state.autoSellEnabled ? '<div style="font-size:11px;opacity:.7;margin:12px 0 6px">Редкости:</div><div style="display:flex;flex-wrap:wrap;gap:6px">' + Object.keys(RARITY).map(r => '<button class="autoSellRarity" data-r="' + r + '" style="padding:8px 12px;border-radius:8px;border:2px solid ' + (state.autoSellRarities.includes(r)?'var(--acc)':'var(--border)') + ';background:' + (state.autoSellRarities.includes(r)?'var(--acc)':'var(--panel2)') + ';color:#fff;font-size:11px;cursor:pointer;font-family:inherit;font-weight:700;min-height:36px">' + r + '</button>').join('') + '</div>' : '') +
       '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border);margin-top:8px"><span style="font-size:13px">Быстрый разбор</span><input type="checkbox" id="quickDisToggle" ' + (state.quickDismantle?'checked':'') + ' style="width:auto;accent-color:var(--acc);transform:scale(1.3)"></div>' +
     '</div>' +
+    
+    '<div class="profileCard"><h3>🔐 Аккаунт</h3>' +
+      '<div class="profileRow"><span class="lbl">Логин для входа</span><span class="val" style="font-size:11px;color:var(--gold)">' + (state.loginNick || state.nick || '—') + '</span></div>' +
+      '<div style="font-size:10px;opacity:.6;margin:6px 0 10px;line-height:1.4">⚠️ Если сменишь ник — логин останется прежним. Запомни его для входа на новом устройстве.</div>' +
+      '<button class="profileBtn" id="logoutBtn" style="background:linear-gradient(135deg,#dc2626,#7f1d1d);color:#fff">🚪 Выйти из аккаунта</button>' +
+    '</div>' +
 
     '<div class="profileCard"><h3>💾 Сохранение</h3><button class="profileBtn btnGreen" id="manualSaveBtn">💾 Сохранить сейчас</button><div style="font-size:11px;opacity:.6;margin-top:6px">Прогресс сохраняется автоматически при выходе, но можно сохранить вручную.</div></div>' +
 
     '<div class="profileCard"><h3>⚠️ Опасная зона</h3><button class="profileBtn btnRed" id="resetBtn">🗑 Сбросить прогресс</button></div>';
+
+  const _logoutBtn = $('logoutBtn');
+  if(_logoutBtn) {
+    // Очищаем старые обработчики и вешаем новый, чтобы не было конфликтов
+    _logoutBtn.onclick = null; 
+    _logoutBtn.addEventListener('click', () => {
+      if(!confirm('🚪 Выйти из аккаунта?\nПрогресс синхронизируется с облаком.')) return;
+      if(window.doSignOut) {
+        _logoutBtn.textContent = 'Выходим...';
+        window.doSignOut();
+      } else {
+        alert('Подожди, идёт загрузка облака... (Нет связи с Firebase)');
+      }
+    });
+  }
 
   const box = $('avatarBox');
   if(box){
@@ -14835,17 +15552,27 @@ const nameClick = $('profileNameClick');
   $('pickFromCards').onclick = openAvatarPickModal;
   if($('clearAvatar')) $('clearAvatar').onclick = ()=>{ state.avatar=''; state.avatarType=''; state.avatarEmoji=''; save(); renderProfile(); renderHeader(); };
 
-  /* 🚫 Сохранение ника С ФИЛЬТРОМ */
+  /* 🚫 Сохранение ника С ФИЛЬТРОМ + КУЛДАУН 24ч */
   $('saveNick').onclick = ()=>{
     const v = $('nickEdit').value.trim();
     if(!v) return alert('Введи ник');
+    if(v === state.nick) return alert('Это твой текущий ник');
     const check = isValidNick(v);
     if(!check.ok) return alert('❌ ' + check.msg);
+    const CD_NICK = 24 * 60 * 60 * 1000;
+    const left = (state.lastNickChange || 0) + CD_NICK - Date.now();
+    if(left > 0){
+      const h = Math.floor(left / 3600000);
+      const m = Math.floor((left % 3600000) / 60000);
+      return alert('⏳ Ник можно менять раз в 24 часа.\n\nОсталось: ' + h + 'ч ' + m + 'м');
+    }
     state.nick = v.slice(0,20);
+    state.lastNickChange = Date.now();
+    if(!state.loginNick) state.loginNick = state.nick;
     if(!state.referrals.code) ensureRefCode();
     topCache = {points:null, lvl:null, coins:null};
     save(); renderHeader(); renderProfile(); renderTop();
-    alert('Ник изменён');
+    alert('✅ Ник изменён!\n\n⚠️ Логин для входа остался прежним: ' + (state.loginNick || state.nick));
   };
   if($('nextTrackBtn')) $('nextTrackBtn').onclick = ()=>{ initAudio(); nextTrack(); renderProfile(); };
 
@@ -14899,6 +15626,14 @@ const nameClick = $('profileNameClick');
     };
   });
   $('resetBtn').onclick = resetProgress;
+  if($('logoutBtn')) $('logoutBtn').onclick = () => {
+    if(!confirm('🚪 Выйти из аккаунта?\nПрогресс синхронизируется с облаком.')) return;
+    if(window.doSignOut) window.doSignOut();
+    else alert('Подожди, идёт загрузка облака...');
+  };
+  if($('openAdminBtn')) $('openAdminBtn').onclick = () => {
+    switchTab('admin');
+  };
   if($('manualSaveBtn')) $('manualSaveBtn').onclick = ()=>{
     save(); /* не silent — покажет тост */
     notify('💾', 'Сохранено', 'Прогресс сохранён', '#10b981');
@@ -15169,9 +15904,14 @@ function applyCrystalToCard(cardId, mutId){
     notify('✅', 'Мутация наложена!', m.icon + ' ' + m.name, '#10b981');
   } else {
     /* ❌ Провал — мутация сгорела, пустой кристалл вернулся в инвентарь */
-    state.crystalsEmpty = (state.crystalsEmpty || 0) + 1;
+    if(getCrystalsCount() < state.crystalsInvMax) {
+      state.crystalsEmpty = (state.crystalsEmpty || 0) + 1;
+    } else {
+      state.essence += 2; // Авто-продажа, если места нет
+      state.essEarned += 2;
+    }
     playFishMiss();
-    notify('💨', 'Провал!', m.icon + ' ' + m.name + ' сгорела, пустой кристалл вернулся', '#dc2626');
+    notify('💨', 'Провал!', m.icon + ' ' + m.name + ' сгорела', '#dc2626');
   }
 
   save();
@@ -15523,9 +16263,7 @@ function claimMachineSlot(idx){
   if(!card || !m){ state.machineSlots[idx] = null; save(); renderMachine(); return; }
 
   /* 📦 Есть ли место для карты в коллекции? */
-  const _real = getRealInvCount();
-  if(_real >= state.invMax){
-    /* Нет места — вернём после освобождения */
+  if(state.collection.length >= state.invMax){
     return notify('⚠️', 'Инвентарь полон', 'Освободи слот чтобы забрать карту', '#f59e0b');
   }
 
@@ -15848,9 +16586,14 @@ function renderCrystals(){
   const used = getCrystalsCount();
   const max = state.crystalsInvMax || 50;
   const pct = max > 0 ? Math.round(used / max * 100) : 0;
+  
+  // 🔢 Считаем общее количество штук (для наглядности)
+  let totalItems = 0;
+  for(const k in state.crystals) { totalItems += (state.crystals[k] || 0); }
+  totalItems += (state.crystalsEmpty || 0);
 
   let html = '<div style="background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--border)">' +
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Занято слотов</span><b style="color:' + (pct > 90 ? 'var(--red)' : 'var(--gold)') + '">' + used + ' / ' + max + '</b></div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Занято</span><b style="color:' + (pct > 90 ? 'var(--red)' : 'var(--gold)') + '">' + used + ' / ' + max + '</b></div>' +
     '<div style="height:8px;background:var(--panel);border-radius:4px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#a855f7,#ffd93d' + (pct > 90 ? ',#dc2626' : '') + ')"></div></div>' +
     '</div>';
 
@@ -16163,7 +16906,7 @@ function renderRaidTickets(){
   const max = state.raidTicketsInvMax || 100;
   const pct = max > 0 ? Math.round(used / max * 100) : 0;
   let html = '<div style="background:var(--bg2);border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--border)">' +
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Занято слотов</span><b style="color:' + (pct > 90 ? 'var(--red)' : 'var(--gold)') + '">' + used + ' / ' + max + '</b></div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Занято</span><b style="color:' + (pct > 90 ? 'var(--red)' : 'var(--gold)') + '">' + used + ' / ' + max + '</b></div>' +
     '<div style="height:8px;background:var(--panel);border-radius:4px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#dc2626,#ffd93d' + (pct > 90 ? ',#dc2626' : '') + ')"></div></div>' +
     '</div>';
   let anyTicket = false;
@@ -16255,7 +16998,7 @@ function usePotion(potionId){
   if(!state.potions || !state.potions[potionId] || state.potions[potionId] <= 0){
     return notify('❌', 'Нет зелья', 'Зелье закончилось', '#dc2626');
   }
-  /* Применяем буст (универсально для всех 5 эффектов) */
+  
   const now = Date.now();
   const _effectsMap = {
     money:      { field:'money',      multField:'moneyMult',      label:'монет' },
@@ -16264,20 +17007,17 @@ function usePotion(potionId){
     ticketLuck: { field:'ticketLuck', multField:'ticketLuckMult', label:'билетов' }
   };
   const _eff = _effectsMap[potion.effect];
+  
   if(_eff){
     const curMult = state.buffs[_eff.multField] || 2;
     const curUntil = state.buffs[_eff.field] || 0;
     const isActive = curUntil > now;
-    if(!isActive){
-      state.buffs[_eff.multField] = potion.mult;
-      state.buffs[_eff.field] = now + potion.duration * 1000;
-    } else if(potion.mult > curMult){
-      state.buffs[_eff.multField] = potion.mult;
-      state.buffs[_eff.field] = curUntil + potion.duration * 1000;
-    } else {
-      return notify('⚠️', 'Уже активен', 'Более сильный эликсир уже действует', '#f59e0b');
-    }
+    
+    // ✅ Берем максимальный множитель и суммируем время
+    state.buffs[_eff.multField] = isActive ? Math.max(curMult, potion.mult) : potion.mult;
+    state.buffs[_eff.field] = (isActive ? curUntil : now) + potion.duration * 1000;
   }
+  
   state.potions[potionId]--;
   if(state.potions[potionId] <= 0) delete state.potions[potionId];
   state.questStats.potionsUsed = (state.questStats.potionsUsed||0) + 1;
@@ -16636,9 +17376,14 @@ const spinNext = () => {
           setTimeout(spinNext, 50);
         }, 150);
       } else {
-        showRouletteMiniResult(prize, prize._resultHtml || '', spun, qty, () => {
-          setTimeout(spinNext, 200);
-        });
+        if (qty === 1) {
+           // 🛡️ Если крутим 1 раз, не показываем мини-карточку, чтобы не дублировать
+           setTimeout(spinNext, 300);
+        } else {
+           showRouletteMiniResult(prize, prize._resultHtml || '', spun, qty, () => {
+             setTimeout(spinNext, 200);
+           });
+        }
       }
     });
   };
@@ -18181,7 +18926,9 @@ $$('.buffCard').forEach(c=>{
     const price = kind === 'luck' ? 60 : 30;
     if(state.gold < price) return alert('Не хватает золота!');
     state.gold -= price;
-    state.buffs[kind] = Date.now() + BUFF_DURATION*1000;
+    // 🛡️ Берем максимальное время, чтобы не срезать эликсиры
+    const currentEnd = state.buffs[kind] || 0;
+    state.buffs[kind] = Math.max(currentEnd, Date.now()) + BUFF_DURATION*1000;
     playResource(); save(); renderHeader(); renderBuffs();
     alert('Буст на 60 секунд!');
   };
@@ -18193,7 +18940,12 @@ $$('.topTabs button').forEach(b=>{
     $$('.topTabs button').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     currentTopKind = b.dataset.top;
-    renderTop();
+    
+    // 🛡️ Сбрасываем кэш именно для этой вкладки, чтобы не показывало старьё
+    if(typeof _topCacheByKind !== 'undefined' && _topCacheByKind[currentTopKind]) {
+      _topCacheByKind[currentTopKind].timestamp = 0;
+    }
+    renderTop(true); // Принудительно грузим новые данные
   };
 });
 
@@ -18226,35 +18978,238 @@ function resetProgress(){
   if(!confirm('Точно сбросить прогресс? НЕОБРАТИМО!')) return;
   if(!confirm('Совсем-совсем точно?')) return;
   resetting = true;
-  try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem('kotokarty'); }catch(e){}
+  try{ 
+    [SAVE_KEY, 'kotokarty', SAVE_KEY + '_bak1', SAVE_KEY + '_bak2', SAVE_KEY + '_bak3'].forEach(k => localStorage.removeItem(k));
+  }catch(e){}
   location.reload();
 }
 
-/* Кнопка "Погнали" — с ФИЛЬТРОМ */
-if($('nickBtn')) $('nickBtn').onclick = ()=>{
+/* Кнопки Вход/Регистрация */
+let _isRegisterMode = false;
+if($('tabLogin')) $('tabLogin').onclick = () => {
+  _isRegisterMode = false;
+  window._needMigration = false; // 🛡️ Отменяем насильную миграцию!
+  $('tabLogin').style.background = 'var(--acc)'; $('tabLogin').style.color = '#fff'; $('tabLogin').style.border = 'none';
+  $('tabRegister').style.background = 'var(--panel)'; $('tabRegister').style.color = 'var(--txt)'; $('tabRegister').style.border = '2px solid var(--border)';
+  $('passConfirmInput').style.display = 'none';
+  $('nickBtn').textContent = 'Войти';
+  $('authError').textContent = '';
+};
+if($('tabRegister')) $('tabRegister').onclick = () => {
+  _isRegisterMode = true;
+  $('tabRegister').style.background = 'var(--acc)'; $('tabRegister').style.color = '#fff'; $('tabRegister').style.border = 'none';
+  $('tabLogin').style.background = 'var(--panel)'; $('tabLogin').style.color = 'var(--txt)'; $('tabLogin').style.border = '2px solid var(--border)';
+  $('passConfirmInput').style.display = 'block';
+  $('nickBtn').textContent = 'Создать аккаунт';
+  $('authError').textContent = '';
+};
+
+if($('nickBtn')) $('nickBtn').onclick = async ()=>{
   const v = $('nickInput').value.trim();
-  if(!v) return alert('Введи ник');
+  const p = $('passInput').value;
+  const pc = $('passConfirmInput').value;
+  const errEl = $('authError');
+  
+  if(!v) return errEl.textContent = 'Введи ник!';
   const check = isValidNick(v);
-  if(!check.ok) return alert('❌ ' + check.msg);
-  state.nick = v.slice(0,20);
-  ensureRefCode();
-  if(state.pendingRefFromUrl){
-    const res = applyRefCode(state.pendingRefFromUrl);
-    if(res.ok) setTimeout(()=>alert('🎁 ' + res.msg), 500);
-    state.pendingRefFromUrl = null;
+  if(!check.ok) return errEl.textContent = '❌ ' + check.msg;
+  if(p.length < 6) return errEl.textContent = 'Пароль от 6 символов!';
+  
+  if(_isRegisterMode && p !== pc) return errEl.textContent = 'Пароли не совпадают!';
+
+  errEl.textContent = 'Загрузка...';
+  $('nickBtn').disabled = true;
+
+  let res;
+  // Если это старый игрок с анонимным аккаунтом (миграция)
+  if(window._needMigration) {
+    res = await window.linkOldAccount(v, p);
+  } else {
+    res = await window.doFirebaseAuth(v, p, _isRegisterMode);
   }
-  ensureDailyStats(); ensureQuests(); ensureDailyShop(); ensureBourse();
-  if(typeof state.energy !== 'number') state.energy = getStartEnergy();
-  state.lastEnergyTick = Date.now();
-  state.firstLaunch = false;
-  save();
-  $('nickSetup').style.display = 'none';
-  firstInteract();
-  startGame();
+
+  if(!res.ok) {
+    errEl.textContent = res.msg;
+    $('nickBtn').disabled = false;
+    return;
+  }
+
+  // Успех!
+  if (_isRegisterMode || window._needMigration) {
+    // 📝 РЕГИСТРАЦИЯ ИЛИ МИГРАЦИЯ: сохраняем текущий локальный прогресс в облако
+    state.nick = v.slice(0,20);
+    ensureRefCode();
+    if(state.pendingRefFromUrl){
+      const rRef = applyRefCode(state.pendingRefFromUrl);
+      if(rRef.ok) setTimeout(()=>alert('🎁 ' + rRef.msg), 500);
+      state.pendingRefFromUrl = null;
+    }
+    ensureDailyStats(); ensureQuests(); ensureDailyShop(); ensureBourse();
+    if(typeof state.energy !== 'number') state.energy = getStartEnergy();
+    state.lastEnergyTick = Date.now();
+    state.firstLaunch = false;
+    save();
+    
+    if (window._forceCloudSync) await window._forceCloudSync();
+    
+    $('nickSetup').style.display = 'none';
+    firstInteract();
+    startGame();
+  } else {
+    // 🔑 ВХОД НА НОВОМ УСТРОЙСТВЕ: скачиваем сейв из облака!
+    $('nickBtn').textContent = 'Загрузка сейва...';
+    if (window.downloadCloudSave) {
+      const cloudData = await window.downloadCloudSave();
+      if (cloudData) {
+        // Нашли сейв в облаке — загружаем его
+        window.applyCloudState(cloudData);
+        window.state.nick = v.slice(0,20); // На всякий случай обновляем ник
+        window.state.lastSaveTs = Date.now();
+        window.save(true);
+        location.reload(); // Перезагружаем игру, чтобы она запустилась с новыми данными
+      } else {
+        // Облачного сейва нет (аккаунт новый или был удален) — начинаем заново
+        state.nick = v.slice(0,20);
+        save();
+        if (window._forceCloudSync) await window._forceCloudSync();
+        $('nickSetup').style.display = 'none';
+        firstInteract();
+        startGame();
+      }
+    }
+  }
 };
 if($('nickInput')) $('nickInput').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('nickBtn').click(); });
 
+// Переключение вкладок админки
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.adminTabBtn');
+  if(!btn) return;
+  document.querySelectorAll('.adminTabBtn').forEach(b => {
+    b.style.background = 'var(--panel2)'; b.style.color = '#fff';
+  });
+  btn.style.background = 'var(--gold)'; btn.style.color = '#000';
+  document.querySelectorAll('[id^="adminTab-"]').forEach(el => el.style.display = 'none');
+  const target = document.getElementById('adminTab-' + btn.dataset.tab);
+  if(target) target.style.display = 'block';
+});
+
+// 👑 АДМИН: Локальные читы
+function adminLocal(type, amount) {
+  if(type === 'coins') { state.coins += amount; state.coinsEarned += amount; }
+  else if(type === 'gold') { state.gold += amount; state.goldEarned += amount; }
+  else if(type === 'essence') { state.essence += amount; state.essEarned += amount; }
+  else if(type === 'mana') { state.mana += amount; state.manaEarned += amount; }
+  else if(type === 'lvl') { 
+    state.lvl = amount; 
+    state.xpTotal = xpForLevel(amount); 
+    checkUnlocks(); renderNav(); 
+  }
+  else if(type === 'allcards') {
+    const free = state.invMax - (typeof getRealInvCount === 'function' ? getRealInvCount() : state.collection.length);
+    CARD_POOL.slice(0, free).forEach(c => {
+      const card = makeCardOfRarity(c.rarity);
+      card.name = c.name;
+      state.collection.push(card);
+      registerCardStats(card);
+    });
+  }
+  else if(type === 'reset_craft') {
+    if(state.craftSlots) {
+      state.craftSlots.forEach(s => { if(s) { s.endsAt = Date.now(); s.ready = true; } });
+    }
+  }
+  else if(type === 'reset_machine') {
+    if(state.machineSlots) {
+      state.machineSlots.forEach(s => { if(s) { s.endsAt = Date.now(); s.ready = true; } });
+    }
+  }
+  playRare(); save(); renderHeader();
+  if(currentTab === 'collection') renderCollection();
+  if(currentTab === 'profile') renderProfile();
+  if (window._forceCloudSync) window._forceCloudSync(); // Сразу летит в облако
+  notify('👑', 'Чит применён!', type + ' +' + amount, '#ffd93d');
+}
+
+// 👑 АДМИН: Переключение вкладок внутри панели
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.adminTabBtn');
+  if(!btn) return;
+  document.querySelectorAll('.adminTabBtn').forEach(b => {
+    b.style.background = 'var(--panel2)'; b.style.color = '#fff';
+  });
+  btn.style.background = '#ffd93d'; btn.style.color = '#000';
+  document.querySelectorAll('[id^="adminTab-"]').forEach(el => el.style.display = 'none');
+  const target = document.getElementById('adminTab-' + btn.dataset.tab);
+  if(target) target.style.display = 'block';
+});
+
+// 👑 АДМИН: Инициализация вкладки
+function renderAdminTab() {
+  // 1. Заполняем ивенты
+  const eventSel = document.getElementById('adminEventSelect');
+  if(eventSel && eventSel.options.length <= 1) {
+    for(const [key, cfg] of Object.entries(EVENT_TYPES)) {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = `${cfg.icon} ${cfg.name}`;
+      eventSel.appendChild(opt);
+    }
+  }
+  if(eventSel && eventSel.selectedIndex === 0 && eventSel.options.length > 1) {
+    eventSel.selectedIndex = 1; 
+  }
+  
+  // 2. Заполняем карты для выдачи игрокам
+  const cardSel = document.getElementById('adminGiveCardSelect');
+  if(cardSel && cardSel.options.length === 0) {
+    const sorted = CARD_POOL.slice().sort((a,b) => a.name.localeCompare(b.name));
+    sorted.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = `${c.name} (${c.rarity})`;
+      cardSel.appendChild(opt);
+    });
+  }
+
+  // 3. Принудительно обновляем магазин с задержкой
+  setTimeout(() => {
+    if (typeof window.adminUpdateShopForm === 'function') window.adminUpdateShopForm();
+    if (typeof window.renderAdminStockList === 'function') window.renderAdminStockList();
+    if (typeof window.adminUpdateGiveItemList === 'function') window.adminUpdateGiveItemList();
+  }, 100);
+}
+
+// 👑 АДМИН: Обновление списка предметов для выдачи
+window.adminUpdateGiveItemList = function() {
+  const type = document.getElementById('adminGiveType').value;
+  const itemSel = document.getElementById('adminGiveItemId');
+  if (!itemSel) return;
+
+  if (type === 'ticket') {
+    itemSel.style.display = 'block';
+    if (typeof TICKET_TYPES !== 'undefined') {
+      itemSel.innerHTML = Object.values(TICKET_TYPES).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+  } else if (type === 'crystal') {
+    itemSel.style.display = 'block';
+    if (typeof MUTATIONS !== 'undefined') {
+      itemSel.innerHTML = MUTATIONS.map(m => `<option value="${m.id}">${m.icon} ${m.name}</option>`).join('');
+    }
+  } else if (type === 'potion') {
+    itemSel.style.display = 'block';
+    if (typeof POTIONS !== 'undefined') {
+      itemSel.innerHTML = Object.keys(POTIONS).map(k => `<option value="${k}">${POTIONS[k].name}</option>`).join('');
+    }
+  } else {
+    itemSel.style.display = 'none';
+  }
+};
+
 function startGame(){
+  if(window._gameStarted) return; // 🛡️ Защита от двойного запуска
+  window._gameStarted = true;
+  
   ensureDailyStats(); ensureQuests(); ensureDailyShop(); ensureBourse();
   ensureCraftSlots();
 
@@ -18265,7 +19220,8 @@ function startGame(){
 
   setInterval(()=>{ state.playTime = (state.playTime||0) + 1; }, 1000);
   /* 💾 Автосохранение каждые 15 секунд (было 30) */
-  setInterval(() => save(true), 15000);
+  setInterval(() => { save(true); }, 60000); // Локальный сейв раз в минуту
+  setInterval(() => { if (window.syncCloud) window.syncCloud(); }, 180000); // Облако раз в 3 минуты
   /* 💾 Сохранение при сворачивании вкладки (мобильные + alt-tab) */
   document.addEventListener('visibilitychange', () => {
     if(document.hidden) save(true);
@@ -18273,6 +19229,7 @@ function startGame(){
   /* 💾 Сохранение при закрытии вкладки (основное!) */
   window.addEventListener('beforeunload', () => {
     save(true);
+    if (window.syncCloud) window.syncCloud();
   });
   /* 💾 Сохранение при выгрузке страницы (мобильные — надёжнее beforeunload) */
   window.addEventListener('pagehide', () => {
@@ -18349,8 +19306,8 @@ function startGame(){
   const _moveDur   = _isNarrow ? 320 : 1000;
   const _ultraEvery = _isNarrow ? 200 : 500;
   const _ultraDur   = _isNarrow ? 100 : 500;
-  setInterval(()=>{ if(currentTab === 'click') moveBtn($('movingBtn'), _moveDur); }, _moveEvery);
-  setInterval(()=>{ if(currentTab === 'click') moveBtn($('ultraBtn'), _ultraDur); }, _ultraEvery);
+  setInterval(()=>{ if(currentTab === 'click' && !document.hidden) moveBtn($('movingBtn'), _moveDur); }, _moveEvery);
+  setInterval(()=>{ if(currentTab === 'click' && !document.hidden) moveBtn($('ultraBtn'), _ultraDur); }, _ultraEvery);
   setTimeout(()=>{ moveBtn($('movingBtn'), 0); moveBtn($('ultraBtn'), 0); }, 100);
 
   if(!state.tutorial.done){
@@ -18461,14 +19418,38 @@ function getCrystalGlowColor(cr){
   return cr.mode === 'hold' ? '#7c3aed' : '#a855f7'; /* Обычный фиолет */
 }
 
-if(state.nick){
-  $('nickSetup').style.display = 'none';
-  startGame();
-} else {
-  applyTheme();
-  applyMotion();
-  renderHeader();
-}
+window.addEventListener('load', () => {
+  // Ждем 2 секунды, показывая экран загрузки (этого хватит, чтобы Firebase ответил)
+  setTimeout(() => {
+    // 1. Прячем экран загрузки
+    const loader = $('loadingScreen');
+    if (loader) loader.style.display = 'none';
+
+    // 2. Показываем нужный экран
+    if (window._needMigration) {
+      // СТАРЫЙ ИГРОК: Предлагаем привязать пароль, но оставляем кнопку Входа
+      $('nickSetup').style.display = 'flex';
+      $('tabLogin').style.display = 'inline-block'; // ✅ Показываем кнопку Вход
+      $('tabRegister').textContent = 'СОХРАНИТЬ ПРОГРЕСС';
+      $('tabRegister').style.background = 'var(--acc)'; 
+      $('tabRegister').style.color = '#fff';
+      $('passConfirmInput').style.display = 'block';
+      $('nickBtn').textContent = 'Привязать пароль';
+      $('nickInput').value = state.nick || ''; 
+      $('authError').innerHTML = '<span style="color:#10b981">Твой прогресс сохранен. Придумай пароль, чтобы защитить его (или нажми "Вход", чтобы зайти в другой аккаунт).</span>';
+    } else if (state.nick) {
+      // Обычный заход (игрок уже в системе)
+      $('nickSetup').style.display = 'none';
+      startGame();
+    } else {
+      // Новый игрок (впервые зашел)
+      $('nickSetup').style.display = 'flex';
+      applyTheme();
+      applyMotion();
+      renderHeader();
+    }
+  }, 2000); // 2000 мс = 2 секунды
+});
 
 document.body.addEventListener('touchmove', (e)=>{
   if(e.target.closest('main, .modalBox, .avPickGrid, #openAnim')) return;
@@ -18632,6 +19613,23 @@ console.log(
   '%c🐱 Котокарты v12',
   'color:#ffd93d;font-weight:900;font-size:20px;text-shadow:0 0 8px #ffd93d'
 );
+
+// Экспорт для админ-панели (чтобы модуль Firebase видел переменные)
+window.EVENT_TYPES = EVENT_TYPES;
+window.CARD_POOL = CARD_POOL;
+window.MUTATIONS = MUTATIONS;
+window.COMBOS = COMBOS;
+window.POTIONS = POTIONS;
+window.TICKET_TYPES = TICKET_TYPES;
+window.BOSSES = BOSSES;
+window.RARITY = RARITY;
+window.UPGRADES = UPGRADES;
+window.ACHIEVEMENTS = ACHIEVEMENTS;
+window.TITLES = TITLES;
+window.FISH_DATA = FISH_DATA;
+window.onEventStart = onEventStart;
+window.onRaidStart = onRaidStart;
+window.makeDailyShopCard = makeDailyShopCard;
 /* ============================================================
    🎁 ЧИТ-КОД ПО УМОЛЧАНИЮ (что подсказать в консоли)
    ============================================================ */
@@ -18639,6 +19637,795 @@ console.log(
 /* ============================================================
    🎉 КОНЕЦ ВСЕХ 7 ЧАСТЕЙ
    ============================================================ */
+</script>
+
+<!-- ============ FIREBASE CLOUD SYNC ============ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  import { initializeFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDTFTuTqBxZUEy3xmzCTBRvkNEbkZLzqsE",
+    authDomain: "kotokarty.firebaseapp.com",
+    projectId: "kotokarty",
+    storageBucket: "kotokarty.firebasestorage.app",
+    messagingSenderId: "600874525062",
+    appId: "1:600874525062:web:05da69ac018dcbe34dcc07"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  // 🛡️ Принудительный Long Polling для обхода блокировок браузера
+  const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    experimentalLongPollingOptions: { timeoutSeconds: 30 }
+  });
+
+  /* 🔐 Хэш ника → email (стабильный для любой кириллицы) */
+  function cyrb53(str, seed = 0) {
+    let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+    h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+    h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+  function nickToEmail(nick) {
+    const key = String(nick || '').toLowerCase().trim();
+    if (!key) return '';
+    return 'u_' + cyrb53(key).toString(36) + '@kotokarty.game';
+  }
+
+  import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+  window._cloudUserId = null;
+  let _lastCloudSync = 0;
+
+  // 👑 АДМИН-ФУНКЦИИ
+  window.adminSetEvent = async () => {
+    try {
+      const type = document.getElementById('adminEventSelect').value;
+      const dur = parseInt(document.getElementById('adminEventDuration').value) || 10;
+      const isRaid = type && type.startsWith('raid');
+      
+      if(!type) {
+        // Выключаем всё
+        await setDoc(doc(db, "global", "active_event"), { endsAt: 0 });
+        await setDoc(doc(db, "global", "active_raid"), { endsAt: 0 });
+        alert('Все события выключены!');
+        return;
+      }
+      
+      if(isRaid && window.state) {
+        window.state.raidCaught = {}; 
+      }
+      
+      const endsAt = Date.now() + dur * 60 * 1000;
+      const docRef = isRaid ? doc(db, "global", "active_raid") : doc(db, "global", "active_event");
+      
+      await setDoc(docRef, { type, endsAt, startedAt: Date.now() });
+      setTimeout(() => alert('🚀 ' + (isRaid ? 'Рейд' : 'Событие') + ' запущено для всех на ' + dur + ' минут!'), 50);
+    } catch(e) {
+      alert('❌ Ошибка: ' + e.message + '\n\nСкорее всего, твой ID изменился, и Firebase тебя не пускает.');
+    }
+  };
+  
+  window.adminGive = (what) => {
+    if(what === 'coins') { window.state.coins += 1000000; window.state.coinsEarned += 1000000; }
+    if(what === 'gold') { window.state.gold += 1000; window.state.goldEarned += 1000; }
+    window.save(true); window.renderHeader(); alert('Ресурсы выданы!');
+  };
+
+  // 👑 АДМИН: ПОИСК ИГРОКА
+  let _adminTargetDocId = null;
+  window.adminFindPlayer = async () => {
+    const nick = document.getElementById('adminSearchNick').value.trim();
+    if(!nick) return alert('Введи ник!');
+    const btn = document.getElementById('adminFindBtn');
+    if(btn) { btn.disabled = true; btn.textContent = '⏳ Поиск...'; }
+    try {
+      let q = query(collection(db, "profiles"), where("nickname_lower", "==", nick.toLowerCase()));
+      let snap = await getDocs(q);
+      if (snap.empty) {
+        q = query(collection(db, "profiles"), where("nickname", "==", nick));
+        snap = await getDocs(q);
+      }
+      if (snap.empty) {
+        alert('Игрок не найден.');
+        document.getElementById('adminPlayerResult').style.display = 'none';
+        return;
+      }
+      const docSnap = snap.docs[0];
+      _adminTargetDocId = docSnap.id;
+      const data = docSnap.data();
+      const pState = JSON.parse(data.state_data || '{}');
+      document.getElementById('adminPlayerResult').style.display = 'block';
+      document.getElementById('adminTargetName').textContent = '🎯 ' + data.nickname;
+      document.getElementById('adminTargetStats').textContent = `🪙 ${Math.floor(pState.coins || 0)} | 🥇 ${pState.gold || 0} | 🎴 ${(pState.collection || []).length} карт`;
+    } catch(e) {
+      console.error(e);
+      alert('❌ Ошибка поиска: ' + e.message);
+    } finally {
+      if(btn) { btn.disabled = false; btn.textContent = 'Найти'; }
+    }
+  };
+
+  // 👑 АДМИН: ВЫДАТЬ РЕСУРСЫ ИГРОКУ
+  window.adminGivePlayer = async () => {
+    if(!_adminTargetDocId) return alert('Сначала найди игрока!');
+    const type = document.getElementById('adminGiveType').value;
+    let amount = parseInt(document.getElementById('adminGiveAmount').value) || 0;
+    if(amount <= 0) return;
+    
+    // 🛡️ Ограничиваем выдачу 100 штук за раз, чтобы не заспамить инвентарь
+    if ((type === 'crystal' || type === 'ticket' || type === 'potion') && amount > 100) {
+        amount = 100;
+        alert('⚠️ Максимум 100 предметов за раз (чтобы не переполнить инвентарь). Выдаем 100.');
+    }
+    try {
+      const docRef = doc(db, "profiles", _adminTargetDocId);
+      const docSnap = await getDoc(docRef);
+      let pState = JSON.parse(docSnap.data().state_data || '{}');
+      if(type === 'coins') { pState.coins = (pState.coins||0) + amount; pState.coinsEarned = (pState.coinsEarned||0) + amount; }
+      if(type === 'gold') { pState.gold = (pState.gold||0) + amount; pState.goldEarned = (pState.goldEarned||0) + amount; }
+      if(type === 'essence') { pState.essence = (pState.essence||0) + amount; pState.essEarned = (pState.essEarned||0) + amount; }
+      if(type === 'mana') { pState.mana = (pState.mana||0) + amount; pState.manaEarned = (pState.manaEarned||0) + amount; }
+      
+      // 🎁 Выдача конкретных предметов
+      const itemId = document.getElementById('adminGiveItemId').value;
+      
+      if((type === 'ticket' || type === 'crystal' || type === 'potion') && !itemId) {
+          return alert('❌ Ошибка: выбери конкретный предмет из выпадающего списка!');
+      }
+
+      if(type === 'ticket') { 
+          if(!pState.raidTickets) pState.raidTickets = {}; 
+          pState.raidTickets[itemId] = (pState.raidTickets[itemId] || 0) + amount; 
+      }
+      if(type === 'crystal') { 
+          if(!pState.crystals) pState.crystals = {}; 
+          pState.crystals[itemId] = (pState.crystals[itemId] || 0) + amount; 
+      }
+      if(type === 'potion') { 
+          if(!pState.potions) pState.potions = {}; 
+          pState.potions[itemId] = (pState.potions[itemId] || 0) + amount; 
+      }
+      
+      await setDoc(docRef, { state_data: JSON.stringify(pState), updated_at: Date.now() }, { merge: true });
+      if (_adminTargetDocId === window._cloudUserId) {
+          if (window.applyCloudState) window.applyCloudState(pState);
+          window.state.lastSaveTs = Date.now();
+          window.save(true);
+          if (window._forceCloudSync) window._forceCloudSync();
+          if (window.renderHeader) window.renderHeader();
+          if (window.renderCollection) window.renderCollection();
+          alert('✅ Выдано себе!');
+      } else {
+          alert('✅ Выдано! Игроку нужно перезайти.');
+      }
+      window.adminFindPlayer(); 
+    } catch(e) { alert('❌ Ошибка: ' + e.message); }
+  };
+
+  // 👑 АДМИН: ВЫДАТЬ КАРТУ ИГРОКУ
+  window.adminGivePlayerCard = async () => {
+    if(!_adminTargetDocId) return alert('Сначала найди игрока!');
+    const cardName = document.getElementById('adminGiveCardSelect').value;
+    if(!cardName) return;
+    try {
+      const docRef = doc(db, "profiles", _adminTargetDocId);
+      const docSnap = await getDoc(docRef);
+      let pState = JSON.parse(docSnap.data().state_data || '{}');
+      if(!pState.collection) pState.collection = [];
+      const baseCard = window.CARD_POOL.find(c => c.name === cardName);
+      if(!baseCard) return alert('Карта не найдена');
+      const newCard = window.makeCardOfRarity ? window.makeCardOfRarity(baseCard.rarity) : {
+        id: Date.now().toString(36), name: baseCard.name, rarity: baseCard.rarity,
+        income: 50, goldCh: 10, essCh: 10, manaCh: 10, cdMod: 10, slots: 6, stars: 0, mutations: []
+      };
+      newCard.name = baseCard.name;
+      pState.collection.push(newCard);
+      await setDoc(docRef, { state_data: JSON.stringify(pState), updated_at: Date.now() }, { merge: true });
+      if (_adminTargetDocId === window._cloudUserId) {
+          if (window.applyCloudState) window.applyCloudState(pState);
+          window.state.lastSaveTs = Date.now();
+          window.save(true);
+          if (window._forceCloudSync) window._forceCloudSync();
+          if (window.renderCollection) window.renderCollection();
+          alert('✅ Карта выдана себе!');
+      } else {
+          alert('✅ Карта выдана игроку!');
+      }
+      window.adminFindPlayer(); 
+    } catch(e) { alert('❌ Ошибка: ' + e.message); }
+  };
+
+  // 🌍 ГЕНЕРАЦИЯ МИРА (Если база пустая)
+  window.generateWorldForAll = async () => {
+    if (!window.state) return;
+    try {
+      // 1. Проверяем Биржу
+      const bourseRef = doc(db, "global", "bourse");
+      const bourseSnap = await getDoc(bourseRef);
+      if (!bourseSnap.exists() || (Date.now() - (bourseSnap.data().lastChange||0) > 15 * 60 * 1000)) {
+        let rate = 500;
+        if (bourseSnap.exists()) rate = bourseSnap.data().rate;
+        const change = (Math.random() < 0.5 ? -1 : 1) * (0.05 + Math.random()*0.25);
+        rate = Math.round(Math.max(150, Math.min(1500, rate * Math.exp(change))));
+        await setDoc(bourseRef, { rate: rate, lastChange: Date.now(), history: bourseSnap.exists() ? (bourseSnap.data().history || []).slice(-100) : [] }, { merge: true });
+      }
+
+      // 2. Проверяем Расписание
+      const eventRef = doc(db, "global", "events_schedule");
+      const eventSnap = await getDoc(eventRef);
+      const todayKey = typeof getEventDayKey === 'function' ? getEventDayKey() : new Date().toISOString().slice(0,10);
+      
+      if (!eventSnap.exists() || eventSnap.data().dayKey !== todayKey) {
+        const newSchedule = typeof generateDaySchedule === 'function' ? generateDaySchedule() : [];
+        const newRaidSchedule = typeof generateRaidSchedule === 'function' ? generateRaidSchedule() : [];
+        await setDoc(eventRef, { schedule: newSchedule, raidSchedule: newRaidSchedule, dayKey: todayKey, updatedAt: Date.now() });
+      }
+    } catch(e) {
+      console.warn("Ошибка генерации мира:", e);
+    }
+  };
+
+  // 💱 СИНХРОНИЗАЦИЯ БИРЖИ
+  onSnapshot(doc(db, "global", "bourse"), (docSnap) => {
+    if(!window.state) return;
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      window.state.bourse = data;
+      if(typeof renderHeader === 'function') renderHeader();
+      if(window.currentTab === 'bourse' && typeof renderBourse === 'function') renderBourse();
+    }
+  }, (error) => {
+    console.warn("Сеть: биржа временно недоступна", error.message);
+  });
+
+  // 📅 СИНХРОНИЗАЦИЯ РАСПИСАНИЯ СОБЫТИЙ И РЕЙДОВ
+  onSnapshot(doc(db, "global", "events_schedule"), (docSnap) => {
+    if(!window.state) return;
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      window.state.events.schedule = data.schedule || [];
+      window.state.events.raidSchedule = data.raidSchedule || [];
+      window.state.events.dayKey = data.dayKey || '';
+      if(typeof renderEventBar === 'function') renderEventBar();
+    }
+  }, (error) => {
+    console.warn("Сеть: расписание временно недоступно", error.message);
+  });
+
+  // Запускаем генерацию при старте (если мы онлайн)
+  setTimeout(() => { if(window.generateWorldForAll) window.generateWorldForAll(); }, 3000);
+
+  // 🌍 СТАРЫЕ СЛУШАТЕЛИ ОТКЛЮЧЕНЫ (Используем систему Overlays)
+
+  // Сохранение в облако
+  window.syncCloud = async () => {
+    if (!window._cloudUserId) return;
+    if (Date.now() - _lastCloudSync < 60000) return;
+    
+    try {
+      _lastCloudSync = Date.now(); // 🛡️ Ставим таймер только если запрос начался успешно
+      const docRef = doc(db, "profiles", window._cloudUserId);      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const cloudTs = snap.data().updated_at || 0;
+        // 🛡️ Увеличили до 60 секунд, чтобы сетевые задержки не вызывали панику
+        if (cloudTs > (window._lastLocalSaveTime || 0) + 60000) { // 🛡️ Защита
+          if (!confirm('☁️ Облако новее локального.\nЗагрузить его вместо текущего?')) {
+             _lastCloudSync = Date.now(); // Пропускаем синк, чтобы не затереть
+             return;
+          }
+          window.applyCloudState(Object.assign(window.defaultState(), JSON.parse(snap.data().state_data)));
+          window.state.lastSaveTs = Date.now();
+          window.save(true);
+          location.reload();
+          return;
+        }
+      }
+      
+      _lastCloudSync = Date.now();
+      const _points = typeof totalEquipPoints === 'function' ? totalEquipPoints() : 0;
+      
+      // 🚀 ОПТИМИЗАЦИЯ: Вырезаем тяжелый мусор, который генерируется сам
+      const _cloudData = Object.assign({}, window.state);
+      if (_cloudData.events) {
+        _cloudData.events = Object.assign({}, _cloudData.events);
+        delete _cloudData.events.schedule;
+        delete _cloudData.events.raidSchedule;
+      }
+      delete _cloudData.dailyShop;
+      delete _cloudData.balanceHistory;
+      delete _cloudData.fishing;
+      delete _cloudData.raid;
+
+      // 🏆 Собираем облегченную статистику для Топа
+      const _myStats = typeof getMyStatsForLeaderboard === 'function' ? getMyStatsForLeaderboard() : {};
+      
+      const payload = {
+        nickname: state.nick || 'Аноним',
+        nickname_lower: (state.nick || '').toLowerCase(),
+        points: _points,
+        lvl: state.lvl || 1,
+        coins: Math.floor(state.coins || 0),
+        gold: Math.floor(state.gold || 0),
+        ..._myStats, // Распаковываем все новые статы сюда
+        updated_at: Date.now()
+      };
+
+      // 1. Сначала пишем лидерборд (он легкий и важный для топа)
+      try {
+        // 🛡️ Пишем в Топ только если наши статы реально изменились
+        const _lbString = JSON.stringify(payload);
+        if (!window._lastLbPayload || window._lastLbPayload !== _lbString) {
+          window._lastLbPayload = _lbString;
+          const lbRef = doc(db, "leaderboard", window._cloudUserId);
+          await setDoc(lbRef, payload, { merge: true });
+        }
+      } catch(e) {
+        console.error('❌ Leaderboard write failed:', e.code, e.message);
+        if (typeof notify === 'function') notify('⚠️', 'Топ не обновился', e.code || e.message, '#dc2626');
+      }
+
+      // 2. Потом пишем профиль (тяжелый сейв)
+      try {
+        await setDoc(docRef, {
+          ...payload,
+          state_data: JSON.stringify(_cloudData)
+        }, { merge: true });
+        console.log('☁️ Firebase: Сейв и Топ синхронизированы');
+        
+        // 🛡️ ВАЖНО: Обновляем локальное время, чтобы игра не думала, что облако новее
+        window._lastLocalSaveTime = Date.now();
+        if (window.state) window.state.lastSaveTs = Date.now();
+        
+      } catch(e) {
+        console.error('❌ Profile write failed:', e.code, e.message);
+        if (typeof notify === 'function') notify('⚠️', 'Сейв не ушёл', e.code || e.message, '#dc2626');
+      }
+    } catch(e) {
+      console.warn('Ошибка синхронизации Firebase:', e);
+    }
+  };
+
+  window._forceCloudSync = async () => { _lastCloudSync = 0; await window.syncCloud(); };
+
+  // Топ
+  window.fetchLeaderboard = async (kind) => {
+    try {
+      // 🛡️ Теперь мы используем имя вкладки напрямую как поле для сортировки, 
+      // так как мы сохраняем в базу именно эти ключи (maxFishWeight, playTime и т.д.)
+      const q = query(collection(db, "leaderboard"), orderBy(kind, "desc"), limit(50));
+      const querySnapshot = await getDocs(q);
+      const list = [];
+      querySnapshot.forEach((doc) => { 
+        // 🛡️ Теперь возвращаем ВСЕ поля, включая новые (рыба, боссы, время и т.д.)
+        list.push({ id: doc.id, ...doc.data() }); 
+      });
+      return list;
+    } catch (e) {
+      console.error('🔥 fetchLeaderboard [' + kind + ']:', e.code, e.message);
+      throw e; // Пробрасываем ошибку, чтобы renderTop её увидел
+    }
+  };
+
+  // АВТОРИЗАЦИЯ
+  window.doFirebaseAuth = async (nick, pass, isRegister) => {
+    const email = nickToEmail(nick);
+    try {
+      if (isRegister) {
+        // Регистрация нового
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        window._cloudUserId = userCred.user.uid;
+      } else {
+        // Вход существующего
+        const userCred = await signInWithEmailAndPassword(auth, email, pass);
+        window._cloudUserId = userCred.user.uid;
+      }
+      return { ok: true };
+    } catch (e) {
+      if (e.code === 'auth/email-already-in-use') return { ok: false, msg: 'Этот ник уже занят!' };
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') return { ok: false, msg: 'Неверный ник или пароль!' };
+      if (e.code === 'auth/weak-password') return { ok: false, msg: 'Пароль слишком короткий (мин. 6 символов)!' };
+      return { ok: false, msg: 'Ошибка: ' + e.message };
+    }
+  };
+
+  // ПРИВЯЗКА СТАРОГО АККАУНТА (Миграция)
+  window.linkOldAccount = async (nick, pass) => {
+    const email = nickToEmail(nick);
+    try {
+      const credential = EmailAuthProvider.credential(email, pass);
+      const userCred = await linkWithCredential(auth.currentUser, credential);
+      window._cloudUserId = userCred.user.uid;
+      return { ok: true };
+    } catch (e) {
+      if (e.code === 'auth/email-already-in-use') return { ok: false, msg: 'Этот ник уже занят другим игроком!' };
+      if (e.code === 'auth/weak-password') return { ok: false, msg: 'Пароль слишком короткий!' };
+      return { ok: false, msg: 'Ошибка: ' + e.message };
+    }
+  };
+
+  // 🚪 Выход из аккаунта
+  window.doSignOut = async () => {
+    try {
+      save(true);
+      // Пытаемся синхронизировать, но ждем не дольше 1.5 секунд (чтобы не зависнуть)
+      if (window.syncCloud) {
+        await Promise.race([
+          window.syncCloud(),
+          new Promise(r => setTimeout(r, 1500))
+        ]);
+      }
+      
+      await signOut(auth);
+    } catch(e) {
+      console.error('Logout error:', e);
+    } finally {
+      // 🛡️ В любом случае (даже если ошибка) чистим всё и перезагружаемся
+      const keys = ['kotokarty_v9', 'kotokarty', 'kotokarty_v9_bak1', 'kotokarty_v9_bak2', 'kotokarty_v9_bak3'];
+      keys.forEach(k => { try { localStorage.removeItem(k); } catch(e){} });
+      
+      window._lastLbPayload = null;
+      window._adminOverlays = [];
+      
+      // Показываем уведомление, чтобы ты понял, что выход сработал
+      alert('Вы вышли из аккаунта. Сейчас откроется экран входа.');
+      
+      location.reload();
+    }
+  };
+
+  window.updateGlobalShopQty = async (itemId) => {
+    try {
+      const docRef = doc(db, "global", "daily_shop");
+      const snap = await getDoc(docRef);
+      if(snap.exists() && snap.data().items) {
+        let items = snap.data().items;
+        const idx = items.findIndex(x => x.id === itemId);
+        if(idx !== -1 && items[idx].qty > 0) {
+          items[idx].qty--;
+          if(items[idx].qty <= 0) items[idx].soldOut = true;
+          await setDoc(docRef, { items: items }, { merge: true });
+        }
+      }
+    } catch(e) { console.error('Shop sync error:', e); }
+  };
+  // 🛒 ГЛОБАЛЬНЫЙ МАГАЗИН
+  onSnapshot(doc(db, "global", "daily_shop"), (docSnap) => {
+    if(!window.state) return;
+    if(docSnap.metadata.fromCache) return;
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if(data && data.items) {
+        window.state.dailyShop = { items: data.items };
+        if(typeof renderDailyShop === 'function' && $('shopView-daily') && $('shopView-daily').classList.contains('active')) renderDailyShop();
+        if(typeof window.renderAdminStockList === 'function') window.renderAdminStockList(); // Обновляем список в админке
+      }
+    }
+  });
+
+  window.adminRefreshShop = async () => {
+    if(!confirm('Сгенерировать стандартный сток (6 карт)? Текущий сток будет перезаписан.')) return;
+    const newItems = [0,1,2,3,4,5].map(i => window.makeDailyShopCard ? window.makeDailyShopCard(i) : null).filter(Boolean);
+    await setDoc(doc(db, "global", "daily_shop"), { items: newItems, updatedAt: Date.now() });
+    alert('✅ Магазин обновлен для всех!');
+  };
+  
+  window.adminClearShop = async () => {
+    if(!confirm('Полностью очистить магазин?')) return;
+    await setDoc(doc(db, "global", "daily_shop"), { items: [], updatedAt: Date.now() });
+    alert('✅ Магазин очищен!');
+  };
+
+  // 📦 Отрисовка текущего стока в админке
+  window.renderAdminStockList = () => {
+    const cont = document.getElementById('adminCurrentStockList');
+    if(!cont) return;
+    if(!window.state.dailyShop || !window.state.dailyShop.items) {
+      cont.innerHTML = '<div style="font-size:11px;opacity:.6;text-align:center;padding:10px;">Нет данных. Нажми "Сгенерировать стандартный сток"</div>';
+      return;
+    }
+    const items = window.state.dailyShop.items;
+    if(items.length === 0) { 
+      cont.innerHTML = '<div style="font-size:11px;opacity:.6;text-align:center;padding:10px;">Магазин пуст. Добавь что-нибудь!</div>'; 
+      return; 
+    }
+    
+    cont.innerHTML = items.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding:8px 0;">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);">${c.name} <span style="font-size:9px;color:#fff;opacity:0.5;">(${c.type})</span></div>
+          <div style="font-size:10px;opacity:0.8;">Цена: ${c.price} ${c.currency==='gold'?'🥇':'🪙'} ${c.originalPrice ? `(скидка с ${c.originalPrice})` : ''} | Остаток: ${c.qty === -1 ? '∞' : c.qty}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button onclick="adminEditShopItem('${c.id}')" style="background:var(--acc);color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;">✏️ Изм.</button>
+          <button onclick="adminDeleteShopItem('${c.id}')" style="background:var(--red);color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;">🗑 Удал.</button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  window.adminDeleteShopItem = async (itemId) => {
+    if(!confirm('Удалить этот предмет из магазина?')) return;
+    try {
+      const docRef = doc(db, "global", "daily_shop");
+      const snap = await getDoc(docRef);
+      if(snap.exists()) {
+        let items = snap.data().items.filter(x => x.id !== itemId);
+        await setDoc(docRef, { items: items }, { merge: true });
+        alert('✅ Удалено!');
+      }
+    } catch(e) { alert('Ошибка: ' + e.message); }
+  };
+
+  window._editingItemId = null;
+
+  window.adminEditShopItem = async (itemId) => {
+    const docRef = doc(db, "global", "daily_shop");
+    const snap = await getDoc(docRef);
+    if(!snap.exists()) return;
+    let items = snap.data().items;
+    let idx = items.findIndex(x => x.id === itemId);
+    if(idx === -1) return;
+    let item = items[idx];
+    
+    // 🎨 Открываем красивую форму
+    window._editingItemId = itemId;
+    document.getElementById('editItemName').textContent = item.name;
+    document.getElementById('editItemPrice').value = item.price;
+    document.getElementById('editItemOrigPrice').value = item.originalPrice || 0;
+    document.getElementById('editItemQty').value = item.qty;
+    document.getElementById('adminEditItemModal').style.display = 'block';
+    document.getElementById('adminEditItemModal').scrollIntoView({behavior: 'smooth'});
+  };
+
+  window.adminSaveEditedItem = async () => {
+    if(!window._editingItemId) return;
+    const docRef = doc(db, "global", "daily_shop");
+    const snap = await getDoc(docRef);
+    if(!snap.exists()) return;
+    
+    let items = snap.data().items;
+    let idx = items.findIndex(x => x.id === window._editingItemId);
+    if(idx === -1) return;
+
+    items[idx].price = parseInt(document.getElementById('editItemPrice').value) || 0;
+    items[idx].originalPrice = parseInt(document.getElementById('editItemOrigPrice').value) || 0;
+    items[idx].qty = parseInt(document.getElementById('editItemQty').value);
+    items[idx].soldOut = (items[idx].qty === 0);
+
+    try {
+      await setDoc(docRef, { items: items }, { merge: true });
+      document.getElementById('adminEditItemModal').style.display = 'none';
+      window._editingItemId = null;
+      alert('✅ Изменения сохранены!');
+    } catch(e) { alert('Ошибка: ' + e.message); }
+  };
+
+  window._tempSelectedMuts = [];
+  window.adminUpdateShopForm = () => {
+    const type = document.getElementById('adminShopType').value;
+    const itemSel = document.getElementById('adminShopItemId');
+    const mutsContainer = document.getElementById('adminMutsContainer');
+    document.getElementById('adminShopCardFields').style.display = (type === 'card') ? 'grid' : 'none';
+    
+    if (!itemSel) return;
+    itemSel.innerHTML = '';
+    window._tempSelectedMuts = []; // Сбрасываем мутации при смене типа
+
+    if (type === 'card') {
+      itemSel.innerHTML = window.CARD_POOL.map(c => `<option value="${c.name}">${c.name} (${c.rarity})</option>`).join('');
+      
+      // 🧬 Рендерим мутации как кнопки
+      const mutsContainer = document.getElementById('adminMutsContainer');
+      if (mutsContainer) {
+        if (window.MUTATIONS && window.MUTATIONS.length > 0) {
+          mutsContainer.innerHTML = window.MUTATIONS.map(m => 
+            `<button type="button" class="mut-toggle-btn" data-id="${m.id}" onclick="window.toggleMutBtn(this)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--txt);font-size:11px;cursor:pointer;transition:0.2s;">${m.icon} ${m.name}</button>`
+          ).join('');
+        } else {
+          mutsContainer.innerHTML = '<div style="font-size:11px;color:var(--red)">Ошибка загрузки мутаций</div>';
+        }
+      }
+    } else if (type === 'ticket') {
+      itemSel.innerHTML = Object.values(window.TICKET_TYPES).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    } else if (type === 'crystal') {
+      itemSel.innerHTML = window.MUTATIONS.map(m => `<option value="${m.id}">${m.icon} ${m.name}</option>`).join('');
+    } else if (type === 'potion') {
+      itemSel.innerHTML = Object.keys(window.POTIONS).map(k => `<option value="${k}">${window.POTIONS[k].name}</option>`).join('');
+    }
+  };
+
+  window.toggleMutBtn = (btn) => {
+    const id = btn.dataset.id;
+    const idx = window._tempSelectedMuts.indexOf(id);
+    if (idx >= 0) {
+      window._tempSelectedMuts.splice(idx, 1);
+      btn.style.background = 'var(--panel)';
+      btn.style.color = 'var(--txt)';
+      btn.style.borderColor = 'var(--border)';
+    } else {
+      window._tempSelectedMuts.push(id);
+      btn.style.background = 'var(--green)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--green)';
+    }
+  };
+
+  window.adminAddShopItem = async () => {
+    const type = document.getElementById('adminShopType').value;
+    const itemId = document.getElementById('adminShopItemId').value;
+    const price = parseInt(document.getElementById('adminShopPrice').value) || 100;
+    const origPrice = parseInt(document.getElementById('adminShopOrigPrice').value) || 0;
+    const qty = parseInt(document.getElementById('adminShopQty').value);
+    const currency = document.getElementById('adminShopCurrency').value;
+    const stars = Math.min(Math.max(parseInt(document.getElementById('adminShopStars').value) || 0, 0), 25);
+    
+    const selectedMuts = window._tempSelectedMuts || [];
+    
+    if(!itemId) return alert('Выбери предмет!');
+    let newItem = { type, price, originalPrice: origPrice > price ? origPrice : 0, currency, qty, maxQty: qty, soldOut: false, id: typeof uid === 'function' ? uid() : Date.now().toString() + Math.random() };
+
+    if(type === 'card') {
+      const base = window.CARD_POOL.find(c => c.name === itemId);
+      if(!base) return alert('Карта не найдена');
+      newItem.name = base.name;
+      newItem.rarity = base.rarity;
+      newItem.stars = stars;
+      newItem.slots = 6 + stars;
+      newItem.mutations = selectedMuts;
+      newItem.income = 50; newItem.goldCh = 10; newItem.essCh = 10; newItem.manaCh = 10; newItem.cdMod = 10; newItem.activeVisual = null;
+    } else {
+      newItem.name = itemId;
+      newItem.itemId = itemId;
+    }
+
+    try {
+      const docRef = doc(db, "global", "daily_shop");
+      const snap = await getDoc(docRef);
+      let currentItems = snap.exists() && snap.data().items ? snap.data().items : (window.state.dailyShop?.items || []);
+      currentItems.push(newItem);
+      await setDoc(docRef, { items: currentItems, updatedAt: Date.now() });
+      alert('✅ Добавлено в магазин для всех!');
+    } catch(e) { alert('Ошибка: ' + e.message); }
+  };
+
+  // ⏳ АДМИН: ПЛАНИРОВАНИЕ НАЛОЖЕНИЙ
+  window.adminScheduleEvent = async () => {
+    const type = document.getElementById('adminEventSelect').value;
+    const startMin = parseInt(document.getElementById('adminEventStartMin').value) || 0;
+    const dur = parseInt(document.getElementById('adminEventDuration').value) || 10;
+    if(!type) return alert('Выбери событие!');
+
+    try {
+      const docRef = doc(db, "global", "admin_overlays");
+      const snap = await getDoc(docRef);
+      let overlays = snap.exists() ? (snap.data().items || []) : [];
+
+      const startsAt = Date.now() + startMin * 60 * 1000;
+      const endsAt = startsAt + dur * 60 * 1000;
+
+      // 🛡️ Защита: не даем запустить два одинаковых рейда в одно время
+      const isRaid = type.startsWith('raid');
+      if(isRaid) {
+        const conflict = overlays.find(o => o.type === type && (startsAt < o.endsAt && endsAt > o.startsAt));
+        if(conflict) return alert('❌ Ошибка: Рейд "' + type + '" уже запланирован на это время!');
+      }
+
+      overlays.push({ id: Date.now().toString(), type, startsAt, endsAt });
+      await setDoc(docRef, { items: overlays }, { merge: true });
+      alert('✅ Наложение запланировано!');
+      document.getElementById('adminEventStartMin').value = 0;
+    } catch(e) { alert('Ошибка: ' + e.message); }
+  };
+
+  window.adminClearOverlays = async () => {
+    if(!confirm('Удалить все запланированные наложения?')) return;
+    try {
+      await setDoc(doc(db, "global", "admin_overlays"), { items: [] });
+      alert('✅ Очищено!');
+    } catch(e) { alert('Ошибка: ' + e.message); }
+  };
+
+  // Слушатель для отрисовки списка активных наложений в админке
+  onSnapshot(doc(db, "global", "admin_overlays"), (docSnap) => {
+    if(docSnap.exists()) {
+      window._adminOverlays = docSnap.data().items || [];
+      const cont = document.getElementById('adminActiveOverlays');
+      if(cont) {
+        const now = Date.now();
+        const active = window._adminOverlays.filter(o => o.endsAt > now);
+        if(active.length === 0) cont.innerHTML = 'Нет активных наложений';
+        else {
+          cont.innerHTML = active.map(o => {
+            const timeLeft = Math.ceil((o.endsAt - now) / 60000);
+            return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ffffff22"><span>${o.type}</span><span style="color:var(--gold)">Осталось: ${timeLeft} мин</span></div>`;
+          }).join('');
+        }
+      }
+    } else {
+      // 🛡️ Если документ удален, очищаем наложения
+      window._adminOverlays = [];
+      const cont = document.getElementById('adminActiveOverlays');
+      if(cont) cont.innerHTML = 'Нет активных наложений';
+      if(typeof renderEventBar === 'function') renderEventBar();
+    }
+  });
+
+  window.updateGlobalBourse = async (newRate) => {
+    try {
+      const docRef = doc(db, "global", "bourse");
+      const snap = await getDoc(docRef);
+      if(snap.exists()) {
+        await setDoc(docRef, { rate: newRate, lastChange: Date.now() }, { merge: true });
+      }
+    } catch(e) { console.warn("Ошибка обновления биржи:", e); }
+  };
+
+  // ☁️ Скачивание сейва при входе на новом устройстве
+  window.downloadCloudSave = async () => {
+    if (!window._cloudUserId) return null;
+    try {
+      const docSnap = await getDoc(doc(db, "profiles", window._cloudUserId));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.state_data) return JSON.parse(data.state_data);
+      }
+    } catch(e) { 
+      console.error('Download save error:', e); 
+    }
+    return null;
+  };
+
+  // Проверка при старте
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      window._cloudUserId = user.uid;
+      const isAnon = user.isAnonymous;
+      if(typeof window.renderHeader === 'function') window.renderHeader(); // 👑 Обновляем шапку, чтобы появилась кнопка
+      
+      // Ждем чуть-чуть, чтобы window.state успел проинициализироваться
+      await new Promise(r => setTimeout(r, 300));
+      
+      if (isAnon && window.state.nick) {
+        window._needMigration = true; 
+              } else if (!isAnon) {
+                try {
+                  const docSnap = await getDoc(doc(db, "profiles", window._cloudUserId));
+                  if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const _localTs = (window.state && window.state.lastSaveTs) ? window.state.lastSaveTs : 0;
+                    if (data.updated_at > _localTs + 10000) {
+                      if (confirm('☁️ Найдено облачное сохранение (возможно, с другого устройства).\n\nЗагрузить его?\n\nЕсли нажать "Отмена", прогресс с этого устройства останется главным.')) {
+                        window.applyCloudState(Object.assign(window.defaultState(), JSON.parse(data.state_data)));
+                        if (window.state) window.state.lastSaveTs = Date.now();
+                        if (window.save) window.save(true); 
+                        location.reload();
+                      } else {
+                        if (window.state) window.state.lastSaveTs = Date.now();
+                        if (window.save) window.save(true);
+                        _lastCloudSync = Date.now(); 
+                      }
+                    }
+                  }
+                } catch(e) {
+                  console.error('Ошибка профиля:', e);
+                }
+              }
+              window._firebaseReady = true;
+    } else {
+      signInAnonymously(auth);
+    }
+  });
 </script>
 </body>
 </html>
