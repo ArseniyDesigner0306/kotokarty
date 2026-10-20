@@ -1,39 +1,36 @@
-const SUPABASE_ORIGIN = 'https://xmyqfbzgkmrjghqjkcu.supabase.co';
-
 export default {
   async fetch(request) {
-    // 1. Заголовки для CORS
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,HEAD,POST,PUT,DELETE,OPTIONS,PATCH",
-      "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-api-version",
-      "Access-Control-Max-Age": "86400",
-    };
-
-    // 2. Обработка предварительного запроса (Preflight)
+    // 1. Обработка предварительного запроса (CORS Preflight)
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,PUT,DELETE,OPTIONS,PATCH",
+          "Access-Control-Allow-Headers": "*",
+        },
+      });
     }
 
-    // 3. Проксирование запроса
+    // 2. Проксирование запроса в Supabase
     const url = new URL(request.url);
-    const targetUrl = SUPABASE_ORIGIN + url.pathname + url.search;
-    
-    // Создаем новый запрос и подменяем заголовки
-    const modifiedRequest = new Request(targetUrl, request);
-    modifiedRequest.headers.set('Host', new URL(SUPABASE_ORIGIN).host);
-    // Важно: Supabase должен думать, что запрос идет с его же домена, чтобы не блокировать
-    modifiedRequest.headers.set('Origin', SUPABASE_ORIGIN); 
+    const targetUrl = "https://xmyqfbzgrmjghqjkcu.supabase.co" + url.pathname + url.search;
 
-    // Выполняем запрос к Supabase
+    // Создаем новый запрос (НЕ ТРОГАЕМ заголовок Host, Cloudflare сам его поставит)
+    const modifiedRequest = new Request(targetUrl, {
+        method: request.method,
+        headers: request.headers,
+        body: request.body
+    });
+
+    // 3. Выполняем запрос
     const response = await fetch(modifiedRequest);
 
     // 4. Возвращаем ответ с CORS-заголовками
     const newResponse = new Response(response.body, response);
-    for (const key in corsHeaders) {
-      newResponse.headers.set(key, corsHeaders[key]);
-    }
-    
+    newResponse.headers.set("Access-Control-Allow-Origin", "*");
+    newResponse.headers.set("Access-Control-Allow-Methods", "GET,HEAD,POST,PUT,DELETE,OPTIONS,PATCH");
+    newResponse.headers.set("Access-Control-Allow-Headers", "*");
+
     return newResponse;
   }
 };
