@@ -9599,13 +9599,24 @@ function isEventActive(type){
 }
 
 function checkEventSchedule(){
+  const now = Date.now();
+  
   // 👑 Если админ запустил событие, локальные рандомные события не работают!
   if (state.events && state.events.adminOverride) {
-    return; // Firebase сам отключит ивент, когда выйдет время
+    // 🛡️ Но если админское событие протухло — чистим
+    if (state.events.active && state.events.active.endsAt <= now) {
+        state.events.active = null;
+        state.events.adminOverride = false;
+    }
+    if (state.events.activeRaid && state.events.activeRaid.endsAt <= now) {
+        state.events.activeRaid = null;
+        state.events.adminOverride = false;
+        state.raidCaught = {};
+    }
+    return; 
   }
   
   ensureEvents();
-  const now = Date.now();
   const mskH = getMskNow().getHours();
 
   /* 🔱 ОБЫЧНЫЕ СОБЫТИЯ — активное закрылось? */
@@ -9793,7 +9804,12 @@ function renderEventBar(){
   const rel = $('raidBar');
   if(rel){
     const r = state.events && state.events.activeRaid;
-    if(!r){
+    // 🛡️ Если рейд закончился, но завис — принудительно стираем
+    if (r && r.endsAt <= Date.now()) {
+        state.events.activeRaid = null;
+        state.events.adminOverride = false;
+    }
+    if(!state.events.activeRaid){
       const rSchedule = (state.events && state.events.raidSchedule) || [];
       const next = rSchedule.find(e => !e.done && e.startsAt > Date.now());
       if(next && EVENT_TYPES[next.type]){
@@ -11607,36 +11623,44 @@ function renderAchievements(){
 /* ============================================================
    ГЕНЕРАЦИЯ РЫБ
    ============================================================ */
-function rollFishRarity(depthTier){
-  const weights = {c:30, u:30, r:17, sr:10, e:6, l:4, d:1.5, m:0.8, s:0.2};
-  /* 🎰 Буст удачи влияет на вес редких рыб */
-  if(depthTier <= 2){ weights.l=0; weights.d=0; weights.m=0; weights.s=0; }
-  else if(depthTier <= 3){ weights.d=0; weights.m=0; weights.s=0; }
-  else if(depthTier <= 4){ weights.m=0; weights.s=0; }
-  else if(depthTier <= 5){ weights.s=0; }
-  const shift = depthTier * 1.5;
-  weights.c  = Math.max(1, weights.c - shift*3);
-  weights.u  = Math.max(1, weights.u - shift*2);
-  weights.r  += shift*1.5; weights.sr += shift*1.2; weights.e += shift*0.8;
-  weights.l  += shift*0.4; weights.d += shift*0.2; weights.m += shift*0.1; weights.s += shift*0.05;
-  /* 🚫 Реальное обнуление по глубине (после shift) */
-  if(depthTier <= 2){ weights.l=0; weights.d=0; weights.m=0; weights.s=0; }
-  else if(depthTier <= 3){ weights.d=0; weights.m=0; weights.s=0; }
-  else if(depthTier <= 4){ weights.m=0; weights.s=0; }
-  else if(depthTier <= 5){ weights.s=0; }
+// 🎣 МАТРИЦА РЕДКОСТИ ПО ГЛУБИНАМ
+const RARITY_POOL_BY_DEPTH = {
+  0: {c:70, u:30},                         // 🟢 Пруд: Только обычные и необычные
+  1: {c:40, u:50, r:10},                   // 🔵 Река: Появляются редкие
+  2: {u:30, r:50, sr:15, e:5},             // 🟣 Озеро: Супер редкие и эпики
+  3: {r:10, sr:30, e:40, l:15, d:5},       // 🔴 Глубина: Легендарки и алмазы
+  4: {e:10, l:30, d:35, m:20, s:5}         // ⚫ Бездна: Только топ-тир (Мифики, Секретки)
+};
+
+function rollFishRarity(depthId){
+  // Берем базовые веса для текущей глубины
+  const weights = { ...(RARITY_POOL_BY_DEPTH[depthId] || RARITY_POOL_BY_DEPTH[0]) };
+  
   const _roleFisherR = getDeckRoleBonus();
   const _fisherBonus = (_roleFisherR && _roleFisherR.active && _roleFisherR.bonus.rarityBonus) ? _roleFisherR.bonus.rarityBonus : 0;
   let luck = getUpgradeVal('luck_rarity') + getRod().rarityBonus + _fisherBonus;
-  /* 🎰 Буст удачи — ×2/×3/×5/×10 к эффективной удаче */
+  
   if(isBuffActive('luck')){
     const _luckMult = state.buffs.luckMult || 2;
-    luck += (_luckMult - 1) * 50; /* ×2 = +50, ×3 = +100, ×5 = +200, ×10 = +450 */
+    luck += (_luckMult - 1) * 50; 
   }
+  
+  // 🍀 Удача повышает шанс на хорошую рыбу, но НЕ добавляет ту, которой нет на глубине
   if(luck > 0){
     const boost = 1 + luck/100;
-    weights.r *= boost; weights.sr *= boost*1.2; weights.e *= boost*1.3;
-    weights.l *= boost*1.4; weights.d *= boost*1.5; weights.m *= boost*1.6; weights.s *= boost*1.7;
+    if(weights.sr) weights.sr *= boost * 1.2;
+    if(weights.e) weights.e *= boost * 1.3;
+    if(weights.l) weights.l *= boost * 1.4;
+    if(weights.d) weights.d *= boost * 1.5;
+    if(weights.m) weights.m *= boost * 1.6;
+    if(weights.s) weights.s *= boost * 1.7;
+    
+    // Уменьшаем шанс на мусор
+    if(weights.c) weights.c = Math.max(1, weights.c / boost);
+    if(weights.u) weights.u = Math.max(1, weights.u / boost);
+    if(weights.r) weights.r = Math.max(1, weights.r / boost);
   }
+  
   let total = 0;
   for(const k in weights) total += weights[k];
   let r = Math.random() * total;
@@ -11645,8 +11669,8 @@ function rollFishRarity(depthTier){
 }
 
 /* 🔥 Вес рыбы — рандомный от min до max с бустами */
-function makeFishInstance(depthTier){
-  const r = rollFishRarity(depthTier);
+function makeFishInstance(depthId, depthTier){
+  const r = rollFishRarity(depthId);
   const pool = fishesByRarity(r);
   const base = pick(pool);
   const tier = FISH_RARITY_TIER[r];
@@ -12185,7 +12209,7 @@ function spawnFish(depthId, progress){
   let count = narrow ? (1 + Math.floor(Math.random() * 2)) : (1 + Math.floor(Math.random() * 3));
   count = Math.max(1, Math.round(count * spawnMult));
   for(let i = 0; i < count && f.fish.length < maxFish; i++){
-    const fish = makeFishInstance(depth.tierBonus, depth.tierBonus);
+    const fish = makeFishInstance(depth.id, depth.tierBonus);
     const canvas = $('fishingCanvas');
     let radius = Math.max(14, 26 - FISH_RARITY_TIER[fish.rarity] * 1.8);
     if(narrow) radius = Math.round(radius * 1.45);
