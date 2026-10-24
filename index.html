@@ -1432,7 +1432,9 @@ body.event-crystal #playArea{box-shadow:0 0 30px #a5b4fc88,inset 0 0 20px #a5b4f
 
     <div style="display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;">
       <button class="halTabBtn active" data-tab="cauldron" style="flex:1;min-width:75px;padding:10px 4px;border-radius:8px;border:none;background:#ff8c00;color:#000;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🍲 Котёл</button>
-      <button class="halTabBtn" data-tab="quests" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">📜 Задания</button>
+      <button class="halTabBtn" data-tab="quests" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:var(--txt);font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">📜 Задания</button>
+      <button class="halTabBtn" data-tab="puzzle" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:var(--txt);font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🧩 Пазл</button>
+      <button class="halTabBtn" data-tab="inv" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:var(--txt);font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🎒 Куски</button>
       <button class="halTabBtn" data-tab="puzzle" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🧩 Пазл</button>
       <button class="halTabBtn" data-tab="inv" style="flex:1;padding:10px 4px;border-radius:8px;border:none;background:var(--panel2);color:#fff;font-weight:700;font-family:inherit;font-size:11px;cursor:pointer">🎒 Куски</button>
     </div>
@@ -1457,9 +1459,9 @@ body.event-crystal #playArea{box-shadow:0 0 30px #a5b4fc88,inset 0 0 20px #a5b4f
         <div style="text-align:center; font-size:11px; opacity:0.8; margin-bottom:15px" id="halCauldronReq">Требуется: 0 🍭, 0 🍬</div>
 
         <button class="profileBtn" id="halBrewBtn" style="background:linear-gradient(135deg,#a855f7,#6b21a8); font-size:16px; min-height:55px; width:100%; margin-bottom:10px" onclick="brewCauldron()">🔥 СВАРИТЬ ЗЕЛЬЕ</button>
-        <div style="font-size:10px; opacity:0.6; text-align:center; margin-top:-5px; margin-bottom:10px;">Каждая варка даёт опыт Котлу!</div>
+        <div style="font-size:10px; opacity:0.7; text-align:center; margin-top:-5px; margin-bottom:10px; color:var(--txt);">Каждая варка даёт опыт Котлу!</div>
         
-        <div style="background:#00000066; padding:10px; border-radius:8px; font-size:11px; border:1px solid #ffffff22">
+        <div style="background:var(--bg2); padding:10px; border-radius:8px; font-size:11px; border:1px solid var(--border); color:var(--txt);">
           <b>Следующий гейт (Уровень <span id="halGateLevel">5</span>):</b><br>
           <span style="color:#ffd93d" id="halGateText">Победи в рейде "Пруд"</span>
         </div>
@@ -20313,6 +20315,7 @@ function renderHalloweenTab() {
   const reqText = document.getElementById('halCauldronReq');
   if(reqText) {
     reqText.innerHTML = `Сварено зелий для уровня: <b>${_exp} / 3</b>`;
+    reqText.style.color = 'var(--txt)';
   }
   
   const _btn = document.getElementById('halBrewBtn');
@@ -20343,7 +20346,7 @@ function renderHalloweenTab() {
     const passed = isGatePassed(nextGate);
     const icon = passed ? '✅' : '❌';
     const color = passed ? '#10b981' : '#dc2626';
-    gateText.innerHTML = `<span style="color:${color}; font-weight:900; margin-right:4px;">${icon}</span> <span style="color:#fff;">${gate.text}</span>`;
+    gateText.innerHTML = `<span style="color:${color}; font-weight:900; margin-right:4px;">${icon}</span> <span style="color:var(--txt);">${gate.text}</span>`;
   }
   
   renderPuzzle();
@@ -21314,6 +21317,8 @@ window.makeDailyShopCard = makeDailyShopCard;
   // 🌍 ГЕНЕРАЦИЯ МИРА (Если база пустая)
   window.generateWorldForAll = async () => {
     if (!window.state) return;
+    // 🛡️ Генерировать мир может только админ, иначе Firebase заблокирует запись
+    if (window._cloudUserId !== 'gkC2d8RQmMT8OlfY6XVzK3qWwq33') return; 
     try {
       // 1. Проверяем Биржу
       const bourseRef = doc(db, "global", "bourse");
